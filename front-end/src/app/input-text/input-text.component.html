@@ -1,0 +1,42 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+  <div 
+    [ngClass]="messages.length === 0 ? 'flex flex-1 justify-center items-center' : 'flex flex-1 flex-col mb-4 justify-end'"
+    class="max-w-xl w-full mx-auto px-4"
+  >
+  <form (ngSubmit)="onSubmit()" class="flex items-center max-w-xl w-full mx-auto px-4">
+    <label for="simple-search" class="sr-only">Ask me something...</label>
+    
+    <textarea
+        id="answer"
+        name="answer"
+        [(ngModel)]="answer"
+        rows="1"
+        class="flex-1 bg-gray-50 border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Ask me something..."
+        required
+    ></textarea>
+
+    <button
+      type="submit"
+      class="p-2.5 ms-1 text-sm font-medium text-white bg-gray-300 rounded-lg border border-gray-500 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-500"
+    >
+      <svg
+        class="w-4 h-4"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 20 20"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+        />
+      </svg>
+      <span class="sr-only">Send</span>
+    </button>
+  </form>
+  </div>
+</div>

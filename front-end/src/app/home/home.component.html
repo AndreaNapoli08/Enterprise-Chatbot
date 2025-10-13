@@ -1,0 +1,11 @@
+<div class="bg-gray-50 dark:bg-gray-900 relative">
+  <p class="text-3xl text-center font-semibold leading-normal text-gray-900 dark:text-white absolute top-20 w-full">
+    Enterprise Chatbot
+  </p>
+
+  <input-text (submitAnswer)="handleMessage($event)"></input-text>
+
+  <div class="w-full flex justify-center">
+    <chat-bubble *ngIf="this.messages.length > 0" [message]="messages[messages.length - 1]"></chat-bubble>
+  </div>
+</div>
