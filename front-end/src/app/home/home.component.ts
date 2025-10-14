@@ -18,6 +18,7 @@ export class Home implements AfterViewChecked {
 
   handleMessage(message: any) {
     this.messages.push(message);
+
     setTimeout(() => {
       const now = new Date();
       const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -28,7 +29,6 @@ export class Home implements AfterViewChecked {
         time
       });
 
-      // Indica che dopo il rendering bisogna scrollare
       this.shouldScroll = true;
     }, 100);
   }
