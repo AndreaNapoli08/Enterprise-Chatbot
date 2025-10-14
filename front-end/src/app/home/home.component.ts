@@ -12,12 +12,15 @@ import { ChatBubble } from '../chat-bubble/chat-bubble.component';
 })
 export class Home implements AfterViewChecked {
   messages: any[] = [];
-  private shouldScroll = false;
+  shouldScroll = false;
+  loading = false;
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
 
   handleMessage(message: any) {
     this.messages.push(message);
+    this.shouldScroll = true;
+    this.loading = true;
 
     setTimeout(() => {
       const now = new Date();
@@ -28,9 +31,9 @@ export class Home implements AfterViewChecked {
         role: 'bot',
         time
       });
-
+      this.loading = false;
       this.shouldScroll = true;
-    }, 100);
+    }, 1000);
   }
 
   ngAfterViewChecked(): void {
