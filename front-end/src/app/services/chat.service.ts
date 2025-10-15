@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 interface RasaResponse {
-  recipient_id: string;
+  sender: string;
   text: string;
 }
 
@@ -18,7 +18,7 @@ export class ChatService {
 
   sendMessage(message: string, senderId: string = 'utente1'): Observable<RasaResponse[]> {
     return this.http.post<RasaResponse[]>(this.RASA_URL, {
-      sender: senderId,
+      sender: senderId, 
       message: message
     });
   }
