@@ -35,14 +35,23 @@
         </span>
       </div>
 
-      <!-- Bolla messaggio -->
-      <div
+      <!-- Messaggio testuale -->
+      <div *ngIf="message.text"
         class="inline-block px-4 py-2 border rounded-xl break-words whitespace-pre-wrap"
         [ngClass]="message.role === 'bot'
           ? 'bg-gray-300 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 rounded-e-xl rounded-es-xl'
           : 'bg-gray-200 dark:bg-gray-600 text-black dark:text-white border-gray-400 rounded-s-xl rounded-ee-xl'"
       >
         <p class="text-sm font-normal">{{ message.text }}</p>
+      </div>
+
+      <!-- Immagine -->
+      <div *ngIf="message.image" class="mt-2">
+        <img
+          [src]="message.image"
+          alt="Immagine dal bot"
+          class="rounded-xl border border-gray-200 dark:border-gray-700 w-auto max-w-full"
+        />
       </div>
 
       <!-- Orario -->

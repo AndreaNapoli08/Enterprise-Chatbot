@@ -39,10 +39,12 @@ export class InputText {
     this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
       responses.forEach(resp => {
         const botMessage: Message = {
-          text: resp.text,
+          text: resp.text || '',
+          image: resp.image || '',
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
+        console.log('Bot response:', botMessage);
         this.botResponse.emit(botMessage); //mandiamo la risposta al componente padre
       });
     });

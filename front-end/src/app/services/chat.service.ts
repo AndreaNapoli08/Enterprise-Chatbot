@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 
 interface RasaResponse {
   sender: string;
-  text: string;
+  text?: string;
+  image?: string;
 }
 
 @Injectable({

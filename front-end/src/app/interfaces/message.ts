@@ -1,5 +1,6 @@
 export interface Message {
-  text: string;
+  text?: string;
+  image?: string;
   role: 'user' | 'bot';
   time: string;
 }
