@@ -9,7 +9,7 @@
       <div
         #scrollContainer
         *ngIf="messages.length > 0"
-        class="flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh]"
+        class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh]"
       >
         <chat-bubble *ngFor="let msg of messages" [message]="msg"></chat-bubble>
         

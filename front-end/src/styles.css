@@ -6,3 +6,49 @@
 @plugin "flowbite/plugin";
 
 @source "../node_modules/flowbite";
+
+@layer utilities {
+  /* Scrollbar base */
+  .scrollbar::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Definizione delle variabili base (light mode di default) */
+  :root {
+    --sb-track: #f6f3f3; /* light track */
+    --sb-thumb: #9ca3af; /* light thumb */
+    --sb-thumb-hover: #6b7280;
+    --sb-thumb-border: #f3f4f6;
+  }
+
+  /* Override automatico in dark mode */
+  .dark {
+    --sb-track: #1f2937; /* dark track */
+    --sb-thumb: #064088; /* dark thumb */
+    --sb-thumb-hover: #064b9f;
+    --sb-thumb-border: #1f2937;
+  }
+
+  /* WebKit browsers */
+  .scrollbar::-webkit-scrollbar-track {
+    border-radius: 100vh;
+    background: var(--sb-track);
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb);
+    border-radius: 100vh;
+    border: 3px solid var(--sb-thumb-border);
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--sb-thumb-hover);
+  }
+
+  /* Firefox */
+  .scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) var(--sb-track);
+  }
+}
