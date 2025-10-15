@@ -2,6 +2,8 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
+import { ChatService } from '../services/chat.service';  // importa il servizio
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'input-text',
@@ -13,6 +15,9 @@ import { Message } from '../interfaces/message';
 export class InputText {
   answer = '';
   @Output() submitAnswer = new EventEmitter<Message>();
+  @Output() botResponse = new EventEmitter<Message>();
+
+  constructor(private chatService: ChatService) {}
 
   onSubmit() {
     const text = this.answer.trim();
@@ -27,7 +32,20 @@ export class InputText {
       time
     };
     
+    // invio ad home per visualizzare il messaggio graficamente
     this.submitAnswer.emit(message);
+
+    // invio a Rasa
+    this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
+      responses.forEach(resp => {
+        const botMessage: Message = {
+          text: resp.text,
+          role: 'bot',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        this.botResponse.emit(botMessage); //mandiamo la risposta al componente padre
+      });
+    });
     this.answer = '';
   }
 

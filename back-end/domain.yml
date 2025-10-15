@@ -14,8 +14,7 @@ responses:
   - text: "Ciao! Come posso aiutarti?"
 
   utter_cheer_up:
-  - text: "Ecco qualcosa per tirarti su il morale:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
+  - text: "Ecco qualcosa per tirarti su il morale: https://upload.wikimedia.org/wikipedia/commons/8/85/Smiley.svg"
 
   utter_did_that_help:
   - text: "Ti è stato d'aiuto?"

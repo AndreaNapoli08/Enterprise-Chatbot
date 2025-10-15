@@ -1,18 +1,25 @@
 import { Component } from '@angular/core';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { OnInit } from '@angular/core';
 import { initFlowbite } from 'flowbite';
-import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  standalone: true,
+  imports: [RouterOutlet],
 })
 export class AppComponent implements OnInit {
-  title = 'web-app';
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     initFlowbite();
+
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        initFlowbite();
+      }
+    });
   }
 }

@@ -18,22 +18,17 @@ export class Home implements AfterViewChecked {
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
 
   handleMessage(message: any) {
-    this.messages.push(message);
-    this.shouldScroll = true;
     this.loading = true;
-
-    setTimeout(() => {
-      const now = new Date();
-      const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-      this.messages.push({
-        text: `Hai detto: "${message.text}"`,
-        role: 'bot',
-        time
-      });
-      this.loading = false;
+    if(message.role === 'bot') {
+      setTimeout(() => {
+        this.messages.push(message);
+        this.loading = false;
+        this.shouldScroll = true;
+      }, 500);
+    }else{
+      this.messages.push(message);
       this.shouldScroll = true;
-    }, 1000);
+    }
   }
 
   ngAfterViewChecked(): void {
