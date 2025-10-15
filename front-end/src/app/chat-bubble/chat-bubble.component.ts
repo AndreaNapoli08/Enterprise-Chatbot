@@ -1,6 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';
+import { ChatService } from '../services/chat.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'chat-bubble',
@@ -10,5 +12,31 @@ import { Message } from '../interfaces/message';
 })
 export class ChatBubble {
   @Input() message!: Message;
+  @Output() botResponse = new EventEmitter<Message>();
 
+  constructor(private chatService: ChatService) {}
+
+  sendButtonPayload(payload: string) {
+    let text = '';
+    if(payload === 'option A'){
+      text = "Opzione A";
+    }else{ 
+      text = "Opzione B";
+    }
+
+    this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
+      responses.forEach(resp => {
+        const botMessage: Message = {
+          text: resp.text || '',
+          image: resp.image || '',
+          buttons: resp.buttons || [],
+          role: 'bot',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        console.log('Bot response:', botMessage);
+        this.botResponse.emit(botMessage); 
+      });
+    });
+  }
+  
 }

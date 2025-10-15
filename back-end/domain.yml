@@ -8,6 +8,16 @@ intents:
   - mood_great
   - mood_unhappy
   - bot_challenge
+  - ask_option
+  - choose_option_a
+  - choose_option_b
+
+slots:
+  option:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: option
 
 responses:
   utter_greet:
@@ -28,6 +38,20 @@ responses:
 
   utter_iamabot:
   - text: "Sono un bot, alimentato da Rasa."
+
+  utter_ask_option:
+  - text: "Scegli un'opzione:"
+    buttons:
+      - title: "Opzione A"
+        payload: 'option A'
+      - title: "Opzione B"
+        payload: 'option B'
+
+  utter_chosen_option_a:
+    - text: "Hai scelto l'opzione A ✅"
+
+  utter_chosen_option_b:
+    - text: "Hai scelto l'opzione B ✅"
 
 session_config:
   session_expiration_time: 60

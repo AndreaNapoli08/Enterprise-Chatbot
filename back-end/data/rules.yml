@@ -11,3 +11,18 @@ rules:
   steps:
   - intent: bot_challenge
   - action: utter_iamabot
+
+- rule: Chiedi all'utente di scegliere un'opzione
+  steps:
+  - intent: ask_option
+  - action: utter_ask_option
+
+- rule: Gestisci opzione A
+  steps:
+  - intent: choose_option_a
+  - action: utter_chosen_option_a
+
+- rule: Gestisci opzione B
+  steps:
+  - intent: choose_option_b
+  - action: utter_chosen_option_b

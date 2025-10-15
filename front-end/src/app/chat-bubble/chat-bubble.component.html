@@ -54,6 +54,15 @@
         />
       </div>
 
+      <!-- Pulsanti -->
+      <div *ngIf="message.buttons" class="flex flex-wrap gap-2 mt-2">
+        <button *ngFor="let btn of message.buttons"
+                (click)="sendButtonPayload(btn.payload)"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow transition duration-200">
+          {{ btn.title }}
+        </button>
+      </div>
+
       <!-- Orario -->
       <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
         {{ message.time }}

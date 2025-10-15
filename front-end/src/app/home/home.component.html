@@ -11,7 +11,7 @@
         *ngIf="messages.length > 0"
         class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh]"
       >
-        <chat-bubble *ngFor="let msg of messages" [message]="msg"></chat-bubble>
+        <chat-bubble *ngFor="let msg of messages" [message]="msg" (botResponse)="handleMessage($event)"></chat-bubble>
         
         <div class="h-10">
           <div *ngIf="loading" role="status">

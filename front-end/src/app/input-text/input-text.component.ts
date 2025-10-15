@@ -2,7 +2,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
-import { ChatService } from '../services/chat.service';  // importa il servizio
+import { ChatService } from '../services/chat.service';  
 import { take } from 'rxjs/operators';
 
 @Component({
@@ -41,6 +41,7 @@ export class InputText {
         const botMessage: Message = {
           text: resp.text || '',
           image: resp.image || '',
+          buttons: resp.buttons || [],
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
