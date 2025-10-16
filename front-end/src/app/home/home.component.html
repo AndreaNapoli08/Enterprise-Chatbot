@@ -1,11 +1,12 @@
-<div class="bg-gray-50 dark:bg-gray-900 relative">
+<div class="relative">
   <p class="text-3xl text-center font-semibold leading-normal text-gray-900 dark:text-white absolute top-5 w-full">
     Enterprise Chatbot
   </p>
-  <button (click)="logout()" class="absolute top-5 right-5 text-sm text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1 rounded">
-    Logout
-  </button>
   
+  <div class="absolute top-5 right-5">
+    <app-profile></app-profile>
+  </div>
+
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
     <div class="flex flex-1 flex-col max-w-3xl w-full mx-auto px-4 mb-3" [ngStyle]="{ 'justify-content': messages.length === 0 ? 'center' : 'flex-end' }">
       
@@ -25,9 +26,7 @@
               <span class="sr-only">Loading...</span>
           </div>
         </div>
-
       </div>
-
       <input-text (submitAnswer)="handleMessage($event)"></input-text>
     </div>
   </div>

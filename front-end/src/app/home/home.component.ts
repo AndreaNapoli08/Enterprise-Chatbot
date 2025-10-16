@@ -2,12 +2,13 @@ import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { InputText } from '../input-text/input-text.component';
 import { ChatBubble } from '../chat-bubble/chat-bubble.component';
+import { Profile } from '../profile/profile.component';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ChatBubble, InputText],
+  imports: [CommonModule, ChatBubble, InputText, Profile],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
