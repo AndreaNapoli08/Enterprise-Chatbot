@@ -15,7 +15,6 @@ import { take } from 'rxjs/operators';
 export class InputText {
   answer = '';
   @Output() submitAnswer = new EventEmitter<Message>();
-  @Output() botResponse = new EventEmitter<Message>();
 
   constructor(private chatService: ChatService) {}
 
@@ -46,7 +45,7 @@ export class InputText {
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         console.log('Bot response:', botMessage);
-        this.botResponse.emit(botMessage); //mandiamo la risposta al componente padre
+        this.submitAnswer.emit(botMessage); //mandiamo la risposta al componente padre
       });
     });
     this.answer = '';
