@@ -24,7 +24,8 @@ export class Login {
     } else {
       const success = this.authService.login(this.email, this.password);
       if (success) {
-        this.router.navigate(['/home']); // Reindirizza alla pagina home se il login ha avuto successo
+        localStorage.setItem('email', this.email);
+        this.router.navigate(['/home']); 
       } else {
         alert('Utente non trovato');
         this.loginFailed = true;

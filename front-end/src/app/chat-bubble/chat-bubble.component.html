@@ -14,11 +14,14 @@
     }"
   >
     <!-- Avatar -->
-    <img
-      class="w-8 h-8 rounded-full shrink-0"
-      [src]="message.role === 'bot' ? 'bot.jpg' : 'user.png'"
-      [alt]="message.role === 'bot' ? 'Bot avatar' : 'User avatar'"
+    <img *ngIf="message.role === 'bot'"
+      class = "w-8 h-8 rounded-full shrink-0"
+      src = "bot.jpg"
+      alt = "Bot avatar"
     />
+    <div *ngIf="message.role === 'user'" class="relative shrink-0 inline-flex items-center justify-center w-9 h-9 overflow-hidden bg-gray-300 rounded-full dark:bg-gray-600">
+      <span class="font-medium text-gray-600 dark:text-white">{{initials}}</span>
+    </div>
 
     <!-- Contenitore testo -->
     <div

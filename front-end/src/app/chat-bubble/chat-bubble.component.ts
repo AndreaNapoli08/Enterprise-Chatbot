@@ -12,6 +12,7 @@ import { take } from 'rxjs/operators';
 })
 export class ChatBubble {
   @Input() message!: Message;
+  @Input() initials: string = '';
   @Output() botResponse = new EventEmitter<Message>();
 
   constructor(private chatService: ChatService) {}

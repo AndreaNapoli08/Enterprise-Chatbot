@@ -7,11 +7,12 @@ import { Router } from '@angular/router';
 
 export class AuthService {
   private users: { email: string; password: string }[] = [
-    { email: 'user', password: 'ciao' },
+    { email: 'andre', password: 'ciao' },
   ];
 
   constructor(private router: Router) {}
   private loggedIn: boolean = false;
+  private currentEmail: string | null = null;
 
   login(email: string, password: string) {
     const user = this.users.find(
@@ -27,9 +28,14 @@ export class AuthService {
     return this.loggedIn;
   }
 
+  getEmail(): string | null {
+    return localStorage.getItem('email');
+  }
+
   logout() {
     this.loggedIn = false; 
-    localStorage.setItem('loggedIn', this.loggedIn.toString());
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('email');
     this.router.navigate(['/login']);
   }
 }

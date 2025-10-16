@@ -14,11 +14,19 @@ import { AuthService } from '../services/auth.service';
 })
 export class Home implements AfterViewChecked {
   messages: any[] = [];
+  email: string | null = null;
+  initials: string = '';
   shouldScroll = false;
   loading = false;
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
   constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    this.email = this.authService.getEmail();
+    this.initials = this.getInitialsFromEmail(this.email);
+    console.log(this.initials);
+  }
 
   handleMessage(message: any) {
     this.loading = true;
@@ -52,7 +60,12 @@ export class Home implements AfterViewChecked {
     }
   }
 
-  logout() {
-    this.authService.logout();
+  getInitialsFromEmail(email: string | null): string {
+    if (!email) return '';
+    const [name] = email.split('@');
+    return name
+      .split('.')
+      .map(part => part[0]?.toUpperCase())
+      .join('') || name[0].toUpperCase();
   }
 }
