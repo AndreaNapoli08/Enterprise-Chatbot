@@ -17,14 +17,7 @@ export class ChatBubble {
   constructor(private chatService: ChatService) {}
 
   sendButtonPayload(payload: string) {
-    let text = '';
-    if(payload === 'option A'){
-      text = "Opzione A";
-    }else{ 
-      text = "Opzione B";
-    }
-
-    this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
+    this.chatService.sendMessage(payload).pipe(take(1)).subscribe(responses => {
       responses.forEach(resp => {
         const botMessage: Message = {
           text: resp.text || '',

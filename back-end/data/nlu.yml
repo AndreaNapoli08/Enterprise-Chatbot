@@ -96,21 +96,12 @@ nlu:
     - dammi delle opzioni
     - fammi scegliere
     
-- intent: choose_option_a
+- intent: choose_option
   examples: |
-    - Opzione A
+    - scelgo [A](option)
+    - scelgo [B](option)
+    - voglio l'opzione [A](option)
+    - opzione [B](option)
+    - prendo [A](option)
+    - la [B](option)
 
-- intent: choose_option_b
-  examples: |
-    - Opzione B
-
-- intent: ask_document
-  examples: |
-    - mostrami un documento
-    - voglio vedere un documento
-    - fammi vedere un documento
-    - dammi un documento
-    - puoi mostrarmi la policy dell'azienda?
-    - puoi mostrarmi i termini di servizio?
-    - puoi mostrarmi la privacy policy?
-    - voglio vedere i termini di servizio

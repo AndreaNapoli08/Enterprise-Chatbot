@@ -9,9 +9,11 @@ intents:
   - mood_unhappy
   - bot_challenge
   - ask_option
-  - choose_option_a
-  - choose_option_b
+  - choose_option
   - ask_document
+
+entities:
+  - option
 
 slots:
   option:
@@ -44,19 +46,12 @@ responses:
   - text: "Scegli un'opzione:"
     buttons:
       - title: "Opzione A"
-        payload: 'option A'
+        payload: '/choose_option{"option":"A"}'
       - title: "Opzione B"
-        payload: 'option B'
+        payload: '/choose_option{"option":"B"}'
 
-  utter_chosen_option_a:
-    - text: "Hai scelto l'opzione A ✅"
-
-  utter_chosen_option_b:
-    - text: "Hai scelto l'opzione B ✅"
-
-  utter_show_document:
-    - text: "Ecco il documento che hai richiesto:"
-      attachment: "https://economiaemanagement.dip.unipv.it/sites/dip10/files/2022-07/linee_guida_tesi_su_tirocinio.pdf"
+  utter_chosen_option:
+    - text: "Hai scelto l'opzione {option} ✅"
 
 session_config:
   session_expiration_time: 60

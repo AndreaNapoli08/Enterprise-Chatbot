@@ -17,17 +17,7 @@ rules:
   - intent: ask_option
   - action: utter_ask_option
 
-- rule: Gestisci opzione A
+- rule: Gestisci la scelta di un'opzione
   steps:
-  - intent: choose_option_a
-  - action: utter_chosen_option_a
-
-- rule: Gestisci opzione B
-  steps:
-  - intent: choose_option_b
-  - action: utter_chosen_option_b
-
-- rule: Mostra un documento
-  steps:
-  - intent: ask_document
-  - action: utter_show_document
+  - intent: choose_option
+  - action: utter_chosen_option
