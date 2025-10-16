@@ -7,6 +7,7 @@ interface RasaResponse {
   text?: string;
   image?: string;
   buttons?: { title: string, payload: string }[];
+  attachment?: { type: string; url: string }; 
 }
 
 @Injectable({

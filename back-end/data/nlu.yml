@@ -95,3 +95,14 @@ nlu:
     - voglio scegliere un'opzione
     - dammi delle opzioni
     - fammi scegliere
+
+- intent: ask_document
+  examples: |
+    - mostrami un documento
+    - voglio vedere un documento
+    - fammi vedere un documento
+    - dammi un documento
+    - puoi mostrarmi la policy dell'azienda?
+    - puoi mostrarmi i termini di servizio?
+    - puoi mostrarmi la privacy policy?
+    - voglio vedere i termini di servizio
