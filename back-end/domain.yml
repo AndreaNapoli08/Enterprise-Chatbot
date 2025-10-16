@@ -11,6 +11,7 @@ intents:
   - ask_option
   - choose_option_a
   - choose_option_b
+  - ask_document
 
 slots:
   option:
@@ -52,6 +53,10 @@ responses:
 
   utter_chosen_option_b:
     - text: "Hai scelto l'opzione B ✅"
+
+  utter_show_document:
+    - text: "Ecco il documento che hai richiesto:"
+      attachment: "https://economiaemanagement.dip.unipv.it/sites/dip10/files/2022-07/linee_guida_tesi_su_tirocinio.pdf"
 
 session_config:
   session_expiration_time: 60

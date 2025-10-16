@@ -26,3 +26,8 @@ rules:
   steps:
   - intent: choose_option_b
   - action: utter_chosen_option_b
+
+- rule: Mostra un documento
+  steps:
+  - intent: ask_document
+  - action: utter_show_document
