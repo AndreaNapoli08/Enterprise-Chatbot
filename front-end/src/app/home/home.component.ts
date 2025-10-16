@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { InputText } from '../input-text/input-text.component';
 import { ChatBubble } from '../chat-bubble/chat-bubble.component';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -16,6 +17,7 @@ export class Home implements AfterViewChecked {
   loading = false;
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
+  constructor(private authService: AuthService) {}
 
   handleMessage(message: any) {
     this.loading = true;
@@ -47,5 +49,9 @@ export class Home implements AfterViewChecked {
     } catch (err) {
       console.warn('Scroll error:', err);
     }
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

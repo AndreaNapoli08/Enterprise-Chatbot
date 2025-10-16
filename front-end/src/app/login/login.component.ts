@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -14,13 +16,13 @@ export class Login {
   loginFailed: boolean = false;
   passwordVisible = false;
 
-  //constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
-  /*onSubmit() {
-    if (this.username === '' || this.password === '') {
+  onSubmit() {
+    if (this.email === '' || this.password === '') {
       alert('Compilare tutti i campi');
     } else {
-      const success = this.authService.login(this.username, this.password);
+      const success = this.authService.login(this.email, this.password);
       if (success) {
         this.router.navigate(['/home']); // Reindirizza alla pagina home se il login ha avuto successo
       } else {
@@ -28,7 +30,7 @@ export class Login {
         this.loginFailed = true;
       }
     }
-  }*/
+  }
 
   togglePasswordVisibility(): void {
     this.passwordVisible = !this.passwordVisible;
