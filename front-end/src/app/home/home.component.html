@@ -27,7 +27,10 @@
           </div>
         </div>
       </div>
-      <input-text (submitAnswer)="handleMessage($event)" [loading]="loading"></input-text>
+      <input-text 
+        (submitAnswer)="handleMessage($event)" 
+        [disabled]="loading" >
+      </input-text>
     </div>
   </div>
 </div>

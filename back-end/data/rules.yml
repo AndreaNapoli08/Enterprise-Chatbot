@@ -36,3 +36,8 @@ rules:
   steps:
   - intent: out_of_scope
   - action: utter_fallback
+
+- rule: Gestione fine della conversazione
+  steps:
+  - intent: conversation_end
+  - action: utter_conversation_end

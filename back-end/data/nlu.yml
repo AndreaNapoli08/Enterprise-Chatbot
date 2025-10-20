@@ -27,6 +27,24 @@ nlu:
     - ci sentiamo
     - alla prossima
     - addio
+    - ciao ciao
+    - a più tardi
+    - ci vediamo
+    - a domani
+    - buon pomeriggio
+    - buonanotte a tutti
+    - ci si sente
+    - a dopo allora
+    - salutami tutti
+    - a risentirci
+    - stasera ci vediamo
+    - buona serata
+    - alla prossima volta
+    - tieniti in contatto
+    - ci aggiorniamo
+    - resto a disposizione
+    - arrivederLa
+    - alla prossima occasione
 
 - intent: affirm
   examples: |
@@ -135,3 +153,29 @@ nlu:
     - mnopqrs
     - abcd123
     - 123abc
+    - sacbs
+    - com diedcoin
+    - edc
+
+- intent: conversation_end
+  examples: |
+    - Ho finito
+    - È tutto
+    - Non ho altre domande
+    - Grazie, è tutto
+    - Questo è tutto
+    - Va bene, grazie
+    - Non serve altro
+    - Ho finito per ora
+    - Niente di più
+    - Tutto chiaro, grazie
+    - Non ho bisogno di altro
+    - È tutto per oggi
+    - Va bene, ci sentiamo
+    - Grazie per l’aiuto
+    - Ok, grazie mille
+    - Tutto risolto
+    - Ho ottenuto tutte le informazioni
+    - Non c’è altro da chiedere
+    - Ho finito la mia sessione
+    - Chiudo qui la conversazione

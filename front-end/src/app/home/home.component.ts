@@ -67,4 +67,8 @@ export class Home implements AfterViewChecked {
       .map(part => part[0]?.toUpperCase())
       .join('') || name[0].toUpperCase();
   }
+
+  onConversationEnded() {
+    
+  }
 }

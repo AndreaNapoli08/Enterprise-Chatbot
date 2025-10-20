@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
@@ -15,9 +15,18 @@ import { take } from 'rxjs/operators';
 export class InputText {
   answer = '';
   @Output() submitAnswer = new EventEmitter<Message>();
-  @Input() loading!: boolean;
+  @Input() disabled!: boolean;
+  @ViewChild('textarea') textarea!: ElementRef<HTMLTextAreaElement>;
+
+  conversationEnded = false;
 
   constructor(private chatService: ChatService) {}
+  
+  ngOnChanges() {
+      setTimeout(() => {
+        this.textarea.nativeElement.focus();
+      }, 0);
+  }
 
   onSubmit() {
     const text = this.answer.trim();
@@ -48,7 +57,14 @@ export class InputText {
         };
         console.log('Intent:', resp.intent, 'Confidence:', resp.confidence);
 
-        this.submitAnswer.emit(botMessage); //mandiamo la risposta al componente padre
+        if(resp.intent === 'conversation_end' || resp.intent === 'goodbye') {
+          // aggiungo un timer così viene visualizzato il messaggio di bot prima di disabilitare l'input
+          setTimeout(() => {
+              this.disabled = true;
+              this.conversationEnded = true;
+          }, 800);
+        } 
+        this.submitAnswer.emit(botMessage); 
       });
     });
     this.answer = '';
