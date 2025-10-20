@@ -106,3 +106,32 @@ nlu:
     - puoi mostrarmi i termini di servizio?
     - puoi mostrarmi la privacy policy?
     - voglio vedere i termini di servizio
+
+- intent: out_of_scope
+  examples: |
+    - asdfgh
+    - j,mhjg
+    - qwerty
+    - !@#$%
+    - 12345
+    - blablabla
+    - lkjhgf
+    - zxcvbn
+    - poiuy
+    - mnbvcx
+    - qazwsx
+    - xcvbnm
+    - poiuytrewq
+    - grdfgr
+    - qweasdzxc
+    - qazxswedc
+    - mnbvcxz
+    - plmoknijb
+    - asdqwe
+    - zxcvbnqwe
+    - qwertasdf
+    - poiuytre
+    - lkjasd
+    - mnopqrs
+    - abcd123
+    - 123abc

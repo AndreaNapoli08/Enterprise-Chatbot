@@ -25,7 +25,6 @@ export class Home implements AfterViewChecked {
   ngOnInit() {
     this.email = this.authService.getEmail();
     this.initials = this.getInitialsFromEmail(this.email);
-    console.log(this.initials);
   }
 
   handleMessage(message: any) {

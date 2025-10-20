@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
@@ -15,6 +15,7 @@ import { take } from 'rxjs/operators';
 export class InputText {
   answer = '';
   @Output() submitAnswer = new EventEmitter<Message>();
+  @Input() loading!: boolean;
 
   constructor(private chatService: ChatService) {}
 
@@ -45,7 +46,8 @@ export class InputText {
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
-        console.log('Bot response:', botMessage);
+        console.log('Intent:', resp.intent, 'Confidence:', resp.confidence);
+
         this.submitAnswer.emit(botMessage); //mandiamo la risposta al componente padre
       });
     });

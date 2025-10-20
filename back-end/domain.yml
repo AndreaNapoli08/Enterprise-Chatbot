@@ -11,6 +11,8 @@ intents:
   - ask_option
   - choose_option
   - ask_document
+  - nlu_fallback
+  - out_of_scope
 
 entities:
   - option
@@ -59,6 +61,9 @@ responses:
         type: "file"
         url: "https://economiaemanagement.dip.unipv.it/sites/dip10/files/2022-07/linee_guida_tesi_su_tirocinio.pdf"
 
+  utter_fallback:
+    - text: "Mi dispiace, non ho capito bene. Puoi riformulare?"
+    
 session_config:
   session_expiration_time: 60
   carry_over_slots_to_new_session: true

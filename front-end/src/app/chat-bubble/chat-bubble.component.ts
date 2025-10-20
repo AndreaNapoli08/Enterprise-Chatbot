@@ -27,7 +27,6 @@ export class ChatBubble {
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
-        console.log('Bot response:', botMessage);
         this.botResponse.emit(botMessage); 
       });
     });

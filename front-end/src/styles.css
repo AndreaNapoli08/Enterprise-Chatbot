@@ -52,3 +52,7 @@
     scrollbar-color: var(--sb-thumb) var(--sb-track);
   }
 }
+
+textarea:disabled {
+  cursor: not-allowed;
+}
