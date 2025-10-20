@@ -18,6 +18,8 @@ export class Home implements AfterViewChecked {
   initials: string = '';
   shouldScroll = false;
   loading = false;
+  buttons = false;
+  waiting_answer = false;
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
   constructor(private authService: AuthService) {}
@@ -31,8 +33,13 @@ export class Home implements AfterViewChecked {
     this.loading = true;
     if(message.role === 'bot') {
       setTimeout(() => {
-        this.messages.push(message);
-        this.loading = false;
+        this.messages.push(message);    
+        if(message.buttons.length === 0){
+          this.waiting_answer = false;
+          this.loading = false;
+        }else{
+          this.waiting_answer = true;
+        }
         this.shouldScroll = true;
       }, 500);
     }else{
