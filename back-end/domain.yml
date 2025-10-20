@@ -62,6 +62,9 @@ responses:
         url: "https://economiaemanagement.dip.unipv.it/sites/dip10/files/2022-07/linee_guida_tesi_su_tirocinio.pdf"
 
   utter_fallback:
+    - text: "Non so la risposta a questa domanda. Mi dispiace"
+
+  utter_out_of_scope:
     - text: "Mi dispiace, non ho capito bene. Puoi riformulare?"
   
   utter_conversation_end:
