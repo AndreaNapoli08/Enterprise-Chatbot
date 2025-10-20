@@ -27,11 +27,6 @@ rules:
   - intent: ask_document
   - action: utter_show_document
 
-- rule: Gestione fallback
-  steps:
-    - intent: nlu_fallback
-    - action: utter_fallback
-
 - rule: Gestione out_of_scope
   steps:
   - intent: out_of_scope
@@ -41,3 +36,8 @@ rules:
   steps:
   - intent: conversation_end
   - action: utter_conversation_end
+
+- rule: Gestione fallback
+  steps:
+  - intent: nlu_fallback
+  - action: action_handle_fallback

@@ -28,3 +28,8 @@ stories:
   - action: utter_did_that_help
   - intent: deny
   - action: utter_goodbye
+
+- story: gestione fallback
+  steps:
+  - intent: nlu_fallback
+  - action: action_handle_fallback

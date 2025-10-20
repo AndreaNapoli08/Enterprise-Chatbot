@@ -18,12 +18,22 @@ intents:
 entities:
   - option
 
+actions:
+  - action_handle_fallback
+
 slots:
   option:
     type: text
     mappings:
       - type: from_entity
         entity: option
+  
+  fallback_count:
+    type: float
+    initial_value: 0
+    influence_conversation: false
+    mappings:
+      - type: custom
 
 responses:
   utter_greet:
@@ -70,6 +80,9 @@ responses:
   
   utter_conversation_end:
     - text: "Grazie per aver utilizzato il nostro servizio. Buona giornata!"
+
+  utter_contact_operator:
+    - text: "Mi dispiace, non riesco a capire la tua richiesta. Ti consiglio di contattare un operatore umano."
 
 session_config:
   session_expiration_time: 60

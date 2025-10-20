@@ -1,27 +1,31 @@
-# This files contains your custom actions which can be used to run
-# custom Python code.
-#
-# See this guide on how to implement these action:
-# https://rasa.com/docs/rasa/custom-actions
+from typing import Any, Text, Dict, List
+from rasa_sdk import Action, Tracker
+from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.events import SlotSet
 
+class ActionHandleFallback(Action):
 
-# This is a simple example for a custom action which utters "Hello World!"
+    def name(self) -> Text:
+        return "action_handle_fallback"
 
-# from typing import Any, Text, Dict, List
-#
-# from rasa_sdk import Action, Tracker
-# from rasa_sdk.executor import CollectingDispatcher
-#
-#
-# class ActionHelloWorld(Action):
-#
-#     def name(self) -> Text:
-#         return "action_hello_world"
-#
-#     def run(self, dispatcher: CollectingDispatcher,
-#             tracker: Tracker,
-#             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-#
-#         dispatcher.utter_message(text="Hello World!")
-#
-#         return []
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        # Leggi il contatore fallback corrente
+        fallback_count = tracker.get_slot("fallback_count") or 0
+
+        # Incrementa il contatore
+        fallback_count += 1
+
+        # Decide quale risposta dare
+        if fallback_count == 1:
+            dispatcher.utter_message(response="utter_fallback")
+        elif fallback_count == 2:
+            dispatcher.utter_message(response="utter_fallback")
+        else:
+            dispatcher.utter_message(response="utter_contact_operator")
+            fallback_count = 0  # reset dopo il terzo fallback
+
+        # Aggiorna lo slot fallback_count
+        return [SlotSet("fallback_count", fallback_count)]
