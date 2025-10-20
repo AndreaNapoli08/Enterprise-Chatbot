@@ -13,6 +13,7 @@ intents:
   - ask_document
   - nlu_fallback
   - out_of_scope
+  - conversation_end
 
 entities:
   - option

@@ -125,6 +125,47 @@ nlu:
     - puoi mostrarmi la privacy policy?
     - voglio vedere i termini di servizio
 
+- intent: nlu_fallback
+  examples: |
+    - qual è il meteo oggi
+    - che ore sono
+    - raccontami una barzelletta
+    - chi ha vinto la partita di calcio
+    - dimmi qualcosa di interessante
+    - cosa cucino stasera
+    - mi dai una ricetta
+    - qual è la capitale della Francia
+    - come funziona internet
+    - chi è il presidente degli Stati Uniti
+    - voglio ascoltare musica
+    - fammi vedere un video
+    - qual è il significato della vita
+    - puoi fare una battuta
+    - come faccio a perdere peso
+    - dimmi un proverbio
+    - come si chiama il tuo creatore
+    - puoi cantare una canzone
+    - quanto costa un’auto
+    - qual è la popolazione mondiale
+    - mostrami un meme
+    - spiegami la teoria della relatività
+    - come faccio a fare un backup
+    - qual è la temperatura a Roma
+    - raccontami una storia
+    - dimmi un indovinello
+    - puoi fare un gioco
+    - come si scrive bene in inglese
+    - qual è il numero più grande
+    - chi ha inventato il telefono
+    - mostrami una foto di un gatto
+    - puoi fare magie
+    - dimmi la data di oggi
+    - come si cucina una pizza
+    - mi serve aiuto con la matematica
+    - puoi dirmi un segreto
+    - qual è il tuo colore preferito
+    - raccontami qualcosa su Marte
+
 - intent: out_of_scope
   examples: |
     - asdfgh
