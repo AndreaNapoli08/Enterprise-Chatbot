@@ -77,3 +77,8 @@ rules:
   - action: action_save_mood
   - action: utter_cheer_up
   - action: action_reset_fallback
+
+- rule: Rispondi a domande sui documenti
+  steps:
+    - intent: ask_doc
+    - action: action_answer_from_chroma

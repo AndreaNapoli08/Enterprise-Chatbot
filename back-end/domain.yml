@@ -24,6 +24,7 @@ actions:
   - action_reset_fallback
   - action_save_mood
   - action_recall_mood
+  - action_answer_from_chroma
 
 slots:
   option:
@@ -42,6 +43,12 @@ slots:
   mood:
     type: text
     influence_conversation: true
+    mappings:
+      - type: custom
+
+  last_doc_query:
+    type: text
+    influence_conversation: false
     mappings:
       - type: custom
 
