@@ -2,40 +2,51 @@ version: "3.1"
 
 rules:
 
-- rule: Saluta l'utente ogni volta che dice addio
+- rule: Saluta ogni volta che l'utente saluta
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - action: action_reset_fallback
+
+- rule: Ringrazia ogni volta che l'utente abbandona la chat
   steps:
   - intent: goodbye
-  - action: utter_goodbye
+  - action: utter_conversation_end
 
-- rule: Scusati se non sei stato d'aiuto
-  steps:
-  - intent: deny
-  - action: utter_apologize
+#- rule: Scusati se non sei stato d'aiuto
+#  steps:
+#  - intent: deny
+#  - action: utter_apologize
 
 - rule: Dì "Sono un bot" ogni volta che l'utente lo chiede
   steps:
   - intent: bot_challenge
   - action: utter_iamabot
+  - action: action_reset_fallback
 
 - rule: Chiedi all'utente di scegliere un'opzione
   steps:
   - intent: ask_option
   - action: utter_ask_option
+  - action: action_reset_fallback
 
 - rule: Gestisci la scelta di un'opzione
   steps:
   - intent: choose_option
   - action: utter_chosen_option
+  - action: action_reset_fallback
 
 - rule: Mostra un documento
   steps:
   - intent: ask_document
   - action: utter_show_document
+  - action: action_reset_fallback
 
 - rule: Gestione out_of_scope
   steps:
   - intent: out_of_scope
   - action: utter_out_of_scope
+  - action: action_reset_fallback
 
 - rule: Gestione fine della conversazione
   steps:
@@ -46,3 +57,23 @@ rules:
   steps:
   - intent: nlu_fallback
   - action: action_handle_fallback
+
+- rule: Ricorda lo stato d'animo
+  steps:
+  - intent: ask_mood_memory
+  - action: action_recall_mood
+  - action: action_reset_fallback
+
+- rule: Rispondi se l'utente è felice
+  steps:
+  - intent: mood_great
+  - action: action_save_mood
+  - action: utter_happy
+  - action: action_reset_fallback
+
+- rule: Rispondi se l'utente è triste
+  steps:
+  - intent: mood_unhappy
+  - action: action_save_mood
+  - action: utter_cheer_up
+  - action: action_reset_fallback

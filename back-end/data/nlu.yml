@@ -73,7 +73,7 @@ nlu:
     - meraviglioso
     - mi sento alla grande
     - mi sento benissimo
-    - sono felicissimo
+    - sono felice
     - sto alla grande
     - giornata stupenda
     - tutto va alla perfezione
@@ -220,3 +220,14 @@ nlu:
     - Non c’è altro da chiedere
     - Ho finito la mia sessione
     - Chiudo qui la conversazione
+
+- intent: ask_mood_memory
+  examples: |
+    - ti ricordi come mi sentivo prima?
+    - ricordi se ero triste?
+    - che umore avevo?
+    - come stavo prima?
+    - ti ricordi se ero felice?
+    - qual è il mio umore oggi?
+# continuare con altri esempi
+# fallback non si azzera quando arriva una domanda a cui sa rispondere

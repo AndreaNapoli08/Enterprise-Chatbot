@@ -14,12 +14,16 @@ intents:
   - nlu_fallback
   - out_of_scope
   - conversation_end
+  - ask_mood_memory
 
 entities:
   - option
 
 actions:
   - action_handle_fallback
+  - action_reset_fallback
+  - action_save_mood
+  - action_recall_mood
 
 slots:
   option:
@@ -34,6 +38,12 @@ slots:
     influence_conversation: false
     mappings:
       - type: custom
+  
+  mood:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: custom
 
 responses:
   utter_greet:
@@ -43,17 +53,11 @@ responses:
   - text: "Ecco qualcosa per tirarti su il morale:" 
     image: "https://www.tattooforaweek.com/cdn/shop/products/smile-smiley-temporary-tattoo_1000x.jpg?v=1656001188"
 
-  utter_did_that_help:
-  - text: "Ti è stato d'aiuto?"
-
   utter_apologize:
   - text: "Mi dispiace se non sono stato d'aiuto."
 
   utter_happy:
   - text: "Fantastico, continua così!"
-
-  utter_goodbye:
-  - text: "Ciao"
 
   utter_iamabot:
   - text: "Sono un bot, alimentato da Rasa."
