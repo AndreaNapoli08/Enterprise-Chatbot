@@ -7,6 +7,11 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
+- rule: Scusati se non sei stato d'aiuto
+  steps:
+  - intent: deny
+  - action: utter_apologize
+
 - rule: Dì "Sono un bot" ogni volta che l'utente lo chiede
   steps:
   - intent: bot_challenge

@@ -46,6 +46,9 @@ responses:
   utter_did_that_help:
   - text: "Ti è stato d'aiuto?"
 
+  utter_apologize:
+  - text: "Mi dispiace se non sono stato d'aiuto."
+
   utter_happy:
   - text: "Fantastico, continua così!"
 
