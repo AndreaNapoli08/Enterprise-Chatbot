@@ -232,8 +232,9 @@ nlu:
 # continuare con altri esempi
 # fallback non si azzera quando arriva una domanda a cui sa rispondere
 
-- intent: ask_doc
+- intent: ask_information_document
   examples: |
     - è utile inserire la bibliografia?
     - mi dici quante parole deve avere la relazione?
     - quanto prima devo inviare la relazione?
+    - quante parole ha l'estensione complessiva della relazione?

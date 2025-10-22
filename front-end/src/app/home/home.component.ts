@@ -32,16 +32,14 @@ export class Home implements AfterViewChecked {
   handleMessage(message: any) {
     this.loading = true;
     if(message.role === 'bot') {
-      setTimeout(() => {
-        this.messages.push(message);    
-        if(message.buttons.length === 0){
-          this.waiting_answer = false;
-          this.loading = false;
-        }else{
-          this.waiting_answer = true;
-        }
-        this.shouldScroll = true;
-      }, 500);
+      this.messages.push(message);    
+      if(message.buttons.length === 0){
+        this.waiting_answer = false;
+        this.loading = false;
+      }else{
+        this.waiting_answer = true;
+      }
+      this.shouldScroll = true;
     }else{
       this.messages.push(message);
       this.shouldScroll = true;

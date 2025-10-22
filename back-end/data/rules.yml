@@ -80,5 +80,5 @@ rules:
 
 - rule: Rispondi a domande sui documenti
   steps:
-    - intent: ask_doc
+    - intent: ask_information_document
     - action: action_answer_from_chroma

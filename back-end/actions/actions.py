@@ -2,16 +2,27 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
+
 from langchain.vectorstores import Chroma
 from langchain.embeddings import HuggingFaceEmbeddings
+import re
+import warnings
 
-CHROMA_DIR = "data/chroma_db"
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+# === Configurazioni ===
+CHROMA_DIR = "actions/data/chroma_db"
 COLLECTION_NAME = "company_docs"
 
-# embeddings locali
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# === Embeddings locali multilingua ===
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+)
 
-# Contatore fallback consecutivi
+# ====================================================
+# ===============   ACTIONS PERSONALIZZATE   ==========
+# ====================================================
+
+# --- Gestione fallback consecutivi ---
 class ActionHandleFallback(Action):
 
     def name(self) -> Text:
@@ -37,7 +48,7 @@ class ActionHandleFallback(Action):
         # Aggiorna lo slot fallback_count
         return [SlotSet("fallback_count", fallback_count)]
     
-# Resettare contatore fallback
+# --- Reset del contatore fallback ---
 class ActionResetFallbackCount(Action):
     def name(self) -> Text:
         return "action_reset_fallback"
@@ -49,7 +60,7 @@ class ActionResetFallbackCount(Action):
         # Resetta il contatore dei fallback
         return [SlotSet("fallback_count", 0)]
 
-# Salvare lo stato emotivo dell'utente
+# --- Salvataggio stato d'animo ---
 class ActionSaveMood(Action):
     def name(self):
         return "action_save_mood"
@@ -62,7 +73,7 @@ class ActionSaveMood(Action):
             return [SlotSet("mood", "felice")]
         return []
 
-# Richiamare lo stato emotivo salvato
+# --- Richiamo dello stato d'animo ---
 class ActionRecallMood(Action):
     def name(self):
         return "action_recall_mood"
@@ -75,38 +86,42 @@ class ActionRecallMood(Action):
             dispatcher.utter_message(text="Non ricordo come ti sentivi prima.")
         return []
 
-# Rispondere alle domande prendendo le informazioni dai file usando Chroma
+# --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
     def name(self) -> Text:
         return "action_answer_from_chroma"
 
-    def run(self, dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
-        query = tracker.latest_message.get("text")
+    def run(self, dispatcher, tracker, domain):
+        query = tracker.latest_message.get("text", "").strip().lower()
         if not query:
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")
             return []
-
-        # Carica il vectorstore persistente
+        
+        # Carica il database Chroma
         vectordb = Chroma(
             persist_directory=CHROMA_DIR,
             collection_name=COLLECTION_NAME,
             embedding_function=embeddings
         )
-        retriever = vectordb.as_retriever(search_kwargs={"k": 4})
 
+        retriever = vectordb.as_retriever(search_kwargs={"k": 10})
         docs = retriever.get_relevant_documents(query)
+        print(f"🔍 Query: {query}")
+        for d in docs:
+            print(f"→ Score: {getattr(d, 'score', '?')} | Contenuto: {d.page_content[:150]}")
+
         if not docs:
-            dispatcher.utter_message(text="Non ho trovato informazioni rilevanti nei documenti.")
+            dispatcher.utter_message(
+                text="Non ho trovato informazioni rilevanti nei documenti."
+            )
             return []
 
-        # Risposta testuale semplice con i top-3 snippet
+        # Mostra i migliori snippet
         snippets = []
         for i, d in enumerate(docs[:3], start=1):
+            content = d.page_content.replace("\n", " ").strip()
             source = d.metadata.get("source", "")
-            snippets.append(f"{i}. {d.page_content[:500]}... (source: {source})")
+            snippets.append(f"{i}. {content[:400]}... (fonte: {source})")
 
         dispatcher.utter_message(text="Ecco cosa ho trovato nei documenti:")
         dispatcher.utter_message(text="\n\n".join(snippets))
