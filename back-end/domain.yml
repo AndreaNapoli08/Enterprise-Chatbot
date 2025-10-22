@@ -15,6 +15,7 @@ intents:
   - out_of_scope
   - conversation_end
   - ask_mood_memory
+  - ask_information_document
 
 entities:
   - option
