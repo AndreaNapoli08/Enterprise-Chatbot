@@ -1,22 +1,43 @@
 from typing import Any, Text, Dict, List
+import os
+import re
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
 
+# LangChain / Chroma / Embeddings / LLMs
 from langchain.vectorstores import Chroma
 from langchain.embeddings import HuggingFaceEmbeddings
-import re
-import warnings
+from langchain.llms import Ollama
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-# === Configurazioni ===
-CHROMA_DIR = "actions/data/chroma_db"
+# === CONFIGURAZIONI ===
+CHROMA_DIR = "actions/data/chroma_db"   # aggiorna se il tuo percorso è diverso
 COLLECTION_NAME = "company_docs"
 
-# === Embeddings locali multilingua ===
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-)
+# Embeddings (stesso modello usato in ingest.py)
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+# === PROMPT ===
+PROMPT_TEMPLATE = """Sei un assistente che risponde solo in italiano.
+Hai a disposizione delle informazioni provenienti da documenti (contesto).
+Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi.
+Se la risposta non è nel contesto, di' che non è specificato nel documento.
+
+Contesto:
+{context}
+
+Domanda:
+{question}
+
+Risposta concisa in italiano:
+"""
+
+PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
 
 # ====================================================
 # ===============   ACTIONS PERSONALIZZATE   ==========
@@ -91,38 +112,75 @@ class ActionAnswerFromChroma(Action):
     def name(self) -> Text:
         return "action_answer_from_chroma"
 
-    def run(self, dispatcher, tracker, domain):
-        query = tracker.latest_message.get("text", "").strip().lower()
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any]
+    ) -> List[Dict[Text, Any]]:
+
+        # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
+        query = tracker.latest_message.get("text", "").strip()
         if not query:
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")
             return []
-        
-        # Carica il database Chroma
-        vectordb = Chroma(
-            persist_directory=CHROMA_DIR,
-            collection_name=COLLECTION_NAME,
-            embedding_function=embeddings
-        )
 
-        retriever = vectordb.as_retriever(search_kwargs={"k": 10})
-        docs = retriever.get_relevant_documents(query)
-        print(f"🔍 Query: {query}")
-        for d in docs:
-            print(f"→ Score: {getattr(d, 'score', '?')} | Contenuto: {d.page_content[:150]}")
-
-        if not docs:
-            dispatcher.utter_message(
-                text="Non ho trovato informazioni rilevanti nei documenti."
+        # --- CARICA IL DATABASE CHROMA ---
+        try:
+            vectordb = Chroma(
+                persist_directory=CHROMA_DIR,
+                collection_name=COLLECTION_NAME,
+                embedding_function=embeddings
             )
+        except Exception as e:
+            dispatcher.utter_message(text=f"Errore caricando il database Chroma: {e}")
             return []
 
-        # Mostra i migliori snippet
-        snippets = []
-        for i, d in enumerate(docs[:3], start=1):
-            content = d.page_content.replace("\n", " ").strip()
-            source = d.metadata.get("source", "")
-            snippets.append(f"{i}. {content[:400]}... (fonte: {source})")
+        # Recuperatore: cerchiamo i 5 chunk più pertinenti
+        retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 
-        dispatcher.utter_message(text="Ecco cosa ho trovato nei documenti:")
-        dispatcher.utter_message(text="\n\n".join(snippets))
+        # === CONFIGURA LLM LOCALE TRAMITE OLLAMA ===
+        model_name = os.getenv("OLLAMA_MODEL", "mistral")
+
+        try:
+            llm = Ollama(model=model_name, temperature=0)
+        except Exception as e:
+            dispatcher.utter_message(text=f"Errore inizializzando il modello Ollama: {e}")
+            return []
+
+        # === COSTRUISCI CATENA DI DOMANDA-RISPOSTA ===
+        try:
+            qa = RetrievalQA.from_chain_type(
+                llm=llm,
+                retriever=retriever,
+                chain_type="stuff",  # sufficiente per piccoli contesti
+                return_source_documents=True,
+                chain_type_kwargs={"prompt": PROMPT}
+            )
+
+            result = qa({"query": query})
+            answer_text = result.get("result") if isinstance(result, dict) else str(result)
+        except Exception as e:
+            answer_text = None
+            print("Errore nel processo QA:", e)
+
+        # === FALLBACK: se LLM non risponde, cerca manualmente ===
+        if not answer_text:
+            docs = retriever.get_relevant_documents(query)
+            if not docs:
+                dispatcher.utter_message(text="Non ho trovato informazioni rilevanti nei documenti.")
+                return []
+            full_text = " ".join([d.page_content for d in docs])
+            m = re.search(r"(\d{1,3}(?:[.,]\d{3})?\s*(?:parole|pagine))", full_text, re.IGNORECASE)
+            if m:
+                answer_text = f"L'estensione complessiva della relazione dovrebbe essere di circa {m.group(1)}."
+            else:
+                answer_text = docs[0].page_content.strip()[:300] + "..."
+
+        # Pulizia finale
+        answer_text = re.sub(r"\s+", " ", answer_text).strip()
+        if len(answer_text) > 400:
+            answer_text = answer_text[:400] + "..."
+
+        dispatcher.utter_message(text=answer_text)
         return []

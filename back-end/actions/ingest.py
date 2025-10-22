@@ -1,21 +1,15 @@
+
 import os
 from langchain.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 
-# === PERCORSI RELATIVI RISPETTO ALLA RADICE DEL PROGETTO ===
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # dove si trova ingest.py
-DATA_DIR = os.path.join(BASE_DIR, "data/")
-DOCS_DIR = os.path.join(DATA_DIR, "docs")
-CHROMA_DIR = os.path.join(DATA_DIR, "chroma_db")
-COLLECTION_NAME = "company_docs"
+# Directory dei documenti e del DB locale
+DOCS_DIR = "data/docs"
+CHROMA_DIR = "data/chroma_db"
 
-# === CREA CARTELLE SE NON ESISTONO ===
-os.makedirs(DOCS_DIR, exist_ok=True)
-os.makedirs(CHROMA_DIR, exist_ok=True)
-
-# === CARICA DOCUMENTI ===
+# Carica documenti PDF e TXT
 def load_documents():
     loaders = [
         DirectoryLoader(DOCS_DIR, glob="**/*.pdf", loader_cls=PyPDFLoader)
@@ -32,31 +26,25 @@ def main():
     docs = load_documents()
     print(f"Caricati {len(docs)} documenti")
 
-    if not docs:
-        print("Nessun documento trovato in data/docs")
-        return
-
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
+    # Chunking
+    splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=150)
     chunks = splitter.split_documents(docs)
     print(f"Creati {len(chunks)} chunk")
 
-    # Embeddings locali multilingua
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-    )
+    # Embeddings locali HuggingFace
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # Creazione database Chroma persistente
+    # Salva su Chroma
     vectordb = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
         persist_directory=CHROMA_DIR,
-        collection_name=COLLECTION_NAME
+        collection_name="company_docs"
     )
-
     vectordb.persist()
-    vectordb = None
-
-    print(f"DB Chroma salvato in: {os.path.abspath(CHROMA_DIR)}")
+    print(f"DB Chroma salvato in {CHROMA_DIR}")
 
 if __name__ == "__main__":
+    os.makedirs(DOCS_DIR, exist_ok=True)
+    os.makedirs(CHROMA_DIR, exist_ok=True)
     main()
