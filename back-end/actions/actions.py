@@ -2,6 +2,7 @@ from typing import Any, Text, Dict, List
 import os
 import re
 import warnings
+import psutil
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from rasa_sdk import Action, Tracker
@@ -111,7 +112,7 @@ class ActionRecallMood(Action):
 class ActionAnswerFromChroma(Action):
     def name(self) -> Text:
         return "action_answer_from_chroma"
-
+    
     def run(
         self,
         dispatcher: CollectingDispatcher,
@@ -135,19 +136,30 @@ class ActionAnswerFromChroma(Action):
         except Exception as e:
             dispatcher.utter_message(text=f"Errore caricando il database Chroma: {e}")
             return []
+        
+        print("Database Chroma caricato correttamente.")
 
-        # Recuperatore: cerchiamo i 5 chunk più pertinenti
-        retriever = vectordb.as_retriever(search_kwargs={"k": 5})
+        # Recuperatore: cerchiamo i chunk più pertinenti
+        retriever = vectordb.as_retriever(search_kwargs={"k": 2})
 
-        # === CONFIGURA LLM LOCALE TRAMITE OLLAMA ===
-        model_name = os.getenv("OLLAMA_MODEL", "mistral")
-
+        total_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
+        print("RAM totale disponibile:", total_ram_gb, "GB")
+        if total_ram_gb < 8:
+            model_name = "llama3.2:1b"      # ultra leggero
+        elif total_ram_gb < 12:
+            model_name = "phi3:mini"        # bilanciato
+        else:
+            model_name = "mistral"          # potente
+        
         try:
             llm = Ollama(model=model_name, temperature=0)
+
         except Exception as e:
             dispatcher.utter_message(text=f"Errore inizializzando il modello Ollama: {e}")
             return []
-
+        
+        print("Modello Ollama", model_name, "inizializzato correttamente.")
+        
         # === COSTRUISCI CATENA DI DOMANDA-RISPOSTA ===
         try:
             qa = RetrievalQA.from_chain_type(
@@ -160,6 +172,7 @@ class ActionAnswerFromChroma(Action):
 
             result = qa({"query": query})
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
+
         except Exception as e:
             answer_text = None
             print("Errore nel processo QA:", e)
@@ -170,12 +183,7 @@ class ActionAnswerFromChroma(Action):
             if not docs:
                 dispatcher.utter_message(text="Non ho trovato informazioni rilevanti nei documenti.")
                 return []
-            full_text = " ".join([d.page_content for d in docs])
-            m = re.search(r"(\d{1,3}(?:[.,]\d{3})?\s*(?:parole|pagine))", full_text, re.IGNORECASE)
-            if m:
-                answer_text = f"L'estensione complessiva della relazione dovrebbe essere di circa {m.group(1)}."
-            else:
-                answer_text = docs[0].page_content.strip()[:300] + "..."
+            answer_text = docs[0].page_content.strip()[:300] + "..."
 
         # Pulizia finale
         answer_text = re.sub(r"\s+", " ", answer_text).strip()

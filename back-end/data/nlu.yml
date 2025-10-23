@@ -229,6 +229,7 @@ nlu:
     - come stavo prima?
     - ti ricordi se ero felice?
     - qual è il mio umore oggi?
+    - come mi sento oggi?
 # continuare con altri esempi
 # fallback non si azzera quando arriva una domanda a cui sa rispondere
 
