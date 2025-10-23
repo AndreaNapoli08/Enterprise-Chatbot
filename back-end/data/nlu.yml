@@ -221,7 +221,7 @@ nlu:
     - Ho finito la mia sessione
     - Chiudo qui la conversazione
 
-- intent: ask_mood_memory
+- intent: ask_mood
   examples: |
     - ti ricordi come mi sentivo prima?
     - ricordi se ero triste?

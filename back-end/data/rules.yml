@@ -60,21 +60,24 @@ rules:
 
 - rule: Ricorda lo stato d'animo
   steps:
-  - intent: ask_mood_memory
-  - action: action_recall_mood
+  - intent: ask_mood
+  #- action: action_recall_mood
+  - action: action_query_context
   - action: action_reset_fallback
 
 - rule: Rispondi se l'utente è felice
   steps:
   - intent: mood_great
-  - action: action_save_mood
+  #- action: action_save_mood
+  - action: action_extract_context
   - action: utter_happy
   - action: action_reset_fallback
 
 - rule: Rispondi se l'utente è triste
   steps:
   - intent: mood_unhappy
-  - action: action_save_mood
+  #- action: action_save_mood
+  - action: action_extract_context
   - action: utter_cheer_up
   - action: action_reset_fallback
 

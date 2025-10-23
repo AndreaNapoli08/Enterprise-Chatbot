@@ -3,6 +3,8 @@ import os
 import re
 import warnings
 import psutil
+import json, requests, re
+from datetime import datetime
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from rasa_sdk import Action, Tracker
@@ -83,30 +85,30 @@ class ActionResetFallbackCount(Action):
         return [SlotSet("fallback_count", 0)]
 
 # --- Salvataggio stato d'animo ---
-class ActionSaveMood(Action):
-    def name(self):
-        return "action_save_mood"
+# class ActionSaveMood(Action):
+#     def name(self):
+#         return "action_save_mood"
 
-    def run(self, dispatcher, tracker, domain):
-        latest_intent = tracker.latest_message["intent"].get("name")
-        if latest_intent == "mood_unhappy":
-            return [SlotSet("mood", "triste")]
-        elif latest_intent == "mood_great":
-            return [SlotSet("mood", "felice")]
-        return []
+#     def run(self, dispatcher, tracker, domain):
+#         latest_intent = tracker.latest_message["intent"].get("name")
+#         if latest_intent == "mood_unhappy":
+#             return [SlotSet("mood", "triste")]
+#         elif latest_intent == "mood_great":
+#             return [SlotSet("mood", "felice")]
+#         return []
 
-# --- Richiamo dello stato d'animo ---
-class ActionRecallMood(Action):
-    def name(self):
-        return "action_recall_mood"
+# # --- Richiamo dello stato d'animo ---
+# class ActionRecallMood(Action):
+#     def name(self):
+#         return "action_recall_mood"
 
-    def run(self, dispatcher, tracker, domain):
-        mood = tracker.get_slot("mood")
-        if mood:
-            dispatcher.utter_message(text=f"Prima mi avevi detto che eri {mood}.")
-        else:
-            dispatcher.utter_message(text="Non ricordo come ti sentivi prima.")
-        return []
+#     def run(self, dispatcher, tracker, domain):
+#         mood = tracker.get_slot("mood")
+#         if mood:
+#             dispatcher.utter_message(text=f"Prima mi avevi detto che eri {mood}.")
+#         else:
+#             dispatcher.utter_message(text="Non ricordo come ti sentivi prima.")
+#         return []
 
 # --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
@@ -191,4 +193,139 @@ class ActionAnswerFromChroma(Action):
             answer_text = answer_text[:400] + "..."
 
         dispatcher.utter_message(text=answer_text)
+        return []
+    
+
+# Provo a salvare in automatico il contesto
+class ActionExtractContext(Action):
+    def name(self) -> Text:
+        return "action_extract_context"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any]
+    ) -> List[Dict[Text, Any]]:
+
+        user_message = tracker.latest_message.get("text")
+        if not user_message:
+            return []
+
+        # 🔹 Prompt GENERICO: il modello decide cosa estrarre
+        prompt = f"""
+            Sei un assistente che estrae informazioni strutturate da un messaggio in formato JSON.
+            
+            Regole fondamentali:
+            1. L'output DEVE essere solo un oggetto JSON valido, non aggiungere altro testo.
+            2. Se l'utente esprime uno stato d'animo, USA SEMPRE la chiave "mood".
+            3. Se una chiave non si applica, non includerla.
+
+            Esempi:
+            - Messaggio: "Oggi sono molto felice!" -> Risposta: {{"mood": "felice"}}
+            - Messaggio: "Devo fissare una riunione per domani." -> Risposta: {{"azione": "fissare riunione", "data": "domani"}}
+            - Messaggio: "Sono triste." -> Risposta: {{"mood": "triste"}}
+
+            Messaggio dell'utente da analizzare: "{user_message}"
+        """
+
+        # Chiamata al modello locale (Ollama). Qui non uso LangChain per quello devo fare la chiamata al modello per diminuire l'overhead
+        # LangChain ha senso se vogliamo integrare più fonti di conoscenza. In questo caso va bene solo la chiamata al modello essendo che abbiamo un singolo JSON 
+        try:
+            response = requests.post(
+                "http://localhost:11434/api/generate",
+                json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
+                timeout=200
+            )
+            data = response.json()
+            text_output = data.get("response", data.get("text", "{}"))
+        except Exception as e:
+            text_output = "{}"
+
+        # 🔹 Estrai il primo JSON valido dal testo
+        match = re.search(r"\{.*\}", text_output, re.DOTALL)
+        extracted = {}
+        if match:
+            try:
+                extracted = json.loads(match.group(0))
+            except Exception:
+                extracted = {}
+
+        # Aggiungi metadati (data e ultimo messaggio)
+        extracted["_last_user_message"] = user_message
+        extracted["_timestamp"] = datetime.utcnow().isoformat() + "Z"
+
+        # 🔹 Recupera il contesto precedente (se esiste)
+        prev_context = tracker.get_slot("auto_context")
+        try:
+            prev = json.loads(prev_context) if prev_context else {}
+        except Exception:
+            prev = {}
+
+        # 🔹 Unisci vecchio e nuovo contesto
+        merged = dict(prev)
+        for k, v in extracted.items():
+            # se entrambi liste → unisci
+            if k in merged and isinstance(merged[k], list) and isinstance(v, list):
+                merged[k] = list(dict.fromkeys(merged[k] + v))
+            else:
+                merged[k] = v
+
+        new_context = json.dumps(merged, ensure_ascii=False)
+
+        print(new_context)
+        # 🔹 Salva tutto nello slot
+        return [SlotSet("auto_context", new_context)]
+
+
+class ActionQueryContext(Action):
+    def name(self) -> Text:
+        return "action_query_context"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any]
+    ) -> List[Dict[Text, Any]]:
+
+        # Messaggio dell'utente (es: "con chi avevo la riunione?")
+        user_question = tracker.latest_message.get("text")
+
+        print("Domanda utente:", user_question)
+        # Contesto salvato in auto_context
+        context_json = tracker.get_slot("auto_context")
+
+        print("Contesto:", context_json)
+        if not context_json:
+            dispatcher.utter_message("Non ho ancora informazioni salvate su di te 😅")
+            return []
+
+        # Prompt dinamico per interrogare il contesto
+        prompt = f"""
+            Sei un assistente che deve rispondere a domande basandosi solo sul seguente contesto JSON:
+
+            {context_json}
+
+            Domanda: "{user_question}"
+
+            Istruzioni:
+            - Se la risposta è chiaramente deducibile dal contesto, rispondi in linguaggio naturale (una o due frasi).
+            - Se non trovi la risposta nel contesto, di' chiaramente che non hai quella informazione.
+            - Non inventare nulla.
+        """
+
+        # Chiamata all'LLM (esempio con Ollama)
+        try:
+            response = requests.post(
+                "http://localhost:11434/api/generate",
+                json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
+                timeout=200
+            )
+            data = response.json()
+            answer = data.get("response", data.get("text", "")).strip()
+        except Exception as e:
+            answer = f"Errore durante l'interrogazione del contesto: {e}"
+
+        dispatcher.utter_message(text=answer)
         return []

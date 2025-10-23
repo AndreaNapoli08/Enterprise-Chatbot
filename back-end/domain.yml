@@ -14,7 +14,7 @@ intents:
   - nlu_fallback
   - out_of_scope
   - conversation_end
-  - ask_mood_memory
+  - ask_mood
   - ask_information_document
 
 entities:
@@ -23,9 +23,11 @@ entities:
 actions:
   - action_handle_fallback
   - action_reset_fallback
-  - action_save_mood
-  - action_recall_mood
+  # - action_save_mood
+  # - action_recall_mood
   - action_answer_from_chroma
+  - action_extract_context
+  - action_query_context
 
 slots:
   option:
@@ -41,13 +43,13 @@ slots:
     mappings:
       - type: custom
   
-  mood:
-    type: text
-    influence_conversation: true
-    mappings:
-      - type: custom
+  # mood:
+  #   type: text
+  #   influence_conversation: true
+  #   mappings:
+  #     - type: custom
 
-  last_doc_query:
+  auto_context:
     type: text
     influence_conversation: false
     mappings:
