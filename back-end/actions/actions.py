@@ -146,13 +146,13 @@ class ActionAnswerFromChroma(Action):
 
         total_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
         print("RAM totale disponibile:", total_ram_gb, "GB")
-        if total_ram_gb < 8:
-            model_name = "llama3.2:1b"      # ultra leggero
-        elif total_ram_gb < 12:
-            model_name = "phi3:mini"        # bilanciato
-        else:
-            model_name = "mistral"          # potente
-        
+        # if total_ram_gb < 8:
+        #     model_name = "llama3.2:1b"      # ultra leggero
+        # elif total_ram_gb < 12:
+        #     model_name = "phi3:mini"        # bilanciato
+        # else:
+        #     model_name = "mistral"          # potente
+        model_name = "mistral" 
         try:
             llm = Ollama(model=model_name, temperature=0)
 
@@ -171,10 +171,12 @@ class ActionAnswerFromChroma(Action):
                 return_source_documents=True,
                 chain_type_kwargs={"prompt": PROMPT}
             )
+            print("Catena di domanda-risposta costruita correttamente.")
 
             result = qa({"query": query})
+            print("Risultato QA:", result)
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
-
+            print("Risposta generata dall'LLM:", answer_text)
         except Exception as e:
             answer_text = None
             print("Errore nel processo QA:", e)
@@ -214,7 +216,7 @@ class ActionExtractContext(Action):
 
         # 🔹 Prompt GENERICO: il modello decide cosa estrarre
         prompt = f"""
-            Sei un assistente che estrae informazioni strutturate da un messaggio in formato JSON.
+            Sei un assistente italiano che estrae informazioni strutturate da un messaggio in formato JSON.
             
             Regole fondamentali:
             1. L'output DEVE essere solo un oggetto JSON valido, non aggiungere altro testo.
@@ -234,11 +236,15 @@ class ActionExtractContext(Action):
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
-                json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
+                #json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
+                json={"model": "mistral", "prompt": prompt, "stream": False},
                 timeout=200
             )
+            print(response)
             data = response.json()
+            print(data)
             text_output = data.get("response", data.get("text", "{}"))
+            print(text_output)
         except Exception as e:
             text_output = "{}"
 
@@ -298,32 +304,41 @@ class ActionQueryContext(Action):
 
         print("Contesto:", context_json)
         if not context_json:
-            dispatcher.utter_message("Non ho ancora informazioni salvate su di te 😅")
+            dispatcher.utter_message("Non ho ancora informazioni salvate su di te")
             return []
 
         # Prompt dinamico per interrogare il contesto
         prompt = f"""
-            Sei un assistente che deve rispondere a domande basandosi solo sul seguente contesto JSON:
+            Sei un assistente italiano che risponde alle domande basandosi solo sul seguente contesto JSON:
 
             {context_json}
 
             Domanda: "{user_question}"
 
             Istruzioni:
-            - Se la risposta è chiaramente deducibile dal contesto, rispondi in linguaggio naturale (una o due frasi).
-            - Se non trovi la risposta nel contesto, di' chiaramente che non hai quella informazione.
+            - Rispondi sempre in italiano.
+            - Rispondi all'utente usando il "tu", riferendoti a lui/lei in seconda persona.
+            - Non parlare in prima persona.
+            - Se la risposta è chiaramente deducibile dal contesto, rispondi in una o due frasi concise.
+            - Se l'utente chiede il suo umore, rispondi come: "Oggi sei felice" o "Oggi sei triste".
+            - Se la risposta non è nel contesto, di' chiaramente che non hai quell'informazione.
             - Non inventare nulla.
+            - Restituisci solo una frase chiara.
         """
-
+        print("Prompt generato:", prompt)
         # Chiamata all'LLM (esempio con Ollama)
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
-                json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
+                #json={"model": "llama3.2:1b", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
+                json={"model": "mistral", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
                 timeout=200
             )
+            print("qui arriva", response)
             data = response.json()
+            print(data)
             answer = data.get("response", data.get("text", "")).strip()
+            print(answer)
         except Exception as e:
             answer = f"Errore durante l'interrogazione del contesto: {e}"
 
