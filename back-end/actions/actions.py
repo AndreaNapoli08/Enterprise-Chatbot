@@ -236,7 +236,7 @@ class ActionExtractContext(Action):
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
-                #json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
+                #json={"model": "phi3:mini", "prompt": prompt, "stream": False},
                 json={"model": "mistral", "prompt": prompt, "stream": False},
                 timeout=200
             )
@@ -330,7 +330,7 @@ class ActionQueryContext(Action):
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
-                #json={"model": "llama3.2:1b", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
+                #json={"model": "phi3:mini", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
                 json={"model": "mistral", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
                 timeout=200
             )
