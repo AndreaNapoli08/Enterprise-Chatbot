@@ -43,7 +43,8 @@ export class Home implements AfterViewChecked {
 
   handleMessage(message: any) {
     this.loading = true;
-    if(message.role === 'bot') {
+    if(message.role === 'bot'){ 
+      console.log("Received bot message:", message);
       clearTimeout(this.longWaitTimer);
       clearInterval(this.textChangeTimer);
       this.long_waiting = false;
@@ -57,6 +58,19 @@ export class Home implements AfterViewChecked {
         this.waiting_answer = true;
       }
       this.shouldScroll = true;
+      if(message.text === "Perfetto, cerco subito nei documenti"){
+        clearTimeout(this.longWaitTimer);
+        clearInterval(this.textChangeTimer);
+        this.longWaitTimer = setTimeout(() => {
+          this.long_waiting = true;
+          this.textIndex = 0;
+          this.long_waiting_text = this.waitingTexts[this.textIndex];
+          this.textChangeTimer = setInterval(() => {
+            this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
+            this.long_waiting_text = this.waitingTexts[this.textIndex];
+          }, 1000);
+        }, 2000);
+      }
     }else{
       this.messages.push(message);
       this.shouldScroll = true;
@@ -72,8 +86,8 @@ export class Home implements AfterViewChecked {
         this.textChangeTimer = setInterval(() => {
           this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
           this.long_waiting_text = this.waitingTexts[this.textIndex];
-        }, 10000);
-      }, 30000);
+        }, 1000);
+      }, 2000);
     }
   }
 

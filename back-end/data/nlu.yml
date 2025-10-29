@@ -107,13 +107,6 @@ nlu:
     - sto parlando con un bot?
     - sto parlando con una persona?
 
-- intent: ask_option
-  examples: |
-    - mostrami dei bottoni
-    - voglio scegliere un'opzione
-    - dammi delle opzioni
-    - fammi scegliere
-
 - intent: ask_document
   examples: |
     - mostrami un documento

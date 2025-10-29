@@ -9,7 +9,8 @@ intents:
   - mood_unhappy
   - bot_challenge
   - ask_option
-  - choose_option
+  - choose_yes
+  - choose_no
   - ask_document
   - nlu_fallback
   - out_of_scope
@@ -65,16 +66,27 @@ responses:
   utter_iamabot:
   - text: "Sono un bot, alimentato da Rasa."
 
-  utter_ask_option:
-    - text: "Scegli un'opzione:"
-      buttons:
-        - title: "Opzione A"
-          payload: '/choose_option{{"option":"A"}}'
-        - title: "Opzione B"
-          payload: '/choose_option{{"option":"B"}}'
+  # utter_ask_option:
+  #   - text: "Scegli un'opzione:"
+  #     buttons:
+  #       - title: "Opzione A"
+  #         payload: '/choose_option{{"option":"A"}}'
+  #       - title: "Opzione B"
+  #         payload: '/choose_option{{"option":"B"}}'
 
-  utter_chosen_option:
-    - text: "Hai scelto l'opzione {option} ✅"
+  # utter_chosen_option:
+  #   - text: "Hai scelto l'opzione {option} ✅"
+
+  utter_ask_option:
+    - text: "Vuoi che cerco nei documenti?"
+      buttons:
+      - title: "Si"
+        payload: "/choose_yes"
+      - title: "No"
+        payload: "/choose_no"
+
+  utter_option_no:
+    - text: "Va bene, non cerco nei documenti per ora."
 
   utter_show_document:
     - text: "Ecco il documento che hai richiesto:"

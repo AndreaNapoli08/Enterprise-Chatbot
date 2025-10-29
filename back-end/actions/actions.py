@@ -98,6 +98,11 @@ class ActionAnswerFromChroma(Action):
         
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
+        
+        if query == "/choose_yes":
+            user_messages = [e for e in tracker.events if e.get("event") == "user"]
+            query = user_messages[-2].get("text")
+        
         if not query:
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")
             return []

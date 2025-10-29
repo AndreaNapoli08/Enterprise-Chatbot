@@ -19,17 +19,28 @@ rules:
   - action: utter_iamabot
   - action: action_reset_fallback
 
-- rule: Chiedi all'utente di scegliere un'opzione
-  steps:
-  - intent: ask_option
-  - action: utter_ask_option
-  - action: action_reset_fallback
+# Bottone classico per scegliere un'opzione
+# - rule: Chiedi all'utente di scegliere un'opzione
+#   steps:
+#   - intent: ask_option
+#   - action: utter_ask_option
+#   - action: action_reset_fallback
 
-- rule: Gestisci la scelta di un'opzione
+# - rule: Gestisci la scelta di un'opzione
+#   steps:
+#   - intent: choose_option
+#   - action: utter_chosen_option
+#   - action: action_reset_fallback
+
+- rule: L'utente vuole cercare nei documenti
   steps:
-  - intent: choose_option
-  - action: utter_chosen_option
-  - action: action_reset_fallback
+    - intent: choose_yes
+    - action: action_answer_from_chroma
+
+- rule: L'utente non vuole cercare nei documenti
+  steps:
+    - intent: choose_no
+    - action: utter_option_no
 
 - rule: Mostra un documento
   steps:
@@ -52,6 +63,7 @@ rules:
   steps:
   - intent: nlu_fallback
   - action: action_handle_fallback
+  - action: utter_ask_option
 
 - rule: Ricorda lo stato d'animo
   steps:
