@@ -15,7 +15,8 @@ intents:
   - out_of_scope
   - conversation_end
   - ask_mood
-  - ask_information_document
+  - ask_information_relazione
+  - ask_information_aziendale
 
 entities:
   - option
@@ -23,8 +24,6 @@ entities:
 actions:
   - action_handle_fallback
   - action_reset_fallback
-  # - action_save_mood
-  # - action_recall_mood
   - action_answer_from_chroma
   - action_extract_context
   - action_query_context
@@ -42,12 +41,6 @@ slots:
     influence_conversation: false
     mappings:
       - type: custom
-  
-  # mood:
-  #   type: text
-  #   influence_conversation: true
-  #   mappings:
-  #     - type: custom
 
   auto_context:
     type: text

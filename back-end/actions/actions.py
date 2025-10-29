@@ -25,23 +25,6 @@ COLLECTION_NAME = "company_docs"
 # Embeddings (stesso modello usato in ingest.py)
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# === PROMPT ===
-PROMPT_TEMPLATE = """Sei un assistente che risponde solo in italiano.
-Hai a disposizione delle informazioni provenienti da documenti (contesto).
-Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi.
-Se la risposta non è nel contesto, di' che non è specificato nel documento.
-
-Contesto:
-{context}
-
-Domanda:
-{question}
-
-Risposta concisa in italiano:
-"""
-
-PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
-
 # ====================================================
 # ===============   ACTIONS PERSONALIZZATE   ==========
 # ====================================================
@@ -84,32 +67,6 @@ class ActionResetFallbackCount(Action):
         # Resetta il contatore dei fallback
         return [SlotSet("fallback_count", 0)]
 
-# --- Salvataggio stato d'animo ---
-# class ActionSaveMood(Action):
-#     def name(self):
-#         return "action_save_mood"
-
-#     def run(self, dispatcher, tracker, domain):
-#         latest_intent = tracker.latest_message["intent"].get("name")
-#         if latest_intent == "mood_unhappy":
-#             return [SlotSet("mood", "triste")]
-#         elif latest_intent == "mood_great":
-#             return [SlotSet("mood", "felice")]
-#         return []
-
-# # --- Richiamo dello stato d'animo ---
-# class ActionRecallMood(Action):
-#     def name(self):
-#         return "action_recall_mood"
-
-#     def run(self, dispatcher, tracker, domain):
-#         mood = tracker.get_slot("mood")
-#         if mood:
-#             dispatcher.utter_message(text=f"Prima mi avevi detto che eri {mood}.")
-#         else:
-#             dispatcher.utter_message(text="Non ricordo come ti sentivi prima.")
-#         return []
-
 # --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
     def name(self) -> Text:
@@ -121,7 +78,24 @@ class ActionAnswerFromChroma(Action):
         tracker: Tracker,
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
+        # === PROMPT PERSONALIZZATO PER DOMANDE SUI DOCUMENTI ===
+         # === PROMPT ===
+        PROMPT_TEMPLATE = """Sei un assistente che risponde solo in italiano.
+        Hai a disposizione delle informazioni provenienti da documenti (contesto).
+        Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi.
+        Se la risposta non è nel contesto, di' che non è specificato nel documento.
 
+        Contesto:
+        {context}
+
+        Domanda:
+        {question}
+
+        Risposta concisa in italiano:
+        """
+
+        PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
+        
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
         if not query:

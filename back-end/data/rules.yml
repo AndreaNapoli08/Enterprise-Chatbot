@@ -13,11 +13,6 @@ rules:
   - intent: goodbye
   - action: utter_conversation_end
 
-#- rule: Scusati se non sei stato d'aiuto
-#  steps:
-#  - intent: deny
-#  - action: utter_apologize
-
 - rule: Dì "Sono un bot" ogni volta che l'utente lo chiede
   steps:
   - intent: bot_challenge
@@ -61,14 +56,12 @@ rules:
 - rule: Ricorda lo stato d'animo
   steps:
   - intent: ask_mood
-  #- action: action_recall_mood
   - action: action_query_context
   - action: action_reset_fallback
 
 - rule: Rispondi se l'utente è felice
   steps:
   - intent: mood_great
-  #- action: action_save_mood
   - action: action_extract_context
   - action: utter_happy
   - action: action_reset_fallback
@@ -76,12 +69,16 @@ rules:
 - rule: Rispondi se l'utente è triste
   steps:
   - intent: mood_unhappy
-  #- action: action_save_mood
   - action: action_extract_context
   - action: utter_cheer_up
   - action: action_reset_fallback
 
-- rule: Rispondi a domande sui documenti
+- rule: Rispondi a domande sul documento linee_guida
   steps:
-    - intent: ask_information_document
+    - intent: ask_information_relazione
+    - action: action_answer_from_chroma
+
+- rule: Rispondi a domande sul documento aziendale
+  steps:
+    - intent: ask_information_aziendale
     - action: action_answer_from_chroma

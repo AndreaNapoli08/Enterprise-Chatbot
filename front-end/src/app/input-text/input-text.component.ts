@@ -44,8 +44,13 @@ export class InputText {
     // invio ad home per visualizzare il messaggio graficamente
     this.submitAnswer.emit(message);
 
+    const startTime = performance.now();
+
     // invio a Rasa
     this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
+      const elapesedTime = (performance.now() - startTime) / 1000;
+      console.log(`Rasa response time: ${elapesedTime.toFixed(2)} seconds`);
+
       responses.forEach(resp => {
         const botMessage: Message = {
           text: resp.text || '',

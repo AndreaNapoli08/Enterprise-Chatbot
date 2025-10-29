@@ -230,12 +230,103 @@ nlu:
     - ti ricordi se ero felice?
     - qual è il mio umore oggi?
     - come mi sento oggi?
-# continuare con altri esempi
-# fallback non si azzera quando arriva una domanda a cui sa rispondere
 
-- intent: ask_information_document
+- intent: ask_information_relazione
   examples: |
     - è utile inserire la bibliografia?
     - mi dici quante parole deve avere la relazione?
     - quanto prima devo inviare la relazione?
     - quante parole ha l'estensione complessiva della relazione?
+
+- intent: ask_information_aziendale
+  examples: |
+    - Che cos’è Blue Reply?
+    - Di cosa si occupa Blue Reply?
+    - Quanti dipendenti ha Blue Reply?
+    - Quali sono i valori aziendali di Blue Reply?
+    - A quale gruppo appartiene Blue Reply?
+    - Qual è la missione di Blue Reply?
+    - Come è organizzata l’azienda?
+    - Quali sono le principali aree di competenza di Blue Reply?
+    - A cosa serve questo manuale?
+    - Ogni quanto viene aggiornato il manuale aziendale?
+    - Dove posso trovare le versioni aggiornate del documento?
+    - Quanti giorni di ferie spettano ai dipendenti Blue Reply?
+    - Come vengono calcolate le ferie per chi lavora part-time?
+    - Posso accumulare le ferie non utilizzate?
+    - Posso essere pagato per le ferie non godute?
+    - Come posso richiedere le ferie?
+    - Dove si inseriscono le ferie nel portale HR?
+    - Entro quando devo pianificare le ferie?
+    - Chi approva le ferie?
+    - Cosa succede se mi ammalo durante le ferie?
+    - Quando ci sono ferie collettive?
+    - Come faccio a sapere quante ferie mi restano?
+    - Quali tipi di permessi riconosce Blue Reply?
+    - Cosa sono i permessi ROL?
+    - Posso richiedere un permesso per motivi personali?
+    - Come richiedere un permesso per visita medica?
+    - Devo allegare un certificato per una visita medica?
+    - Quanti giorni di permesso spettano in caso di lutto?
+    - È possibile chiedere un permesso non retribuito?
+    - Come vengono tracciati i permessi?
+    - Come funziona il sistema dei buoni pasto elettronici?
+    - A quanto ammonta il valore dei buoni pasto?
+    - Quando vengono caricati i buoni pasto?
+    - Posso usarli nei supermercati?
+    - Quanti buoni posso usare insieme?
+    - Cosa devo fare se perdo la card dei buoni pasto?
+    - Quanto tempo serve per ricevere una nuova card?
+    - Come segnalo un problema con la card dei buoni pasto?
+    - Come aggiorno i miei dati anagrafici nel portale HR?
+    - Dove posso modificare il mio IBAN?
+    - Entro quanto tempo viene aggiornato il nuovo IBAN?
+    - Quali dati personali gestisce l’azienda?
+    - Come vengono protetti i miei dati personali?
+    - A chi devo segnalare una violazione della privacy?
+    - Quali tipi di contratto usa Blue Reply?
+    - Dove posso consultare il mio contratto di lavoro?
+    - Quando viene pagato lo stipendio?
+    - Dove trovo il mio cedolino paga?
+    - Chi contatto se trovo errori nel cedolino?
+    - Come richiedere un rimborso spese?
+    - Quali documenti servono per un rimborso?
+    - Quando riceverò il rimborso spese?
+    - Come posso ottenere un certificato di servizio?
+    - Dove trovo la mia CU o altri documenti fiscali?
+    - Quali benefit offre Blue Reply?
+    - Come funziona la piattaforma welfare?
+    - Posso convertire il premio di produttività in welfare?
+    - Cosa succede se non uso il credito welfare entro fine anno?
+    - Come accedo all’assicurazione sanitaria?
+    - Chi è coperto dal fondo sanitario?
+    - Come richiedo un rimborso medico?
+    - A chi scrivo se ho problemi con la piattaforma welfare?
+    - Dove trovo le comunicazioni ufficiali HR?
+    - Riceverò notifiche per aggiornamenti o scadenze?
+    - Cosa succede se non rispetto una scadenza nel portale HR?
+    - Come vengono gestite le comunicazioni di emergenza?
+    - Cosa devo fare per ricevere gli avvisi urgenti?
+    - Come funziona lo smart working in Blue Reply?
+    - Quanti giorni a settimana posso lavorare da remoto?
+    - Devo firmare un accordo per lo smart working?
+    - Quali strumenti mi fornisce l’azienda per lavorare da casa?
+    - Qual è l’orario di reperibilità in smart working?
+    - Possono chiedermi di rientrare in sede?
+    - Quali corsi di formazione sono disponibili?
+    - Dove posso iscrivermi a un corso aziendale?
+    - Cosa include la formazione obbligatoria?
+    - Cosa succede se non completo i corsi obbligatori?
+    - Cos’è la Blue Academy?
+    - Come funziona il programma di mentoring?
+    - Quali sono le regole per l’uso dei dispositivi aziendali?
+    - Posso installare software personali sul PC aziendale?
+    - Cosa devo fare se perdo il laptop aziendale?
+    - Posso usare reti Wi-Fi pubbliche per accedere ai sistemi aziendali?
+    - Cosa devo fare se ricevo un’e-mail sospetta di phishing?
+    - Che cosa sono le sessioni di cyber awareness?
+    - Qual è l’indirizzo e-mail dell’HR?
+    - Come contatto il team payroll o amministrazione?
+    - Chi devo contattare per problemi con il portale HR?
+    - Dove trovo i moduli aziendali?
+    - Come accedo all’Intranet Blue Reply?
