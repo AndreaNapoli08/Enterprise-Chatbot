@@ -21,6 +21,18 @@ export class Home implements AfterViewChecked {
   buttons = false;
   waiting_answer = false;
 
+  // Visualizzazione elementi dopo un'attesa prolungata
+  long_waiting = false;
+  long_waiting_text = '';
+  private longWaitTimer: any = null;
+  private textChangeTimer: any = null;
+  private textIndex = 0;
+  private waitingTexts = [
+    'Sto pensando...',
+    'Lettura dei documenti...',
+    'Sto cercando una risposta...'
+  ];
+
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
   constructor(private authService: AuthService) {}
 
@@ -32,7 +44,12 @@ export class Home implements AfterViewChecked {
   handleMessage(message: any) {
     this.loading = true;
     if(message.role === 'bot') {
-      this.messages.push(message);    
+      clearTimeout(this.longWaitTimer);
+      clearInterval(this.textChangeTimer);
+      this.long_waiting = false;
+      this.long_waiting_text = '';
+
+      this.messages.push(message);  
       if(message.buttons.length === 0){
         this.waiting_answer = false;
         this.loading = false;
@@ -43,6 +60,20 @@ export class Home implements AfterViewChecked {
     }else{
       this.messages.push(message);
       this.shouldScroll = true;
+      
+      // dopo 30 secondi di attesa mostra "Sto pensando...", dopodiché ogni 10 secondi cambia il testo mostrato
+      // per indicare che il bot sta ancora elaborando la risposta e non si è bloccato
+      clearTimeout(this.longWaitTimer);
+      clearInterval(this.textChangeTimer);
+      this.longWaitTimer = setTimeout(() => {
+        this.long_waiting = true;
+        this.textIndex = 0;
+        this.long_waiting_text = this.waitingTexts[this.textIndex];
+        this.textChangeTimer = setInterval(() => {
+          this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
+          this.long_waiting_text = this.waitingTexts[this.textIndex];
+        }, 10000);
+      }, 30000);
     }
   }
 
@@ -73,7 +104,4 @@ export class Home implements AfterViewChecked {
       .join('') || name[0].toUpperCase();
   }
 
-  onConversationEnded() {
-    
-  }
 }
