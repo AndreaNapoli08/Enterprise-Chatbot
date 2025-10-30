@@ -15,11 +15,14 @@ export class ChatBubble {
   @Input() initials: string = '';
   @Output() botResponse = new EventEmitter<Message>();
   @Output() stateChange = new EventEmitter<boolean>();
-
+  buttonsDisabled: boolean = false;
+  
   constructor(private chatService: ChatService) {}
+  
 
   sendButtonPayload(payload: string) {
-    if(payload == "/choose_yes") {
+    this.buttonsDisabled = true;
+    if(payload == "/choose_yes_document") {
       const botMessage: Message = {
           text: "Perfetto, cerco subito nei documenti",
           image:'',

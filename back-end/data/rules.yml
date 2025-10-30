@@ -34,12 +34,12 @@ rules:
 
 - rule: L'utente vuole cercare nei documenti
   steps:
-    - intent: choose_yes
+    - intent: choose_yes_document
     - action: action_answer_from_chroma
 
 - rule: L'utente non vuole cercare nei documenti
   steps:
-    - intent: choose_no
+    - intent: choose_no_document
     - action: utter_option_no
 
 - rule: Mostra un documento

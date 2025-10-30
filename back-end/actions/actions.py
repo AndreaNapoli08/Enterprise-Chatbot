@@ -99,7 +99,7 @@ class ActionAnswerFromChroma(Action):
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
         
-        if query == "/choose_yes":
+        if query == "/choose_yes_document":
             user_messages = [e for e in tracker.events if e.get("event") == "user"]
             query = user_messages[-2].get("text")
         

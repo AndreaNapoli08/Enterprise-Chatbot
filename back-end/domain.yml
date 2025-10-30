@@ -9,8 +9,8 @@ intents:
   - mood_unhappy
   - bot_challenge
   - ask_option
-  - choose_yes
-  - choose_no
+  - choose_yes_document
+  - choose_no_document
   - ask_document
   - nlu_fallback
   - out_of_scope
@@ -81,9 +81,9 @@ responses:
     - text: "Vuoi che cerco nei documenti?"
       buttons:
       - title: "Si"
-        payload: "/choose_yes"
+        payload: "/choose_yes_document"
       - title: "No"
-        payload: "/choose_no"
+        payload: "/choose_no_document"
 
   utter_option_no:
     - text: "Va bene, non cerco nei documenti per ora."

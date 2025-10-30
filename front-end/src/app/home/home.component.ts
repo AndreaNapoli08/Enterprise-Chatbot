@@ -43,51 +43,53 @@ export class Home implements AfterViewChecked {
 
   handleMessage(message: any) {
     this.loading = true;
-    if(message.role === 'bot'){ 
-      console.log("Received bot message:", message);
-      clearTimeout(this.longWaitTimer);
-      clearInterval(this.textChangeTimer);
-      this.long_waiting = false;
-      this.long_waiting_text = '';
+    this.shouldScroll = true;
 
-      this.messages.push(message);  
-      if(message.buttons.length === 0){
-        this.waiting_answer = false;
-        this.loading = false;
-      }else{
-        this.waiting_answer = true;
-      }
-      this.shouldScroll = true;
-      if(message.text === "Perfetto, cerco subito nei documenti"){
-        clearTimeout(this.longWaitTimer);
-        clearInterval(this.textChangeTimer);
-        this.longWaitTimer = setTimeout(() => {
-          this.long_waiting = true;
-          this.textIndex = 0;
-          this.long_waiting_text = this.waitingTexts[this.textIndex];
-          this.textChangeTimer = setInterval(() => {
-            this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
-            this.long_waiting_text = this.waitingTexts[this.textIndex];
-          }, 1000);
-        }, 2000);
-      }
-    }else{
-      this.messages.push(message);
-      this.shouldScroll = true;
-      
-      // dopo 30 secondi di attesa mostra "Sto pensando...", dopodiché ogni 10 secondi cambia il testo mostrato
-      // per indicare che il bot sta ancora elaborando la risposta e non si è bloccato
+    // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
+    const startLongWaiting = (delay = 30000, interval = 10000) => {
       clearTimeout(this.longWaitTimer);
       clearInterval(this.textChangeTimer);
+
       this.longWaitTimer = setTimeout(() => {
         this.long_waiting = true;
         this.textIndex = 0;
         this.long_waiting_text = this.waitingTexts[this.textIndex];
+
         this.textChangeTimer = setInterval(() => {
+          // Cambia ciclicamente il testo mostrato per indicare attività
           this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
           this.long_waiting_text = this.waitingTexts[this.textIndex];
-        }, 1000);
-      }, 2000);
+        }, interval);
+      }, delay);
+    };
+
+    if (message.role === 'bot') {
+      // Interrompe eventuali timer precedenti
+      clearTimeout(this.longWaitTimer);
+      clearInterval(this.textChangeTimer);
+
+      // Reset dello stato di attesa lunga
+      this.long_waiting = false;
+      this.long_waiting_text = '';
+
+      this.messages.push(message);
+
+      // Se il messaggio del bot non ha pulsanti, non è in attesa di risposta
+      this.waiting_answer = message.buttons.length > 0;
+      this.loading = this.waiting_answer;
+
+      // Se il bot inizia una ricerca, mostra il messaggio di attesa dopo un po’
+      if (message.text === "Perfetto, cerco subito nei documenti") {
+        startLongWaiting();
+      }
+
+    } else {
+      // Messaggio utente
+      this.messages.push(message);
+
+      // Dopo un breve ritardo, mostra un messaggio di "Sto pensando..."
+      // e cambialo ciclicamente per indicare che il bot sta ancora elaborando
+      startLongWaiting();
     }
   }
 
