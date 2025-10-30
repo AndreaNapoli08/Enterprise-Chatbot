@@ -4,6 +4,7 @@ import { InputText } from '../input-text/input-text.component';
 import { ChatBubble } from '../chat-bubble/chat-bubble.component';
 import { Profile } from '../profile/profile.component';
 import { AuthService } from '../services/auth.service';
+import { Message } from '../interfaces/message';
 
 @Component({
   selector: 'app-home',
@@ -13,7 +14,7 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./home.component.css']
 })
 export class Home implements AfterViewChecked {
-  messages: any[] = [];
+  messages: Message[] = [];
   email: string | null = null;
   initials: string = '';
   shouldScroll = false;

@@ -1,8 +1,8 @@
 from typing import Any, Text, Dict, List
 import os
 import re
+from unittest import result
 import warnings
-import psutil
 import json, requests, re
 from datetime import datetime
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -18,6 +18,7 @@ from langchain.llms import Ollama
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
+
 # === CONFIGURAZIONI ===
 CHROMA_DIR = "actions/data/chroma_db"   # aggiorna se il tuo percorso è diverso
 COLLECTION_NAME = "company_docs"
@@ -26,7 +27,7 @@ COLLECTION_NAME = "company_docs"
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 # ====================================================
-# ===============   ACTIONS PERSONALIZZATE   ==========
+# ===============   ACTIONS PERSONALIZZATE   =========
 # ====================================================
 
 # --- Gestione fallback consecutivi ---
@@ -56,31 +57,20 @@ class ActionHandleFallback(Action):
         return [SlotSet("fallback_count", fallback_count)]
     
 # --- Reset del contatore fallback ---
-class ActionResetFallbackCount(Action):
-    def name(self) -> Text:
-        return "action_reset_fallback"
-
-    def run(self, dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
-        # Resetta il contatore dei fallback
-        return [SlotSet("fallback_count", 0)]
-
-# --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
     vectordb = None
     llm = None
 
     def name(self) -> Text:
         return "action_answer_from_chroma"
-    
+
     def run(
         self,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
+
         # 🔹 Lazy loading del DB Chroma (caricato solo la prima volta)
         if ActionAnswerFromChroma.vectordb is None:
             try:
@@ -92,16 +82,16 @@ class ActionAnswerFromChroma(Action):
             except Exception as e:
                 dispatcher.utter_message(text=f"Errore caricando il database Chroma: {e}")
                 return []
-            
+
         if ActionAnswerFromChroma.llm is None:
             try:
                 # total_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
                 # if total_ram_gb < 8:
-                #     model_name = "llama3.2:1b"      # ultra leggero
+                #     model_name = "llama3.2:1b"  # ultra leggero
                 # elif total_ram_gb < 12:
-                #     model_name = "phi3:mini"        # bilanciato
+                #     model_name = "phi3:mini"    # bilanciato
                 # else:
-                #     model_name = "mistral"          # potente
+                #     model_name = "mistral"      # potente
                 ActionAnswerFromChroma.llm = Ollama(
                     model="mistral",
                     temperature=0,
@@ -109,35 +99,32 @@ class ActionAnswerFromChroma(Action):
             except Exception as e:
                 dispatcher.utter_message(text=f"Errore inizializzando Mistral: {e}")
                 return []
-        
+
         # === PROMPT ===
-        PROMPT_TEMPLATE = """Sei un assistente che risponde solo in italiano.
-        Hai a disposizione delle informazioni provenienti da documenti (contesto).
-        Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi.
-        Se la risposta non è nel contesto, di' che non è specificato nel documento.
+        PROMPT_TEMPLATE = """
+        Sei un assistente che risponde solo in italiano. Hai a disposizione delle informazioni provenienti da documenti (contesto). 
+        Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi. 
+        Se la risposta non è nel contesto, di' che non è specificato nel documento. 
 
-        Contesto:
-        {context}
+        Contesto: {context} 
 
-        Domanda:
-        {question}
+        Domanda: {question} 
 
-        Risposta concisa in italiano:
+        Risposta concisa in italiano: 
         """
-
         PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
-        
+
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
-        
+
         if query == "/choose_yes_document":
             user_messages = [e for e in tracker.events if e.get("event") == "user"]
             query = user_messages[-2].get("text")
-        
+
         if not query:
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")
             return []
-        
+
         # Recuperatore: cerchiamo i chunk più pertinenti
         retriever = ActionAnswerFromChroma.vectordb.as_retriever(search_kwargs={"k": 2})
 
@@ -146,32 +133,45 @@ class ActionAnswerFromChroma(Action):
             qa = RetrievalQA.from_chain_type(
                 llm=ActionAnswerFromChroma.llm,
                 retriever=retriever,
-                chain_type="stuff",  # sufficiente per piccoli contesti
+                chain_type="stuff",
                 return_source_documents=True,
                 chain_type_kwargs={"prompt": PROMPT}
             )
-
-            result = qa({"query": query})
+            result = qa.invoke({"query": query})
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
         except Exception as e:
             answer_text = None
             print("Errore nel processo QA:", e)
 
-        # === FALLBACK: se LLM non risponde, cerca manualmente ===
+        # === FALLBACK: se LLM non risponde ===
         if not answer_text:
             docs = retriever.get_relevant_documents(query)
             if not docs:
                 dispatcher.utter_message(text="Non ho trovato informazioni rilevanti nei documenti.")
                 return []
-            answer_text = docs[0].page_content.strip()[:300] + "..."
 
         # Pulizia finale
         answer_text = re.sub(r"\s+", " ", answer_text).strip()
-        if len(answer_text) > 400:
-            answer_text = answer_text[:400] + "..."
 
-        dispatcher.utter_message(text=answer_text)
+        # Estrazione delle fonti
+        source_docs = result.get("source_documents", [])
+        if source_docs:
+            best_doc = source_docs[0]  # documento con similarità più alta
+            meta = getattr(best_doc, "metadata", {})
+            source_name = meta.get("source", "Documento sconosciuto")
+            page_number = meta.get("page", None)
+            if page_number is not None:
+                sources_text = f"Fonte: {os.path.basename(source_name)} — Pag. {page_number+1}"
+            else:
+                sources_text = f"Fonte: {os.path.basename(source_name)}"
+        else:
+            sources_text = ""
+
+        final_message = f"{answer_text}\n\u200B\n{sources_text}"
+        dispatcher.utter_message(text=final_message)
+
         return []
+
     
 # Provo a salvare in automatico il contesto
 class ActionExtractContext(Action):
