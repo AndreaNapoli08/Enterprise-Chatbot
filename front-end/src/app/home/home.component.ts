@@ -21,13 +21,14 @@ export class Home implements AfterViewChecked {
   buttons = false;
   waiting_answer = false;
 
-  // Visualizzazione elementi dopo un'attesa prolungata
+  // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
   long_waiting = false;
   long_waiting_text = '';
-  private longWaitTimer: any = null;
-  private textChangeTimer: any = null;
-  private textIndex = 0;
-  private waitingTexts = [
+  longWaitTimer: any = null;
+  textChangeTimer: any = null;
+  textIndex = 0;
+  startTime = 0;
+  waitingTexts = [
     'Sto pensando...',
     'Lettura dei documenti...',
     'Sto cercando una risposta...'
@@ -49,7 +50,6 @@ export class Home implements AfterViewChecked {
     const startLongWaiting = (delay = 30000, interval = 10000) => {
       clearTimeout(this.longWaitTimer);
       clearInterval(this.textChangeTimer);
-
       this.longWaitTimer = setTimeout(() => {
         this.long_waiting = true;
         this.textIndex = 0;
@@ -64,15 +64,19 @@ export class Home implements AfterViewChecked {
     };
 
     if (message.role === 'bot') {
-      // Interrompe eventuali timer precedenti
       clearTimeout(this.longWaitTimer);
       clearInterval(this.textChangeTimer);
+
+      const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
 
       // Reset dello stato di attesa lunga
       this.long_waiting = false;
       this.long_waiting_text = '';
 
-      this.messages.push(message);
+      this.messages.push({
+        ...message,
+        elapsedSeconds: elapsedSeconds > 20 ? elapsedSeconds : null
+      });
 
       // Se il messaggio del bot non ha pulsanti, non è in attesa di risposta
       this.waiting_answer = message.buttons.length > 0;
@@ -81,11 +85,14 @@ export class Home implements AfterViewChecked {
       // Se il bot inizia una ricerca, mostra il messaggio di attesa dopo un po’
       if (message.text === "Perfetto, cerco subito nei documenti") {
         startLongWaiting();
+        this.startTime = Date.now();
       }
 
     } else {
       // Messaggio utente
       this.messages.push(message);
+
+      this.startTime = Date.now();
 
       // Dopo un breve ritardo, mostra un messaggio di "Sto pensando..."
       // e cambialo ciclicamente per indicare che il bot sta ancora elaborando

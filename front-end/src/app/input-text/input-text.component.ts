@@ -55,7 +55,6 @@ export class InputText {
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
-        console.log('Intent:', resp.intent, 'Confidence:', resp.confidence);
         
         if(resp.intent === 'conversation_end' || resp.intent === 'goodbye' || resp.text?.toLowerCase().includes('operatore umano')) {
           // aggiungo un timer così viene visualizzato il messaggio di bot prima di disabilitare l'input

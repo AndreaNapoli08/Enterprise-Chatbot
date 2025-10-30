@@ -69,6 +69,9 @@ class ActionResetFallbackCount(Action):
 
 # --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
+    vectordb = None
+    llm = None
+
     def name(self) -> Text:
         return "action_answer_from_chroma"
     
@@ -78,8 +81,36 @@ class ActionAnswerFromChroma(Action):
         tracker: Tracker,
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
-        # === PROMPT PERSONALIZZATO PER DOMANDE SUI DOCUMENTI ===
-         # === PROMPT ===
+        # 🔹 Lazy loading del DB Chroma (caricato solo la prima volta)
+        if ActionAnswerFromChroma.vectordb is None:
+            try:
+                ActionAnswerFromChroma.vectordb = Chroma(
+                    persist_directory=CHROMA_DIR,
+                    collection_name=COLLECTION_NAME,
+                    embedding_function=embeddings,
+                )
+            except Exception as e:
+                dispatcher.utter_message(text=f"Errore caricando il database Chroma: {e}")
+                return []
+            
+        if ActionAnswerFromChroma.llm is None:
+            try:
+                # total_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
+                # if total_ram_gb < 8:
+                #     model_name = "llama3.2:1b"      # ultra leggero
+                # elif total_ram_gb < 12:
+                #     model_name = "phi3:mini"        # bilanciato
+                # else:
+                #     model_name = "mistral"          # potente
+                ActionAnswerFromChroma.llm = Ollama(
+                    model="mistral",
+                    temperature=0,
+                )
+            except Exception as e:
+                dispatcher.utter_message(text=f"Errore inizializzando Mistral: {e}")
+                return []
+        
+        # === PROMPT ===
         PROMPT_TEMPLATE = """Sei un assistente che risponde solo in italiano.
         Hai a disposizione delle informazioni provenienti da documenti (contesto).
         Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi.
@@ -106,56 +137,22 @@ class ActionAnswerFromChroma(Action):
         if not query:
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")
             return []
-
-        # --- CARICA IL DATABASE CHROMA ---
-        try:
-            vectordb = Chroma(
-                persist_directory=CHROMA_DIR,
-                collection_name=COLLECTION_NAME,
-                embedding_function=embeddings
-            )
-        except Exception as e:
-            dispatcher.utter_message(text=f"Errore caricando il database Chroma: {e}")
-            return []
         
-        print("Database Chroma caricato correttamente.")
-
         # Recuperatore: cerchiamo i chunk più pertinenti
-        retriever = vectordb.as_retriever(search_kwargs={"k": 2})
+        retriever = ActionAnswerFromChroma.vectordb.as_retriever(search_kwargs={"k": 2})
 
-        total_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
-        print("RAM totale disponibile:", total_ram_gb, "GB")
-        # if total_ram_gb < 8:
-        #     model_name = "llama3.2:1b"      # ultra leggero
-        # elif total_ram_gb < 12:
-        #     model_name = "phi3:mini"        # bilanciato
-        # else:
-        #     model_name = "mistral"          # potente
-        model_name = "mistral" 
-        try:
-            llm = Ollama(model=model_name, temperature=0)
-
-        except Exception as e:
-            dispatcher.utter_message(text=f"Errore inizializzando il modello Ollama: {e}")
-            return []
-        
-        print("Modello Ollama", model_name, "inizializzato correttamente.")
-        
         # === COSTRUISCI CATENA DI DOMANDA-RISPOSTA ===
         try:
             qa = RetrievalQA.from_chain_type(
-                llm=llm,
+                llm=ActionAnswerFromChroma.llm,
                 retriever=retriever,
                 chain_type="stuff",  # sufficiente per piccoli contesti
                 return_source_documents=True,
                 chain_type_kwargs={"prompt": PROMPT}
             )
-            print("Catena di domanda-risposta costruita correttamente.")
 
             result = qa({"query": query})
-            print("Risultato QA:", result)
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
-            print("Risposta generata dall'LLM:", answer_text)
         except Exception as e:
             answer_text = None
             print("Errore nel processo QA:", e)
@@ -176,7 +173,6 @@ class ActionAnswerFromChroma(Action):
         dispatcher.utter_message(text=answer_text)
         return []
     
-
 # Provo a salvare in automatico il contesto
 class ActionExtractContext(Action):
     def name(self) -> Text:
@@ -219,11 +215,8 @@ class ActionExtractContext(Action):
                 json={"model": "mistral", "prompt": prompt, "stream": False},
                 timeout=200
             )
-            print(response)
             data = response.json()
-            print(data)
             text_output = data.get("response", data.get("text", "{}"))
-            print(text_output)
         except Exception as e:
             text_output = "{}"
 
@@ -276,12 +269,9 @@ class ActionQueryContext(Action):
 
         # Messaggio dell'utente (es: "con chi avevo la riunione?")
         user_question = tracker.latest_message.get("text")
-
-        print("Domanda utente:", user_question)
         # Contesto salvato in auto_context
         context_json = tracker.get_slot("auto_context")
 
-        print("Contesto:", context_json)
         if not context_json:
             dispatcher.utter_message("Non ho ancora informazioni salvate su di te")
             return []
@@ -304,7 +294,6 @@ class ActionQueryContext(Action):
             - Non inventare nulla.
             - Restituisci solo una frase chiara.
         """
-        print("Prompt generato:", prompt)
         # Chiamata all'LLM (esempio con Ollama)
         try:
             response = requests.post(
@@ -313,11 +302,8 @@ class ActionQueryContext(Action):
                 json={"model": "mistral", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
                 timeout=200
             )
-            print("qui arriva", response)
             data = response.json()
-            print(data)
             answer = data.get("response", data.get("text", "")).strip()
-            print(answer)
         except Exception as e:
             answer = f"Errore durante l'interrogazione del contesto: {e}"
 

@@ -5,4 +5,5 @@ export interface Message {
   attachment?: { type: string; url: string }; 
   role: 'user' | 'bot';
   time: string;
+  elapsedSeconds?: number | null;
 }
