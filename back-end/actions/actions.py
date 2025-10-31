@@ -57,6 +57,18 @@ class ActionHandleFallback(Action):
         return [SlotSet("fallback_count", fallback_count)]
     
 # --- Reset del contatore fallback ---
+class ActionResetFallbackCount(Action):
+    def name(self) -> Text:
+        return "action_reset_fallback"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        # Resetta il contatore dei fallback
+        return [SlotSet("fallback_count", 0)]
+
+# --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
     vectordb = None
     llm = None
@@ -161,7 +173,7 @@ class ActionAnswerFromChroma(Action):
             source_name = meta.get("source", "Documento sconosciuto")
             page_number = meta.get("page", None)
             if page_number is not None:
-                sources_text = f"Fonte: {os.path.basename(source_name)} — Pag. {page_number+1}"
+                sources_text = f"Fonte: {os.path.basename(source_name)} — Pag. {page_number}"
             else:
                 sources_text = f"Fonte: {os.path.basename(source_name)}"
         else:
