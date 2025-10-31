@@ -1,10 +1,12 @@
 from typing import Any, Text, Dict, List
 import os
+os.environ["CHROMA_TELEMETRY_DISABLED"] = "1"
 import re
 from unittest import result
 import warnings
 import json, requests, re
 from datetime import datetime
+import pickle
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from rasa_sdk import Action, Tracker
@@ -17,7 +19,11 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import Ollama
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-
+from langchain.retrievers import EnsembleRetriever
+from langchain.retrievers import BM25Retriever
+from langchain.retrievers import BM25Retriever
+from langchain.document_loaders import DirectoryLoader, PyPDFLoader
+from langchain.retrievers import EnsembleRetriever
 
 # === CONFIGURAZIONI ===
 CHROMA_DIR = "actions/data/chroma_db"   # aggiorna se il tuo percorso è diverso
@@ -72,9 +78,23 @@ class ActionResetFallbackCount(Action):
 class ActionAnswerFromChroma(Action):
     vectordb = None
     llm = None
+    qa_chain = None
 
     def name(self) -> Text:
         return "action_answer_from_chroma"
+    
+    def expand_query(q: str) -> str:
+        synonyms = {
+            "erogazione": ["accredito", "pagamento", "versamento"],
+            "retribuzione": ["stipendio", "salario", "busta paga"],
+            "giorno": ["data", "scadenza", "entro quando"],
+            "ferie": ["vacanze", "congedo"],
+            "permessi": ["assenze", "ore di permesso"],
+        }
+        for k, vals in synonyms.items():
+            if k in q.lower():
+                q += " " + " ".join(vals)
+        return q
 
     def run(
         self,
@@ -83,7 +103,7 @@ class ActionAnswerFromChroma(Action):
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
 
-        # 🔹 Lazy loading del DB Chroma (caricato solo la prima volta)
+        # --- INIZIALIZZAZIONE VETTORDB, LLM E QA_CHAIN SE NON FATTO ---
         if ActionAnswerFromChroma.vectordb is None:
             try:
                 ActionAnswerFromChroma.vectordb = Chroma(
@@ -97,38 +117,53 @@ class ActionAnswerFromChroma(Action):
 
         if ActionAnswerFromChroma.llm is None:
             try:
-                # total_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
-                # if total_ram_gb < 8:
-                #     model_name = "llama3.2:1b"  # ultra leggero
-                # elif total_ram_gb < 12:
-                #     model_name = "phi3:mini"    # bilanciato
-                # else:
-                #     model_name = "mistral"      # potente
                 ActionAnswerFromChroma.llm = Ollama(
                     model="mistral",
-                    temperature=0,
+                    temperature=0
                 )
             except Exception as e:
                 dispatcher.utter_message(text=f"Errore inizializzando Mistral: {e}")
                 return []
+            
+        if ActionAnswerFromChroma.qa_chain is None:
+            # === RETRIEVER SEMANTICO OTTIMIZZATO ===
+            semantic_retriever = ActionAnswerFromChroma.vectordb.as_retriever(
+                search_type="mmr",
+                search_kwargs={"k": 2, "fetch_k": 4, "lambda_mult": 0.5}
+            )
 
-        # === PROMPT ===
-        PROMPT_TEMPLATE = """
-        Sei un assistente che risponde solo in italiano. Hai a disposizione delle informazioni provenienti da documenti (contesto). 
-        Rispondi alla domanda in modo breve, chiaro e preciso, in una o due frasi. 
-        Se la risposta non è nel contesto, di' che non è specificato nel documento. 
+            # === PROMPT OTTIMIZZATO ===
+            PROMPT_TEMPLATE = """
+            Sei un assistente che risponde solo in italiano. 
+            Hai a disposizione delle informazioni provenienti da documenti aziendali (contesto).
+            Rispondi in modo breve, chiaro e preciso (una o due frasi), salvo si tratti di una procedura: in quel caso spiega i passaggi essenziali.
+            Se il contesto contiene riferimenti impliciti o sinonimi, deduci la risposta con ragionamento.
+            Solo se davvero non c’è alcun riferimento, di' che non è specificato nel documento.
 
-        Contesto: {context} 
+            Contesto:
+            {context}
 
-        Domanda: {question} 
+            Domanda:
+            {question}
 
-        Risposta concisa in italiano: 
-        """
-        PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
+            Risposta concisa in italiano:
+            """
+            PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
+
+            ActionAnswerFromChroma.qa_chain = RetrievalQA.from_chain_type(
+                llm=ActionAnswerFromChroma.llm,
+                retriever=semantic_retriever,
+                chain_type="stuff",
+                return_source_documents=True,
+                chain_type_kwargs={
+                    "prompt": PROMPT,
+                    "document_variable_name": "context"
+                },
+            )
 
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
-
+        query = ActionAnswerFromChroma.expand_query(query)
         if query == "/choose_yes_document":
             user_messages = [e for e in tracker.events if e.get("event") == "user"]
             query = user_messages[-2].get("text")
@@ -137,19 +172,9 @@ class ActionAnswerFromChroma(Action):
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")
             return []
 
-        # Recuperatore: cerchiamo i chunk più pertinenti
-        retriever = ActionAnswerFromChroma.vectordb.as_retriever(search_kwargs={"k": 2})
-
         # === COSTRUISCI CATENA DI DOMANDA-RISPOSTA ===
         try:
-            qa = RetrievalQA.from_chain_type(
-                llm=ActionAnswerFromChroma.llm,
-                retriever=retriever,
-                chain_type="stuff",
-                return_source_documents=True,
-                chain_type_kwargs={"prompt": PROMPT}
-            )
-            result = qa.invoke({"query": query})
+            result = ActionAnswerFromChroma.qa_chain.invoke({"query": query})
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
         except Exception as e:
             answer_text = None
@@ -157,7 +182,7 @@ class ActionAnswerFromChroma(Action):
 
         # === FALLBACK: se LLM non risponde ===
         if not answer_text:
-            docs = retriever.get_relevant_documents(query)
+            docs = semantic_retriever.get_relevant_documents(query)
             if not docs:
                 dispatcher.utter_message(text="Non ho trovato informazioni rilevanti nei documenti.")
                 return []
@@ -171,20 +196,16 @@ class ActionAnswerFromChroma(Action):
             best_doc = source_docs[0]  # documento con similarità più alta
             meta = getattr(best_doc, "metadata", {})
             source_name = meta.get("source", "Documento sconosciuto")
-            page_number = meta.get("page", None)
-            if page_number is not None:
-                sources_text = f"Fonte: {os.path.basename(source_name)} — Pag. {page_number}"
-            else:
-                sources_text = f"Fonte: {os.path.basename(source_name)}"
+            sources_text = f"Fonte: {os.path.basename(source_name)}"
         else:
             sources_text = ""
 
+        # Invia la risposta completa all'utente
         final_message = f"{answer_text}\n\u200B\n{sources_text}"
         dispatcher.utter_message(text=final_message)
 
         return []
 
-    
 # Provo a salvare in automatico il contesto
 class ActionExtractContext(Action):
     def name(self) -> Text:

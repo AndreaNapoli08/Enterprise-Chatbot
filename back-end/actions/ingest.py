@@ -27,7 +27,7 @@ def main():
     print(f"Caricati {len(docs)} documenti")
 
     # Chunking
-    splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=150)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
     chunks = splitter.split_documents(docs)
     print(f"Creati {len(chunks)} chunk")
 

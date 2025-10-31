@@ -48,7 +48,7 @@ export class Home implements AfterViewChecked {
     this.shouldScroll = true;
 
     // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
-    const startLongWaiting = (delay = 30000, interval = 10000) => {
+    const startLongWaiting = (delay = 20000, interval = 10000) => {
       clearTimeout(this.longWaitTimer);
       clearInterval(this.textChangeTimer);
       this.longWaitTimer = setTimeout(() => {
