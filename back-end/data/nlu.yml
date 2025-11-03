@@ -115,10 +115,9 @@ nlu:
     - voglio vedere un documento
     - fammi vedere un documento
     - dammi un documento
-    - puoi mostrarmi la policy dell'azienda?
-    - puoi mostrarmi i termini di servizio?
-    - puoi mostrarmi la privacy policy?
-    - voglio vedere i termini di servizio
+    - mi mandi il documento riguardo le informazioni aziendali?
+    - mandami il documento sulle linee guida
+    - puoi inviarmi il documento sulle politiche aziendali?
 
 - intent: nlu_fallback
   examples: |
@@ -245,7 +244,6 @@ nlu:
     - Quali sono le principali aree di competenza di Blue Reply?
     - A cosa serve questo manuale?
     - Ogni quanto viene aggiornato il manuale aziendale?
-    - Dove posso trovare le versioni aggiornate del documento?
     - Quanti giorni di ferie spettano ai dipendenti Blue Reply?
     - Come vengono calcolate le ferie per chi lavora part-time?
     - Posso accumulare le ferie non utilizzate?

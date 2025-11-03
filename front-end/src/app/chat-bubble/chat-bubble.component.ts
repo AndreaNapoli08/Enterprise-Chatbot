@@ -19,7 +19,6 @@ export class ChatBubble {
   buttonsDisabled: boolean = false;
   
   constructor(private chatService: ChatService) {}
-  
 
   sendButtonPayload(payload: string) {
     this.buttonsDisabled = true;
@@ -49,6 +48,16 @@ export class ChatBubble {
         this.botResponse.emit(botMessage); 
       });
     });
+  }
+
+  downloadFile(fileUrl: string, fileName: string) {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
   
 }

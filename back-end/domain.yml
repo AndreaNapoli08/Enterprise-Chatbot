@@ -30,6 +30,7 @@ actions:
   - action_answer_from_chroma
   - action_extract_context
   - action_query_context
+  - action_send_local_pdf
 
 slots:
   option:

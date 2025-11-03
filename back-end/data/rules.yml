@@ -55,7 +55,7 @@ rules:
 - rule: Mostra un documento
   steps:
   - intent: ask_document
-  - action: utter_show_document
+  - action: action_send_local_pdf
   - action: action_reset_fallback
 
 - rule: Gestione out_of_scope

@@ -7,7 +7,7 @@ interface RasaResponse {
   text?: string;
   image?: string;
   buttons?: { title: string; payload: string }[];
-  attachment?: { type: string; url: string };
+  attachment?: { type: string; url: string; name: string, size: number, pages: number };
   intent?: string;
   confidence?: number;
 }

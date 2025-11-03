@@ -9,6 +9,11 @@ from datetime import datetime
 import pickle
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+# import per server Flask per documenti
+from flask import Flask, send_from_directory
+import threading
+
+# import per rasa
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
@@ -24,6 +29,7 @@ from langchain.retrievers import BM25Retriever
 from langchain.retrievers import BM25Retriever
 from langchain.document_loaders import DirectoryLoader, PyPDFLoader
 from langchain.retrievers import EnsembleRetriever
+from PyPDF2 import PdfReader
 
 # === CONFIGURAZIONI ===
 CHROMA_DIR = "actions/data/chroma_db"   # aggiorna se il tuo percorso è diverso
@@ -32,10 +38,82 @@ COLLECTION_NAME = "company_docs"
 # Embeddings (stesso modello usato in ingest.py)
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
+# === Server Flask per servire i documenti ===
+app = Flask(__name__)
+
+# cartella dove tieni i pdf
+PDF_DIR = os.path.join(os.path.dirname(__file__), "data/docs")
+
+@app.route("/documents/<filename>")
+def serve_pdf(filename):
+    return send_from_directory(
+        directory=PDF_DIR,
+        path=filename,
+        as_attachment=True 
+    )
+
+def run_flask_server():
+    app.run(host="0.0.0.0", port=5050)
+
+# Avvia Flask in parallelo quando parte l’action server
+threading.Thread(target=run_flask_server, daemon=True).start()
+
+
 # ====================================================
 # ===============   ACTIONS PERSONALIZZATE   =========
 # ====================================================
 
+# --- Invio PDF locali ---
+class ActionSendLocalPDF(Action):
+    def name(self) -> str:
+        return "action_send_local_pdf"
+
+    def run(self, dispatcher, tracker, domain):
+        user_message = tracker.latest_message.get("text").lower()
+
+        # Mappa di documenti disponibili
+        pdf_map = {
+            "informazioni": "informazioni_aziendali.pdf",
+            "linee guida": "linee_guida.pdf",
+        }
+
+        # Trova il PDF più rilevante
+        selected_pdf = None
+        for key, filename in pdf_map.items():
+            if key in user_message:
+                selected_pdf = filename
+                break
+
+        if not selected_pdf:
+            dispatcher.utter_message(text="Non ho trovato un documento corrispondente alla tua richiesta.")
+            return []
+        
+        # path del file PDF
+        pdf_path = os.path.join(PDF_DIR, selected_pdf)
+
+        # Ottieni dimensione e numero di pagine
+        size_bytes = os.path.getsize(pdf_path)
+        size_mb = round(size_bytes / (1024 * 1024), 2)
+
+        try:
+            reader = PdfReader(pdf_path)
+            num_pages = len(reader.pages)
+        except Exception:
+            num_pages = "N/D"
+
+        pdf_url = f"http://localhost:5050/documents/{selected_pdf}"
+        dispatcher.utter_message(
+            text="Ecco il documento che hai richiesto:",
+            attachment={
+                "type": "file",
+                "url": pdf_url,
+                "name": selected_pdf,
+                "size": size_mb,
+                "pages": num_pages
+            }
+        )
+        return []
+    
 # --- Gestione fallback consecutivi ---
 class ActionHandleFallback(Action):
 
@@ -118,11 +196,11 @@ class ActionAnswerFromChroma(Action):
         if ActionAnswerFromChroma.llm is None:
             try:
                 ActionAnswerFromChroma.llm = Ollama(
-                    model="mistral",
+                    model="phi3:3.8b",
                     temperature=0
                 )
             except Exception as e:
-                dispatcher.utter_message(text=f"Errore inizializzando Mistral: {e}")
+                dispatcher.utter_message(text=f"Errore inizializzando il modello: {e}")
                 return []
             
         if ActionAnswerFromChroma.qa_chain is None:
