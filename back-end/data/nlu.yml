@@ -227,10 +227,48 @@ nlu:
 
 - intent: ask_information_relazione
   examples: |
-    - è utile inserire la bibliografia?
-    - mi dici quante parole deve avere la relazione?
-    - quanto prima devo inviare la relazione?
-    - quante parole ha l'estensione complessiva della relazione?
+    - Come devo scrivere la relazione di tirocinio?
+    - Mi spieghi come fare la relazione finale del tirocinio?
+    - Qual è la struttura della relazione di tirocinio?
+    - Cosa devo inserire nella relazione finale?
+    - A cosa serve la relazione di tirocinio?
+    - Qual è la differenza tra diario di bordo e relazione finale?
+    - Che tipo di testo è la relazione di tirocinio?
+    - Che registro linguistico devo usare per la relazione?
+    - Quante pagine deve avere la relazione finale?
+    - Quale formato devo usare per la relazione di tirocinio?
+    - Quale font e interlinea sono consigliati per la relazione?
+    - Cosa scrivere nella parte introduttiva della relazione?
+    - Come posso descrivere il servizio o l’ente dove ho fatto il tirocinio?
+    - Cosa mettere nella descrizione del contesto del tirocinio?
+    - Devo parlare della mission e vision dell’organizzazione?
+    - Cosa includere nella parte centrale della relazione?
+    - Come descrivere le attività educative osservate?
+    - Come collegare la teoria alla pratica nella relazione di tirocinio?
+    - Come presentare la progettualità pedagogica del servizio?
+    - Cosa scrivere nella parte conclusiva della relazione di tirocinio?
+    - Come fare le riflessioni finali sulla mia esperienza?
+    - Devo analizzare le competenze acquisite durante il tirocinio?
+    - Come spiegare cosa ho imparato dal tirocinio?
+    - Quali criticità devo segnalare nella relazione?
+    - Come posso valutare globalmente la mia esperienza di tirocinio?
+    - Devo inserire la bibliografia nella relazione finale?
+    - Quando si mette l’appendice?
+    - Che cosa devo includere nella copertina della relazione?
+    - Quali informazioni servono nella premessa?
+    - La relazione finale sostituisce il diario di bordo?
+    - Devo scrivere in modo descrittivo o argomentativo?
+    - Come posso rendere la relazione più riflessiva e critica?
+    - Che differenza c’è tra la relazione di tirocinio e una tesi?
+    - Cosa serve per documentare l’attività di tirocinio?
+    - Quali elementi non devono mancare nella relazione di tirocinio?
+    - Come posso organizzare le mie osservazioni nel testo?
+    - Devo riportare anche le attività non frontali del gruppo educativo?
+    - Cosa scrivere sui rapporti con le famiglie nel servizio?
+    - Come inserire gli obiettivi formativi e la loro verifica?
+    - In che modo riflettere sulle competenze professionali acquisite?
+    - Cosa scrivere se ho incontrato difficoltà durante il tirocinio?
+    - Come concludere la relazione di tirocinio in modo efficace?
 
 - intent: ask_information_aziendale
   examples: |

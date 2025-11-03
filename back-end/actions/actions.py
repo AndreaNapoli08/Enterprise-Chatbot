@@ -32,8 +32,7 @@ from langchain.retrievers import EnsembleRetriever
 from PyPDF2 import PdfReader
 
 # === CONFIGURAZIONI ===
-CHROMA_DIR = "actions/data/chroma_db"   # aggiorna se il tuo percorso è diverso
-COLLECTION_NAME = "company_docs"
+CHROMA_DIR = "actions/data/chroma_db" 
 
 # Embeddings (stesso modello usato in ingest.py)
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -154,9 +153,9 @@ class ActionResetFallbackCount(Action):
 
 # --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
-    vectordb = None
+    vectordbs = {}
     llm = None
-    qa_chain = None
+    qa_chains = {}
 
     def name(self) -> Text:
         return "action_answer_from_chroma"
@@ -180,19 +179,35 @@ class ActionAnswerFromChroma(Action):
         tracker: Tracker,
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
+        
+        # Recuperiamo l'intent della domanda e scegliamo la collezione dove cercare la risposta
+        intent_name = tracker.latest_message.get("intent", {}).get("name")
+        print(f"Intent rilevato: {intent_name}")
 
-        # --- INIZIALIZZAZIONE VETTORDB, LLM E QA_CHAIN SE NON FATTO ---
-        if ActionAnswerFromChroma.vectordb is None:
+        if intent_name == "ask_information_relazione":
+            collection_name = "relazione_docs"
+        elif intent_name == "ask_information_aziendale":
+            collection_name = "azienda_docs"
+        else:
+            collection_name = "azienda_docs"  # fallback
+
+        # --- Inizializza il vectordb solo la prima volta ---
+        if collection_name not in ActionAnswerFromChroma.vectordbs:
             try:
-                ActionAnswerFromChroma.vectordb = Chroma(
+                vectordb = Chroma(
                     persist_directory=CHROMA_DIR,
-                    collection_name=COLLECTION_NAME,
+                    collection_name=collection_name,
                     embedding_function=embeddings,
                 )
+                ActionAnswerFromChroma.vectordbs[collection_name] = vectordb
+                print(f"✅ Caricato vectordb per {collection_name}")
             except Exception as e:
-                dispatcher.utter_message(text=f"Errore caricando il database Chroma: {e}")
+                dispatcher.utter_message(text=f"Errore caricando Chroma: {e}")
                 return []
+        else:
+            vectordb = ActionAnswerFromChroma.vectordbs[collection_name]
 
+        # --- Inizializza l’LLM una sola volta ---
         if ActionAnswerFromChroma.llm is None:
             try:
                 ActionAnswerFromChroma.llm = Ollama(
@@ -200,12 +215,12 @@ class ActionAnswerFromChroma(Action):
                     temperature=0
                 )
             except Exception as e:
-                dispatcher.utter_message(text=f"Errore inizializzando il modello: {e}")
+                dispatcher.utter_message(text=f"Errore inizializzando LLM: {e}")
                 return []
             
-        if ActionAnswerFromChroma.qa_chain is None:
-            # === RETRIEVER SEMANTICO OTTIMIZZATO ===
-            semantic_retriever = ActionAnswerFromChroma.vectordb.as_retriever(
+        # --- Inizializza la QA chain per la collezione (una volta sola) ---
+        if collection_name not in ActionAnswerFromChroma.qa_chains:
+            semantic_retriever = vectordb.as_retriever(
                 search_type="mmr",
                 search_kwargs={"k": 2, "fetch_k": 4, "lambda_mult": 0.5}
             )
@@ -228,16 +243,17 @@ class ActionAnswerFromChroma(Action):
             """
             PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "question"])
 
-            ActionAnswerFromChroma.qa_chain = RetrievalQA.from_chain_type(
+            qa_chain = RetrievalQA.from_chain_type(
                 llm=ActionAnswerFromChroma.llm,
                 retriever=semantic_retriever,
                 chain_type="stuff",
                 return_source_documents=True,
-                chain_type_kwargs={
-                    "prompt": PROMPT,
-                    "document_variable_name": "context"
-                },
+                chain_type_kwargs={"prompt": PROMPT, "document_variable_name": "context"}
             )
+            ActionAnswerFromChroma.qa_chains[collection_name] = qa_chain
+            print(f"QA chain inizializzata per {collection_name}")
+        else:
+            qa_chain = ActionAnswerFromChroma.qa_chains[collection_name]
 
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
@@ -252,7 +268,7 @@ class ActionAnswerFromChroma(Action):
 
         # === COSTRUISCI CATENA DI DOMANDA-RISPOSTA ===
         try:
-            result = ActionAnswerFromChroma.qa_chain.invoke({"query": query})
+            result = qa_chain.invoke({"query": query})
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
         except Exception as e:
             answer_text = None

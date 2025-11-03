@@ -5,44 +5,50 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 
-# Directory dei documenti e del DB locale
+# === CONFIGURAZIONI ===
 DOCS_DIR = "data/docs"
 CHROMA_DIR = "data/chroma_db"
 
-# Carica documenti PDF e TXT
-def load_documents():
-    loaders = [
-        DirectoryLoader(DOCS_DIR, glob="**/*.pdf", loader_cls=PyPDFLoader)
-    ]
-    docs = []
-    for loader in loaders:
-        try:
-            docs.extend(loader.load())
-        except Exception as e:
-            print(f"Errore caricando {loader}: {e}")
-    return docs
+# Collezioni separate
+COLLECTIONS = {
+    "informazioni_aziendali.pdf": "azienda_docs",
+    "linee_guida.pdf": "relazione_docs",
+}
 
-def main():
-    docs = load_documents()
-    print(f"Caricati {len(docs)} documenti")
+def ingest_single_pdf(pdf_path, collection_name, embeddings):
+    print("\n Indicizzazione di: {pdf_path} → collezione '{collection_name}'")
 
-    # Chunking
+    # Carica documento
+    loader = PyPDFLoader(pdf_path)
+    docs = loader.load()
+
+    # Split in chunk
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
     chunks = splitter.split_documents(docs)
-    print(f"Creati {len(chunks)} chunk")
 
-    # Embeddings locali HuggingFace
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-    # Salva su Chroma
+    # Crea / aggiorna il database Chroma
     vectordb = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
         persist_directory=CHROMA_DIR,
-        collection_name="company_docs"
+        collection_name=collection_name
     )
     vectordb.persist()
-    print(f"DB Chroma salvato in {CHROMA_DIR}")
+    print(f"Salvato {len(chunks)} chunk nella collezione '{collection_name}'")
+
+def main():
+    # Carica modello embeddings
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    # Cicla su ogni documento definito
+    for filename, collection_name in COLLECTIONS.items():
+        pdf_path = os.path.join(DOCS_DIR, filename)
+        if not os.path.exists(pdf_path):
+            print(f"File mancante: {pdf_path}")
+            continue
+        ingest_single_pdf(pdf_path, collection_name, embeddings)
+
+    print("\nIndicizzazione completata!")
 
 if __name__ == "__main__":
     os.makedirs(DOCS_DIR, exist_ok=True)
