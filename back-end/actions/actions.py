@@ -82,10 +82,18 @@ class ActionSendLocalPDF(Action):
             if key in user_message:
                 selected_pdf = filename
                 break
-
+            
         if not selected_pdf:
-            dispatcher.utter_message(text="Non ho trovato un documento corrispondente alla tua richiesta.")
-            return []
+            user_events = [e for e in tracker.events if e.get("event") == "user"]
+            intent_name = user_events[-2].get("parse_data", {}).get("intent", {}).get("name")
+            print(f"Intent rilevato per documento: {intent_name}")
+            if intent_name == "ask_information_relazione":
+                selected_pdf = "linee_guida.pdf"    
+            elif intent_name == "ask_information_aziendale":
+                selected_pdf = "informazioni_aziendali.pdf" 
+            else:
+                dispatcher.utter_message(text="Non ho trovato un documento corrispondente alla tua richiesta.")
+                return []
         
         # path del file PDF
         pdf_path = os.path.join(PDF_DIR, selected_pdf)
@@ -200,7 +208,6 @@ class ActionAnswerFromChroma(Action):
                     embedding_function=embeddings,
                 )
                 ActionAnswerFromChroma.vectordbs[collection_name] = vectordb
-                print(f"✅ Caricato vectordb per {collection_name}")
             except Exception as e:
                 dispatcher.utter_message(text=f"Errore caricando Chroma: {e}")
                 return []
@@ -251,7 +258,6 @@ class ActionAnswerFromChroma(Action):
                 chain_type_kwargs={"prompt": PROMPT, "document_variable_name": "context"}
             )
             ActionAnswerFromChroma.qa_chains[collection_name] = qa_chain
-            print(f"QA chain inizializzata per {collection_name}")
         else:
             qa_chain = ActionAnswerFromChroma.qa_chains[collection_name]
 
@@ -300,10 +306,9 @@ class ActionAnswerFromChroma(Action):
 
         return []
 
-# Provo a salvare in automatico il contesto
-class ActionExtractContext(Action):
+class ActionSaveContext(Action):
     def name(self) -> Text:
-        return "action_extract_context"
+        return "action_save_context"
 
     async def run(
         self,
@@ -322,24 +327,25 @@ class ActionExtractContext(Action):
             
             Regole fondamentali:
             1. L'output DEVE essere solo un oggetto JSON valido, non aggiungere altro testo.
-            2. Se l'utente esprime uno stato d'animo, USA SEMPRE la chiave "mood".
-            3. Se una chiave non si applica, non includerla.
+            2. Se l'utente esprime uno stato d'animo, usa la chiave "mood".
+            3. Se ti chiede informazioni riguardo un documento, salva il nome del documento su cui ti ha fatto la domanda con la chiave "documents".
+            4. Se una chiave non si applica, non includerla.
 
             Esempi:
             - Messaggio: "Oggi sono molto felice!" -> Risposta: {{"mood": "felice"}}
             - Messaggio: "Devo fissare una riunione per domani." -> Risposta: {{"azione": "fissare riunione", "data": "domani"}}
             - Messaggio: "Sono triste." -> Risposta: {{"mood": "triste"}}
+            - Messaggio: "Chi deve approvare le mie ferie?" -> Risposta: {{"documents": ["informazioni_aziendali.pdf"]}}
+            - Messaggio: "Che struttura ha la relazione?" -> Risposta: {{"documents": ["linee_guida.pdf"]}}
 
             Messaggio dell'utente da analizzare: "{user_message}"
         """
 
-        # Chiamata al modello locale (Ollama). Qui non uso LangChain per quello devo fare la chiamata al modello per diminuire l'overhead
-        # LangChain ha senso se vogliamo integrare più fonti di conoscenza. In questo caso va bene solo la chiamata al modello essendo che abbiamo un singolo JSON 
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
-                #json={"model": "phi3:mini", "prompt": prompt, "stream": False},
-                json={"model": "mistral", "prompt": prompt, "stream": False},
+                json={"model": "phi3:3.8b", "prompt": prompt, "stream": False},
+                #json={"model": "mistral", "prompt": prompt, "stream": False},
                 timeout=200
             )
             data = response.json()
@@ -425,8 +431,8 @@ class ActionQueryContext(Action):
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
-                #json={"model": "phi3:mini", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
-                json={"model": "mistral", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
+                json={"model": "phi3:3.8b", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
+                #json={"model": "mistral", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
                 timeout=200
             )
             data = response.json()

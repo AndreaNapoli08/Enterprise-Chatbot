@@ -28,7 +28,7 @@ actions:
   - action_handle_fallback
   - action_reset_fallback
   - action_answer_from_chroma
-  - action_extract_context
+  - action_save_context
   - action_query_context
   - action_send_local_pdf
 

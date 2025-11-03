@@ -111,7 +111,8 @@ nlu:
 
 - intent: ask_document
   examples: |
-    - mostrami un documento
+    - mostrami un documento originale
+    - mandami il documento completo
     - voglio vedere un documento
     - fammi vedere un documento
     - dammi un documento

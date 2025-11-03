@@ -84,14 +84,14 @@ rules:
 - rule: Rispondi se l'utente è felice
   steps:
   - intent: mood_great
-  - action: action_extract_context
+  - action: action_save_context
   - action: utter_happy
   - action: action_reset_fallback
 
 - rule: Rispondi se l'utente è triste
   steps:
   - intent: mood_unhappy
-  - action: action_extract_context
+  - action: action_save_context
   - action: utter_cheer_up
   - action: action_reset_fallback
 
@@ -99,8 +99,10 @@ rules:
   steps:
     - intent: ask_information_relazione
     - action: action_answer_from_chroma
+    #- action: action_save_context
 
 - rule: Rispondi a domande sul documento aziendale
   steps:
     - intent: ask_information_aziendale
     - action: action_answer_from_chroma
+    #- action: action_save_context
