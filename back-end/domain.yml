@@ -11,6 +11,8 @@ intents:
   - ask_option
   - choose_yes_document
   - choose_no_document
+  - no_close_conversation
+  - yes_close_conversation
   - ask_document
   - nlu_fallback
   - out_of_scope
@@ -77,13 +79,21 @@ responses:
   # utter_chosen_option:
   #   - text: "Hai scelto l'opzione {option} ✅"
 
-  utter_ask_option:
+  utter_ask_option_search_document:
     - text: "Vuoi che cerco nei documenti?"
       buttons:
       - title: "Si"
         payload: "/choose_yes_document"
       - title: "No"
         payload: "/choose_no_document"
+
+  utter_ask_option_close_conversation:
+    - text: "Ti serve ancora aiuto?"
+      buttons:
+      - title: "Si"
+        payload: "/no_close_conversation"
+      - title: "No"
+        payload: "/yes_close_conversation"
 
   utter_option_no:
     - text: "Va bene, non cerco nei documenti per ora."
@@ -100,8 +110,11 @@ responses:
   utter_out_of_scope:
     - text: "Mi dispiace, non ho capito bene. Puoi riformulare?"
   
-  utter_conversation_end:
+  utter_close_conversation:
     - text: "Grazie per aver utilizzato il nostro servizio. Buona giornata!"
+
+  utter_no_close_conversation:
+    - text: "Va bene, sono qui per aiutarti"
 
   utter_contact_operator:
     - text: "Mi dispiace, non riesco a capire la tua richiesta. Ti consiglio di contattare un operatore umano."

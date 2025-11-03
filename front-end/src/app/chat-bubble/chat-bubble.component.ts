@@ -14,7 +14,8 @@ export class ChatBubble {
   @Input() message!: Message;
   @Input() initials: string = '';
   @Output() botResponse = new EventEmitter<Message>();
-  @Output() stateChange = new EventEmitter<boolean>();
+  @Output() stateChangeLoading = new EventEmitter<boolean>();
+  @Output() stateChangeConversation = new EventEmitter<boolean>();
   buttonsDisabled: boolean = false;
   
   constructor(private chatService: ChatService) {}
@@ -31,7 +32,10 @@ export class ChatBubble {
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         this.botResponse.emit(botMessage); 
-        this.stateChange.emit(true);
+        this.stateChangeLoading.emit(true);
+    }
+    if(payload == "/yes_close_conversation") {
+      this.stateChangeConversation.emit(true);
     }
     this.chatService.sendMessage(payload).pipe(take(1)).subscribe(responses => {
       responses.forEach(resp => {

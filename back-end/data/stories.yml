@@ -6,4 +6,4 @@ stories:
   steps:
   - intent: nlu_fallback
   - action: action_handle_fallback
-  - action: utter_ask_option
+  - action: utter_ask_option_search_document

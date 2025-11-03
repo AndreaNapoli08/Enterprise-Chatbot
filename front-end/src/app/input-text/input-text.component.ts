@@ -17,8 +17,7 @@ export class InputText {
   @Output() submitAnswer = new EventEmitter<Message>();
   @Input() disabled!: boolean;
   @ViewChild('textarea') textarea!: ElementRef<HTMLTextAreaElement>;
-
-  conversationEnded = false;
+  @Input() conversationEnded = false;
 
   constructor(private chatService: ChatService) {}
   
@@ -55,11 +54,7 @@ export class InputText {
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
-        
-        if(resp.intent === 'conversation_end' || resp.intent === 'goodbye' || resp.text?.toLowerCase().includes('operatore umano')) {
-          // aggiungo un timer così viene visualizzato il messaggio di bot prima di disabilitare l'input
-          // dobbiamo controllare se la risposta contiene "operatore umano" perché l'intent è sempre nlu_fallback quindi non possiamo basarci 
-          // solo su quello per disabilitare l'input
+        if(resp.text?.toLowerCase().includes('operatore umano')) {
           setTimeout(() => {
               this.disabled = true;
               this.conversationEnded = true;

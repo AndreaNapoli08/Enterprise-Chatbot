@@ -11,7 +11,7 @@ rules:
 - rule: Ringrazia ogni volta che l'utente abbandona la chat
   steps:
   - intent: goodbye
-  - action: utter_conversation_end
+  - action: utter_ask_option_close_conversation
 
 - rule: Dì "Sono un bot" ogni volta che l'utente lo chiede
   steps:
@@ -42,6 +42,16 @@ rules:
     - intent: choose_no_document
     - action: utter_option_no
 
+- rule: L'utente vuole chiudere la conversazione
+  steps:
+    - intent: yes_close_conversation
+    - action: utter_close_conversation
+
+- rule: L'utente non vuole chiudere la conversazione
+  steps:
+    - intent: no_close_conversation
+    - action: utter_no_close_conversation
+
 - rule: Mostra un documento
   steps:
   - intent: ask_document
@@ -57,13 +67,13 @@ rules:
 - rule: Gestione fine della conversazione
   steps:
   - intent: conversation_end
-  - action: utter_conversation_end
+  - action: utter_ask_option_close_conversation
 
 - rule: Gestione fallback
   steps:
   - intent: nlu_fallback
   - action: action_handle_fallback
-  - action: utter_ask_option
+  - action: utter_ask_option_search_document
 
 - rule: Ricorda lo stato d'animo
   steps:

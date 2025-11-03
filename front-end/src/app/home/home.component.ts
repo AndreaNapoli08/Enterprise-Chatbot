@@ -21,6 +21,7 @@ export class Home implements AfterViewChecked {
   loading = false;
   buttons = false;
   waiting_answer = false;
+  conversationEnded = false;
 
   // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
   long_waiting = false;
