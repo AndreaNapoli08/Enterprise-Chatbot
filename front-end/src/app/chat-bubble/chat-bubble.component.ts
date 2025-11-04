@@ -22,7 +22,7 @@ export class ChatBubble {
 
   sendButtonPayload(payload: string) {
     this.buttonsDisabled = true;
-    if(payload == "/choose_yes_document") {
+    if(payload.startsWith("/choose_document")) {
       const botMessage: Message = {
           text: "Perfetto, cerco subito nei documenti",
           image:'',
@@ -58,6 +58,10 @@ export class ChatBubble {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  isLongButtonLayout(buttons: any[]): boolean {
+    return buttons.some(b => b.title.length > 10);
   }
   
 }

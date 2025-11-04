@@ -86,7 +86,6 @@ class ActionSendLocalPDF(Action):
         if not selected_pdf:
             user_events = [e for e in tracker.events if e.get("event") == "user"]
             intent_name = user_events[-2].get("parse_data", {}).get("intent", {}).get("name")
-            print(f"Intent rilevato per documento: {intent_name}")
             if intent_name == "ask_information_relazione":
                 selected_pdf = "linee_guida.pdf"    
             elif intent_name == "ask_information_aziendale":
@@ -159,6 +158,37 @@ class ActionResetFallbackCount(Action):
         # Resetta il contatore dei fallback
         return [SlotSet("fallback_count", 0)]
 
+# --- Elenco documenti disponibili da far scegliere all'utente quando non sa la risposta alla domanda ---
+class ActionListAvailableDocuments(Action):
+    def name(self) -> Text:
+        return "action_list_available_documents"
+
+    def run(self,
+            dispatcher: CollectingDispatcher,
+            tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        # Elenco dei file PDF nella cartella
+        pdf_files = [f for f in os.listdir(PDF_DIR) if f.lower().endswith(".pdf")]
+
+        if not pdf_files:
+            dispatcher.utter_message(text="Non ci sono documenti disponibili al momento.")
+            return []
+
+        # Crea i bottoni per ogni PDF
+        buttons = []
+        for f in pdf_files:
+            title = os.path.splitext(f)[0].replace("_", " ").title()  # es. "policy_aziendale.pdf" -> "Policy Aziendale"
+            payload = f'/choose_document{{"file_name":"{f}"}}'
+            buttons.append({"title": title, "payload": payload})
+
+        # Invia il messaggio con i bottoni
+        dispatcher.utter_message(
+            text="Ecco i documenti disponibili, scegli quello che vuoi visualizzare:",
+            buttons=buttons
+        )
+        return []
+    
 # --- Recupero risposte dai documenti ---
 class ActionAnswerFromChroma(Action):
     vectordbs = {}
@@ -188,16 +218,23 @@ class ActionAnswerFromChroma(Action):
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
         
+        file_name = next(tracker.get_latest_entity_values("file_name"), None) or tracker.get_slot("file_name")
+
         # Recuperiamo l'intent della domanda e scegliamo la collezione dove cercare la risposta
         intent_name = tracker.latest_message.get("intent", {}).get("name")
-        print(f"Intent rilevato: {intent_name}")
 
         if intent_name == "ask_information_relazione":
             collection_name = "relazione_docs"
         elif intent_name == "ask_information_aziendale":
             collection_name = "azienda_docs"
+        elif file_name:
+            if(file_name == "linee_guida.pdf"):
+                collection_name = "relazione_docs"
+            elif(file_name == "informazioni_aziendali.pdf"):    
+                collection_name = "azienda_docs" 
         else:
-            collection_name = "azienda_docs"  # fallback
+            dispatcher.utter_message(text="Non sono sicuro di dove cercare la risposta")
+            return []
 
         # --- Inizializza il vectordb solo la prima volta ---
         if collection_name not in ActionAnswerFromChroma.vectordbs:
@@ -264,9 +301,9 @@ class ActionAnswerFromChroma(Action):
         # ----------- ESTRAI LA DOMANDA DALLA TRACCIA ---------
         query = tracker.latest_message.get("text", "").strip()
         query = ActionAnswerFromChroma.expand_query(query)
-        if query == "/choose_yes_document":
+        if query.startswith("/choose_document"):
             user_messages = [e for e in tracker.events if e.get("event") == "user"]
-            query = user_messages[-2].get("text")
+            query = user_messages[-3].get("text")
 
         if not query:
             dispatcher.utter_message(text="Scusa, non ho capito la domanda.")

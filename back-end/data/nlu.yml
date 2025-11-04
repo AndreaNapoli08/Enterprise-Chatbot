@@ -402,3 +402,9 @@ nlu:
     - Posso contattare l’Helpdesk per problemi di autenticazione VPN?
     - Dove trovo la guida ufficiale per l’uso della VPN?
     - Quali sono i requisiti minimi di rete per usare la VPN?
+
+- intent: choose_document
+  examples: |
+    - [informazioni_aziendali.pdf](file_name)
+    - [linee_guida.pdf](file_name)
+# qui aggiungere altri documenti quando li avremo

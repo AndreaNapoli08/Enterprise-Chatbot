@@ -20,9 +20,11 @@ intents:
   - ask_mood
   - ask_information_relazione
   - ask_information_aziendale
+  - choose_document
 
 entities:
   - option
+  - file_name
 
 actions:
   - action_handle_fallback
@@ -31,6 +33,7 @@ actions:
   - action_save_context
   - action_query_context
   - action_send_local_pdf
+  - action_list_available_documents
 
 slots:
   option:
@@ -47,6 +50,12 @@ slots:
       - type: custom
 
   auto_context:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  file_name:
     type: text
     influence_conversation: false
     mappings:
@@ -95,6 +104,9 @@ responses:
         payload: "/no_close_conversation"
       - title: "No"
         payload: "/yes_close_conversation"
+
+  utter_search_document:
+    - text: "Perfetto, cerco subito nei documenti"
 
   utter_option_no:
     - text: "Va bene, non cerco nei documenti per ora."

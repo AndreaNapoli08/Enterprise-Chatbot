@@ -57,12 +57,22 @@
         />
       </div>
 
-      <!-- Pulsanti -->
-      <div *ngIf="message.buttons" class="flex flex-wrap gap-2 mt-2">
-        <button *ngFor="let btn of message.buttons"
-                (click)="sendButtonPayload(btn.payload)"
-                [disabled]="buttonsDisabled"
-                class="bg-gray-300 hover:bg-gray-400 focus:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 font-semibold py-2 px-4 rounded-xl shadow transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+      <!-- Bottoni -->
+      <div
+        *ngIf="message.buttons"
+        class="flex gap-2 mt-2"
+        [ngClass]="isLongButtonLayout(message.buttons) ? 'flex-col' : 'flex-row flex-wrap'"
+      >
+        <button
+          *ngFor="let btn of message.buttons"
+          (click)="sendButtonPayload(btn.payload)"
+          [disabled]="buttonsDisabled"
+          class="bg-gray-300 hover:bg-gray-400 focus:bg-gray-400 
+                dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 
+                text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
+                font-semibold py-2 px-4 rounded-xl shadow transition duration-200 
+                disabled:opacity-50 disabled:cursor-not-allowed w-fit max-w-full break-words"
+        >
           {{ btn.title }}
         </button>
       </div>
