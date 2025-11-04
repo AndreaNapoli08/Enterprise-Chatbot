@@ -39,7 +39,8 @@
       <input-text 
         (submitAnswer)="handleMessage($event)" 
         [disabled]="loading" 
-        [conversationEnded]="conversationEnded">
+        [conversationEnded]="conversationEnded"
+        [humanOperator]="human_operator">
       </input-text>
     </div>
   </div>

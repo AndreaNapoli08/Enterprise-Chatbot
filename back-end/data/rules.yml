@@ -19,19 +19,6 @@ rules:
   - action: utter_iamabot
   - action: action_reset_fallback
 
-# Bottone classico per scegliere un'opzione
-# - rule: Chiedi all'utente di scegliere un'opzione
-#   steps:
-#   - intent: ask_option
-#   - action: utter_ask_option
-#   - action: action_reset_fallback
-
-# - rule: Gestisci la scelta di un'opzione
-#   steps:
-#   - intent: choose_option
-#   - action: utter_chosen_option
-#   - action: action_reset_fallback
-
 - rule: L'utente vuole cercare nei documenti
   steps:
     - intent: choose_yes_document
@@ -46,6 +33,7 @@ rules:
   steps:
     - intent: choose_no_document
     - action: utter_option_no
+    - action: action_handle_fallback
 
 - rule: L'utente vuole chiudere la conversazione
   steps:
@@ -56,6 +44,7 @@ rules:
   steps:
     - intent: no_close_conversation
     - action: utter_no_close_conversation
+    - action: action_reset_fallback
 
 - rule: Mostra un documento
   steps:
@@ -73,11 +62,12 @@ rules:
   steps:
   - intent: conversation_end
   - action: utter_ask_option_close_conversation
+  - action: action_reset_fallback
 
 - rule: Gestione fallback
   steps:
   - intent: nlu_fallback
-  - action: action_handle_fallback
+  - action: utter_fallback
   - action: utter_ask_option_search_document
 
 - rule: Ricorda lo stato d'animo
@@ -104,10 +94,8 @@ rules:
   steps:
     - intent: ask_information_relazione
     - action: action_answer_from_chroma
-    #- action: action_save_context
 
 - rule: Rispondi a domande sul documento aziendale
   steps:
     - intent: ask_information_aziendale
     - action: action_answer_from_chroma
-    #- action: action_save_context

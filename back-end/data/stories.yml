@@ -5,5 +5,5 @@ stories:
 - story: gestione fallback
   steps:
   - intent: nlu_fallback
-  - action: action_handle_fallback
+  - action: utter_fallback
   - action: utter_ask_option_search_document

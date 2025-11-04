@@ -140,12 +140,10 @@ class ActionHandleFallback(Action):
         fallback_count += 1
 
         # Decide quale risposta dare
-        if fallback_count < 3:
-            dispatcher.utter_message(response="utter_fallback")
-        else:
+        if fallback_count >= 2:
             dispatcher.utter_message(response="utter_contact_operator")
-            fallback_count = 0  # reset dopo il terzo fallback consecutiv
-
+            fallback_count = 0 
+        
         # Aggiorna lo slot fallback_count
         return [SlotSet("fallback_count", fallback_count)]
     
@@ -319,7 +317,14 @@ class ActionAnswerFromChroma(Action):
             print("Risultati con punteggio:", results_with_score)
             if not results_with_score or all(score > 1.1  for _, score in results_with_score):
                 dispatcher.utter_message(text="Nessuna risposta rilevante è stata trovata nei documenti")
-                return []
+                fallback_count = tracker.get_slot("fallback_count") or 0
+                fallback_count += 1
+
+                if fallback_count >= 2:
+                    dispatcher.utter_message(response="utter_contact_operator")
+                    fallback_count = 0 
+    
+                return [SlotSet("fallback_count", fallback_count)]
             
             result = qa_chain.invoke({"query": query})
             answer_text = result.get("result") if isinstance(result, dict) else str(result)

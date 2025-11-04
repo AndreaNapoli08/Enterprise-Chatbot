@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, SimpleChanges  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
@@ -18,13 +18,24 @@ export class InputText {
   @Input() disabled!: boolean;
   @ViewChild('textarea') textarea!: ElementRef<HTMLTextAreaElement>;
   @Input() conversationEnded = false;
+  @Input() humanOperator = false;
 
   constructor(private chatService: ChatService) {}
   
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
+    // Quando humanOperator diventa true → disabilita subito la barra
+    if (changes['humanOperator'] && changes['humanOperator'].currentValue === true) {
+      this.disabled = true;
+      this.conversationEnded = true;
+      return; // evita di richiamare focus
+    }
+
+    // Se non è disabilitato, metti il focus
+    if (!this.disabled) {
       setTimeout(() => {
-        this.textarea.nativeElement.focus();
+        this.textarea?.nativeElement.focus();
       }, 0);
+    }
   }
 
   onSubmit() {
@@ -54,12 +65,6 @@ export class InputText {
           role: 'bot',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
-        if(resp.text?.toLowerCase().includes('operatore umano')) {
-          setTimeout(() => {
-              this.disabled = true;
-              this.conversationEnded = true;
-          }, 800);
-        } 
         this.submitAnswer.emit(botMessage); 
       });
     });

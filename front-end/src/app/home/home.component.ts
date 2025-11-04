@@ -22,6 +22,7 @@ export class Home implements AfterViewChecked {
   buttons = false;
   waiting_answer = false;
   conversationEnded = false;
+  human_operator = false;
 
   // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
   long_waiting = false;
@@ -47,7 +48,11 @@ export class Home implements AfterViewChecked {
   handleMessage(message: any) {
     this.loading = true;
     this.shouldScroll = true;
-
+    console.log(message);
+    if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
+      console.log("Bellaaa");
+      this.human_operator = true;
+    }
     // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
     const startLongWaiting = (delay = 20000, interval = 10000) => {
       clearTimeout(this.longWaitTimer);
