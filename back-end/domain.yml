@@ -105,18 +105,9 @@ responses:
       - title: "No"
         payload: "/yes_close_conversation"
 
-  utter_search_document:
-    - text: "Perfetto, cerco subito nei documenti"
-
   utter_option_no:
     - text: "Va bene, non cerco nei documenti per ora."
-
-  utter_show_document:
-    - text: "Ecco il documento che hai richiesto:"
-      attachment: 
-        type: "file"
-        url: "https://economiaemanagement.dip.unipv.it/sites/dip10/files/2022-07/linee_guida_tesi_su_tirocinio.pdf"
-
+    
   utter_fallback:
     - text: "Non so la risposta a questa domanda. Mi dispiace"
 

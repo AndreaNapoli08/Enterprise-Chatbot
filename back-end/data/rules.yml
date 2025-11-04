@@ -40,7 +40,6 @@ rules:
 - rule: L'utente sceglie un documento e parte la ricerca
   steps:
     - intent: choose_document
-    - action: utter_search_document
     - action: action_answer_from_chroma
 
 - rule: L'utente non vuole cercare nei documenti

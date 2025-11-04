@@ -1,13 +1,16 @@
 from typing import Any, Text, Dict, List
 import os
-os.environ["CHROMA_TELEMETRY_DISABLED"] = "1"
 import re
 from unittest import result
 import warnings
 import json, requests, re
 from datetime import datetime
 import pickle
+import logging
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+logging.getLogger("langchain.utils.math").setLevel(logging.ERROR)
+os.environ["CHROMA_TELEMETRY_DISABLED"] = "1"
 
 # import per server Flask per documenti
 from flask import Flask, send_from_directory
@@ -184,7 +187,7 @@ class ActionListAvailableDocuments(Action):
 
         # Invia il messaggio con i bottoni
         dispatcher.utter_message(
-            text="Ecco i documenti disponibili, scegli quello che vuoi visualizzare:",
+            text="Ecco i documenti disponibili. Dove vuoi che cerco la risposta?",
             buttons=buttons
         )
         return []
@@ -272,10 +275,10 @@ class ActionAnswerFromChroma(Action):
             # === PROMPT OTTIMIZZATO ===
             PROMPT_TEMPLATE = """
             Sei un assistente che risponde solo in italiano. 
-            Hai a disposizione delle informazioni provenienti da documenti aziendali (contesto).
+            Hai a disposizione delle informazioni provenienti da documenti (contesto).
             Rispondi in modo breve, chiaro e preciso (una o due frasi), salvo si tratti di una procedura: in quel caso spiega i passaggi essenziali.
             Se il contesto contiene riferimenti impliciti o sinonimi, deduci la risposta con ragionamento.
-            Solo se davvero non c’è alcun riferimento, di' che non è specificato nel documento.
+            Se non c'è davvero nessun riferimento, rispondi chiaramente che non è specificato nel documento senza spiegare nient'altro.
 
             Contesto:
             {context}
@@ -311,6 +314,13 @@ class ActionAnswerFromChroma(Action):
 
         # === COSTRUISCI CATENA DI DOMANDA-RISPOSTA ===
         try:
+            # Verifica se ci sono contenuti rilevanti nei documenti
+            results_with_score = vectordb.similarity_search_with_score(query, k=2)
+            print("Risultati con punteggio:", results_with_score)
+            if not results_with_score or all(score > 1.1  for _, score in results_with_score):
+                dispatcher.utter_message(text="Nessuna risposta rilevante è stata trovata nei documenti")
+                return []
+            
             result = qa_chain.invoke({"query": query})
             answer_text = result.get("result") if isinstance(result, dict) else str(result)
         except Exception as e:
