@@ -408,3 +408,14 @@ nlu:
     - [informazioni_aziendali.pdf](file_name)
     - [linee_guida.pdf](file_name)
 # qui aggiungere altri documenti quando li avremo
+
+- intent: book_meeting_room
+  examples: |
+    - Voglio prenotare una sala
+    - Devo riservare una stanza per un meeting
+    - Mi serve una sala per domani
+    - Prenota una sala per me
+    - Voglio fissare una riunione
+    - Puoi riservare una sala riunioni?
+    - Ho bisogno di una stanza per una conferenza
+    - Prenotami una sala per un incontro

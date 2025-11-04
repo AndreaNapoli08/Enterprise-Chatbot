@@ -58,8 +58,9 @@ export class InputText {
     this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
       responses.forEach(resp => {
         const botMessage: Message = {
-          text: resp.text || '',
+          text: resp.text || resp.custom?.text || '',
           image: resp.image || '',
+          custom: resp.custom || {},
           buttons: resp.buttons || [],
           attachment: resp.attachment || undefined,
           role: 'bot',

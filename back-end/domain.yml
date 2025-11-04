@@ -21,6 +21,7 @@ intents:
   - ask_information_relazione
   - ask_information_aziendale
   - choose_document
+  - book_meeting_room
 
 entities:
   - option
@@ -122,6 +123,11 @@ responses:
 
   utter_contact_operator:
     - text: "Mi dispiace, non riesco a capire la tua richiesta. Ti consiglio di contattare un operatore umano."
+
+  utter_ask_meeting_date:
+    - text: "Seleziona la data della riunione"
+      custom:
+        type: "date_picker"
 
 session_config:
   session_expiration_time: 60

@@ -6,6 +6,8 @@ interface RasaResponse {
   sender: string;
   text?: string;
   image?: string;
+  custom?: { type?: string;  text?: string;  [key: string]: any; 
+  };
   buttons?: { title: string; payload: string }[];
   attachment?: { type: string; url: string; name: string, size: number, pages: number };
   intent?: string;

@@ -46,11 +46,10 @@ export class Home implements AfterViewChecked {
   }
 
   handleMessage(message: any) {
+    console.log(message);
     this.loading = true;
     this.shouldScroll = true;
-    console.log(message);
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
-      console.log("Bellaaa");
       this.human_operator = true;
     }
     // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
