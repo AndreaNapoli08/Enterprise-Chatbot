@@ -419,3 +419,15 @@ nlu:
     - Puoi riservare una sala riunioni?
     - Ho bisogno di una stanza per una conferenza
     - Prenotami una sala per un incontro
+
+- intent: provide_date
+  examples: |
+    - Devo prenotare la sala per [mercoledì 19 novembre 2025 alle 17:00 per 0.5 ore](appointment_date)
+    - La riunione è [mercoledì 19 novembre 2025 alle 09:30 per 1 ore](appointment_date)
+    - La riunione è il [21 dicembre 2025 dalle 15:30 per 2 ore](appointment_date)
+
+- intent: provide_participants_number
+  examples: |
+    - Saremo in [4](person_picker) persone alla riunione 
+    - La riunione sarà per [10](person_picker) persone
+    - Ci saranno [2](person_picker) partecipanti

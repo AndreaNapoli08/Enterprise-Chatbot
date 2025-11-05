@@ -14,7 +14,13 @@
         *ngIf="messages.length > 0"
         class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh]"
       >
-        <chat-bubble *ngFor="let msg of messages" [message]="msg" (stateChangeLoading)="loading = $event" (stateChangeConversation)="conversationEnded = $event" (botResponse)="handleMessage($event)" [initials]="initials"></chat-bubble>
+        <chat-bubble *ngFor="let msg of messages" 
+          [message]="msg" 
+          (stateChangeLoading)="loading = $event" 
+          (stateChangeConversation)="conversationEnded = $event" 
+          (botResponse)="handleMessage($event)" 
+          [initials]="initials">
+        </chat-bubble>
       </div>
 
       <div *ngIf="loading && waiting_answer === false" class="flex items-center space-x-3 h-10 mb-2">

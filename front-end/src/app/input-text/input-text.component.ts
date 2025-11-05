@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
 import { ChatService } from '../services/chat.service';  
 import { take } from 'rxjs/operators';
+import { MessageBusService } from '../services/message-bus.service';
 
 @Component({
   selector: 'input-text',
@@ -20,7 +21,7 @@ export class InputText {
   @Input() conversationEnded = false;
   @Input() humanOperator = false;
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService, private messageBus: MessageBusService) {}
   
   ngOnChanges(changes: SimpleChanges) {
     // Quando humanOperator diventa true → disabilita subito la barra

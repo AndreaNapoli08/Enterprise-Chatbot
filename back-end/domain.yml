@@ -22,10 +22,14 @@ intents:
   - ask_information_aziendale
   - choose_document
   - book_meeting_room
+  - provide_date
+  - provide_participants_number
 
 entities:
   - option
   - file_name
+  - appointment_date
+  - person_picker
 
 actions:
   - action_handle_fallback
@@ -61,6 +65,20 @@ slots:
     influence_conversation: false
     mappings:
       - type: custom
+  
+  appointment_date:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: appointment_date
+
+  person_picker:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: person_picker
 
 responses:
   utter_greet:
@@ -125,9 +143,15 @@ responses:
     - text: "Mi dispiace, non riesco a capire la tua richiesta. Ti consiglio di contattare un operatore umano."
 
   utter_ask_meeting_date:
-    - text: "Seleziona la data della riunione"
-      custom:
+    - custom:
         type: "date_picker"
+
+  utter_ask_partecipants_number:
+    - custom:
+        type: "number_partecipants"
+
+  utter_confirm_meeting_booking:
+    - text: "La sala è stata prenotata. Ecco i dettagli: {appointment_date}, {person_picker} partecipanti."
 
 session_config:
   session_expiration_time: 60

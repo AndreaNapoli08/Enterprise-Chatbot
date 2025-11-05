@@ -7,8 +7,3 @@ stories:
   - intent: nlu_fallback
   - action: utter_fallback
   - action: utter_ask_option_search_document
-
-- story: prenotazione sala
-  steps:
-  - intent: book_meeting_room
-  - action: utter_ask_meeting_date

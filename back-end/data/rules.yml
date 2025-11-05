@@ -99,3 +99,18 @@ rules:
   steps:
     - intent: ask_information_aziendale
     - action: action_answer_from_chroma
+
+- rule: Prenotazione sala riunioni - chiedi data e ora
+  steps:
+    - intent: book_meeting_room
+    - action: utter_ask_meeting_date
+
+- rule: Prenotazione sala riunioni - chiedi numero di partecipanti
+  steps:
+    - intent: provide_date
+    - action: utter_ask_partecipants_number
+
+- rule: Conferma prenotazione sala riunioni
+  steps:
+    - intent: provide_participants_number
+    - action: utter_confirm_meeting_booking
