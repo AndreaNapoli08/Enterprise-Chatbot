@@ -431,3 +431,10 @@ nlu:
     - Saremo in [4](person_picker) persone alla riunione 
     - La riunione sarà per [10](person_picker) persone
     - Ci saranno [2](person_picker) partecipanti
+
+- intent: provide_room_features
+  examples: |
+    - Le caratteristiche richieste per la sala sono: [Prese di corrente multiple, Accesso per disabili](room_features)
+    - La sala deve avere un [proiettore e microfono](room_features)
+    - Mi serve una sala con [monitor e prese di corrente](room_features)
+    - Vorrei una stanza con [accesso per disabili](room_features)

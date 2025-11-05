@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';
@@ -23,7 +23,8 @@ export class ChatBubble {
   
   constructor(
     private chatService: ChatService, 
-    private messageBus: MessageBusService
+    private messageBus: MessageBusService,
+    private cd: ChangeDetectorRef
   ) {}
 
   selectedDate: Date | null = null;
@@ -33,6 +34,15 @@ export class ChatBubble {
   disabledInputs = false;
   countId: number = 0;
   peopleCount = 1;
+
+  featuresList = [
+    { id: 'proiettore', label: 'Videoproiettore', selected: false },
+    { id: 'monitor', label: 'Monitor', selected: false },
+    { id: 'microfono', label: 'Microfono', selected: false },
+    { id: 'prese', label: 'Prese di corrente multiple', selected: false },
+    { id: 'accesso_disabili', label: 'Accesso disabili', selected: false },
+  ];
+
 
   ngAfterViewInit() {
     if(this.message.custom?.type === 'date_picker') {
@@ -58,6 +68,7 @@ export class ChatBubble {
         });
       }
       this.countId += 1;
+      this.cd.detectChanges(); 
     }
   }
 
@@ -139,6 +150,29 @@ export class ChatBubble {
     this.disabledInputs = true;
 
     const message = `Saremo in ${this.peopleCount} persone alla riunione`;
+    this.chatService.sendMessage(message).pipe(take(1)).subscribe(responses => {
+      responses.forEach(resp => {
+        const botMessage: Message = {
+          text: resp.text || '',
+          image: resp.image || '',
+          custom: resp.custom || {},
+          buttons: resp.buttons || [],
+          role: 'bot',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        this.botResponse.emit(botMessage);
+      });
+    });
+  }
+
+  sendSelectedFeatures() {
+    const selectedFeatures = this.featuresList
+      .filter(f => f.selected)
+      .map(f => f.label);
+
+    const message = `Le caratteristiche richieste per la sala sono: ${selectedFeatures.join(', ')}`;
+    console.log('Caratteristiche selezionate:', message);
+    this.disabledInputs = true;
     this.chatService.sendMessage(message).pipe(take(1)).subscribe(responses => {
       responses.forEach(resp => {
         const botMessage: Message = {

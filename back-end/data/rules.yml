@@ -110,7 +110,12 @@ rules:
     - intent: provide_date
     - action: utter_ask_partecipants_number
 
-- rule: Conferma prenotazione sala riunioni
+- rule: Prenotazione sala riunioni - chiedi numero di partecipanti
   steps:
     - intent: provide_participants_number
-    - action: utter_confirm_meeting_booking
+    - action: utter_ask_features_room
+
+- rule: Conferma prenotazione sala riunioni
+  steps:
+    - intent: provide_room_features
+    - action: action_confirm_meeting_booking

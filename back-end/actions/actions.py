@@ -314,7 +314,6 @@ class ActionAnswerFromChroma(Action):
         try:
             # Verifica se ci sono contenuti rilevanti nei documenti
             results_with_score = vectordb.similarity_search_with_score(query, k=2)
-            print("Risultati con punteggio:", results_with_score)
             if not results_with_score or all(score > 1.1  for _, score in results_with_score):
                 dispatcher.utter_message(text="Nessuna risposta rilevante è stata trovata nei documenti")
                 fallback_count = tracker.get_slot("fallback_count") or 0
@@ -493,4 +492,37 @@ class ActionQueryContext(Action):
             answer = f"Errore durante l'interrogazione del contesto: {e}"
 
         dispatcher.utter_message(text=answer)
+        return []
+    
+# --- messaggio di conferma prenotazione sala ---
+class ActionConfirmMeetingBooking(Action):
+    def name(self) -> Text:
+        return "action_confirm_meeting_booking"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        # Recupera gli slot
+        appointment_date = tracker.get_slot("appointment_date")
+        person_picker = tracker.get_slot("person_picker")
+        room_features = tracker.get_slot("room_features")  
+
+        # Converte la lista in stringa separata da virgole
+        if room_features and isinstance(room_features, list):
+            room_features_string = ", ".join(room_features)
+        else:
+            room_features_string = "nessuna"
+
+        # Messaggio formattato
+        message = (
+            f"La sala è stata prenotata.\n"
+            f"Ecco i dettagli:\n"
+            f"• 📅 Data e ora: {appointment_date}\n"
+            f"• 👥 Numero partecipanti: {person_picker}\n"
+            f"• 🏢 Caratteristiche: {room_features_string}"
+        )
+
+        dispatcher.utter_message(text=message)
+
         return []

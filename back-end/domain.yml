@@ -24,12 +24,14 @@ intents:
   - book_meeting_room
   - provide_date
   - provide_participants_number
+  - provide_room_features
 
 entities:
   - option
   - file_name
   - appointment_date
   - person_picker
+  - room_features
 
 actions:
   - action_handle_fallback
@@ -39,6 +41,7 @@ actions:
   - action_query_context
   - action_send_local_pdf
   - action_list_available_documents
+  - action_confirm_meeting_booking
 
 slots:
   option:
@@ -79,6 +82,13 @@ slots:
     mappings:
       - type: from_entity
         entity: person_picker
+        
+  room_features:
+    type: list
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: room_features
 
 responses:
   utter_greet:
@@ -150,8 +160,9 @@ responses:
     - custom:
         type: "number_partecipants"
 
-  utter_confirm_meeting_booking:
-    - text: "La sala è stata prenotata. Ecco i dettagli: {appointment_date}, {person_picker} partecipanti."
+  utter_ask_features_room:
+    - custom:
+        type: "features_meeting_room"
 
 session_config:
   session_expiration_time: 60
