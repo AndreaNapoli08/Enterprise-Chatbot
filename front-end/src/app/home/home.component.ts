@@ -46,6 +46,7 @@ export class Home implements AfterViewChecked {
   }
 
   handleMessage(message: any) {
+    console.log('Home received message:', message);
     this.loading = true;
     this.shouldScroll = true;
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
@@ -91,6 +92,13 @@ export class Home implements AfterViewChecked {
       if (message.text === "Perfetto, cerco subito nei documenti") {
         startLongWaiting();
         this.startTime = Date.now();
+      }
+      if(message.custom?.type == "date_picker" || message.custom?.type == "number_partecipants" || message.custom?.type == "features_meeting_room") {
+        this.waiting_answer = true;
+        this.loading = true;
+      }else{
+        this.waiting_answer = false;
+        this.loading = false;
       }
 
     } else {

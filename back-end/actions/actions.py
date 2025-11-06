@@ -582,7 +582,7 @@ class ActionAvailabilityCheckRoom(Action):
             # Crea il messaggio di conferma
             features_str = ", ".join(info["caratteristiche"])
             message = (
-                f"✅ La sala {name} (n. {info['numero']}) è stata prenotata con successo!\n\n"
+                f"✅ La sala {name} (n. {info['numero']}) è stata prenotata con successo!\n\u200B\n"
                 f"📅 Data: {appointment_date}\n"
                 f"🕓 Orario: {appointment_hour} - {requested_end.strftime('%H:%M')}\n"
                 f"👥 Partecipanti: {person_picker}\n"

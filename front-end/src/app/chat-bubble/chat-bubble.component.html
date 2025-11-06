@@ -205,6 +205,7 @@
             <input type="text"
                   id="person-input"
                   [value]="peopleCount"
+                  readonly
                   class="bg-gray-50 border-x-0 border-gray-300 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full pb-6 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 
             <div class="absolute bottom-1 start-1/2 -translate-x-1/2 flex items-center text-xs text-gray-400 space-x-1">
@@ -278,7 +279,7 @@
       <!-- Orario -->
       <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
         {{ message.time }} 
-        <span *ngIf="message.elapsedSeconds && message.role === 'bot'" class="ml-2">Ragionato per {{ message.elapsedSeconds }}s</span>
+        <span *ngIf="message.elapsedSeconds && message.role === 'bot' && !message.text?.includes('stata prenotata con successo') && message.custom == {}" class="ml-2">Ragionato per {{ message.elapsedSeconds }}s</span>
       </span>
     </div>
   </div>
