@@ -279,7 +279,12 @@
       <!-- Orario -->
       <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
         {{ message.time }} 
-        <span *ngIf="message.elapsedSeconds && message.role === 'bot' && !message.text?.includes('stata prenotata con successo') && message.custom == {}" class="ml-2">Ragionato per {{ message.elapsedSeconds }}s</span>
+        <span *ngIf="message.elapsedSeconds && 
+          message.role === 'bot' && 
+          !message.text?.includes('stata prenotata con successo') && 
+          !message.text?.includes('non ci sono sale disponibili') &&
+          message.custom == {}"  
+          class="ml-2">Ragionato per {{ message.elapsedSeconds }}s</span>
       </span>
     </div>
   </div>

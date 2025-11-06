@@ -4,7 +4,13 @@
   </p>
   
   <div class="absolute top-5 right-5">
-    <app-profile [initials]="initials"></app-profile>
+    <app-profile 
+      [initials]="initials"
+      [name]="name"
+      [surname]="surname"
+      [email]="email"
+      [role]="role">
+    </app-profile>
   </div>
 
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">

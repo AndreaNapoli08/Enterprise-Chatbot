@@ -23,13 +23,15 @@ export class Login {
       this.showToast("Compilare tutti i campi");
     } else {
       const success = this.authService.login(this.email, this.password);
-      if (success) {
-        localStorage.setItem('email', this.email);
+      this.authService.login(this.email, this.password).subscribe(success => {
+        if (success) {
+          localStorage.setItem('email', this.email);
         this.router.navigate(['/home']); 
-      } else {
-        this.showToast("Utente non trovato");
+        } else {
+          this.showToast("Utente non trovato");
         this.loginFailed = true;
-      }
+        }
+      });
     }
   }
 

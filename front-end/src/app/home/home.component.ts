@@ -14,9 +14,14 @@ import { Message } from '../interfaces/message';
   styleUrls: ['./home.component.css']
 })
 export class Home implements AfterViewChecked {
-  messages: Message[] = [];
+  // dati utente
   email: string | null = null;
   initials: string = '';
+  name: string | null = null;
+  surname: string | null = null;
+  role: string | null = null;
+  // chat
+  messages: Message[] = [];
   shouldScroll = false;
   loading = false;
   buttons = false;
@@ -41,12 +46,22 @@ export class Home implements AfterViewChecked {
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    this.email = this.authService.getEmail();
-    this.initials = this.getInitialsFromEmail(this.email);
+    // Ottieni l'utente corrente dal backend
+    this.authService.getCurrentUser().subscribe(user => {
+      if (user && typeof user !== 'string') { 
+        this.email = user.email;
+        this.initials = this.getInitialsFromEmail(this.email);
+        this.name = user.firstName;
+        this.surname = user.lastName;
+        this.role = user.role;
+      } else {
+        this.email = null;
+        this.initials = '';
+      }
+    });
   }
 
   handleMessage(message: any) {
-    console.log('Home received message:', message);
     this.loading = true;
     this.shouldScroll = true;
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {

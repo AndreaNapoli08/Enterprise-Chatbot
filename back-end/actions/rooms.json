@@ -7,18 +7,7 @@
       "Prese di corrente multiple",
       "Accesso per disabili"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-18 14:15",
-        "end": "2025-11-18 14:45",
-        "persons": "5"
-      },
-      {
-        "start": "2025-11-25 17:05",
-        "end": "2025-11-25 17:35",
-        "persons": "7"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Blu": {
     "numero": 102,
@@ -28,28 +17,7 @@
       "Microfono",
       "Aria condizionata"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-16 14:00",
-        "end": "2025-11-16 14:30",
-        "persons": "3"
-      },
-      {
-        "start": "2025-11-19 14:11",
-        "end": "2025-11-19 14:41",
-        "persons": "4"
-      },
-      {
-        "start": "2025-11-18 18:13",
-        "end": "2025-11-18 20:13",
-        "persons": "5"
-      },
-      {
-        "start": "2025-11-20 17:36",
-        "end": "2025-11-20 18:06",
-        "persons": "4"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Verde": {
     "numero": 103,
@@ -58,13 +26,7 @@
       "Monitor",
       "Aria condizionata"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-16 13:00",
-        "end": "2025-11-16 15:00",
-        "persons": "5"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Gialla": {
     "numero": 104,
@@ -76,23 +38,7 @@
       "Aria condizionata",
       "Accesso per disabili"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-16 13:00",
-        "end": "2025-11-16 15:00",
-        "persons": "10"
-      },
-      {
-        "start": "2025-11-16 17:05",
-        "end": "2025-11-16 17:35",
-        "persons": "6"
-      },
-      {
-        "start": "2025-11-18 17:20",
-        "end": "2025-11-18 18:20",
-        "persons": "6"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Viola": {
     "numero": 105,
@@ -112,33 +58,7 @@
       "Lavagna digitale",
       "Aria condizionata"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-10 18:55",
-        "end": "2025-11-10 19:25",
-        "persons": "4"
-      },
-      {
-        "start": "2025-11-20 16:55",
-        "end": "2025-11-20 17:25",
-        "persons": "6"
-      },
-      {
-        "start": "2025-11-25 16:58",
-        "end": "2025-11-25 17:28",
-        "persons": "1"
-      },
-      {
-        "start": "2025-11-10 17:25",
-        "end": "2025-11-10 18:25",
-        "persons": "5"
-      },
-      {
-        "start": "2025-11-17 17:29",
-        "end": "2025-11-17 17:59",
-        "persons": "2"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Bianca": {
     "numero": 107,
@@ -159,28 +79,7 @@
       "Aria condizionata",
       "Accesso per disabili"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-19 14:30",
-        "end": "2025-11-19 15:00",
-        "persons": "20"
-      },
-      {
-        "start": "2025-11-25 16:59",
-        "end": "2025-11-25 17:29",
-        "persons": "3"
-      },
-      {
-        "start": "2025-11-16 17:00",
-        "end": "2025-11-16 18:00",
-        "persons": "5"
-      },
-      {
-        "start": "2025-11-09 17:10",
-        "end": "2025-11-09 18:40",
-        "persons": "5"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Grigia": {
     "numero": 109,
@@ -253,22 +152,6 @@
       "Aria condizionata",
       "Prese di corrente multiple"
     ],
-    "prenotazioni": [
-      {
-        "start": "2025-11-16 14:30",
-        "end": "2025-11-16 15:30",
-        "persons": "20"
-      },
-      {
-        "start": "2025-11-19 14:00",
-        "end": "2025-11-19 16:00",
-        "persons": "20"
-      },
-      {
-        "start": "2025-11-19 16:00",
-        "end": "2025-11-19 17:30",
-        "persons": "20"
-      }
-    ]
+    "prenotazioni": []
   }
 }

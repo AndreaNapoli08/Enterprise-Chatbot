@@ -9,6 +9,10 @@ import { AuthService } from '../services/auth.service';
 })
 export class Profile {
   @Input() initials: string = '';
+  @Input() name: string | null = null;
+  @Input() surname: string | null = null;
+  @Input() email: string | null = null
+  @Input() role: string | null = null;
 
   constructor(private authService: AuthService) {}
   logout() {
