@@ -40,9 +40,10 @@ export class ChatBubble {
     { id: 'monitor', label: 'Monitor', selected: false },
     { id: 'microfono', label: 'Microfono', selected: false },
     { id: 'prese', label: 'Prese di corrente multiple', selected: false },
-    { id: 'accesso_disabili', label: 'Accesso disabili', selected: false },
+    { id: 'accesso_disabili', label: 'Accesso per disabili', selected: false },
+    { id: 'lavagna_digitale', label: 'Lavagna digitale', selected: false },
+    { id: 'aria_condizionata', label: 'Aria condizionata', selected: false },
   ];
-
 
   ngAfterViewInit() {
     if(this.message.custom?.type === 'date_picker') {
@@ -116,6 +117,7 @@ export class ChatBubble {
       this.disabledInputs = true;
 
       const message = `La riunione è ${dateString} alle ${this.startTime} per ${this.duration} ore.`;
+      console.log(message);
       // invio la data selezionata a RASA
       this.chatService.sendMessage(message).pipe(take(1)).subscribe(responses => {
         responses.forEach(resp => {
@@ -171,7 +173,6 @@ export class ChatBubble {
       .map(f => f.label);
 
     const message = `Le caratteristiche richieste per la sala sono: ${selectedFeatures.join(', ')}`;
-    console.log('Caratteristiche selezionate:', message);
     this.disabledInputs = true;
     this.chatService.sendMessage(message).pipe(take(1)).subscribe(responses => {
       responses.forEach(resp => {

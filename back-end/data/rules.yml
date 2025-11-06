@@ -118,4 +118,4 @@ rules:
 - rule: Conferma prenotazione sala riunioni
   steps:
     - intent: provide_room_features
-    - action: action_confirm_meeting_booking
+    - action: action_availability_check_room

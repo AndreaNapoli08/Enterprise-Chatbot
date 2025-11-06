@@ -30,6 +30,8 @@ entities:
   - option
   - file_name
   - appointment_date
+  - appointment_hour
+  - appointment_duration
   - person_picker
   - room_features
 
@@ -41,7 +43,7 @@ actions:
   - action_query_context
   - action_send_local_pdf
   - action_list_available_documents
-  - action_confirm_meeting_booking
+  - action_availability_check_room
 
 slots:
   option:
@@ -75,6 +77,20 @@ slots:
     mappings:
       - type: from_entity
         entity: appointment_date
+
+  appointment_hour:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: appointment_hour
+    
+  appointment_duration:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: appointment_duration
 
   person_picker:
     type: text

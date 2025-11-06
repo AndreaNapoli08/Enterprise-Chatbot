@@ -5,8 +5,11 @@ from unittest import result
 import warnings
 import json, requests, re
 from datetime import datetime
-import pickle
 import logging
+import json
+from pathlib import Path
+from datetime import datetime, timedelta
+import dateparser
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 logging.getLogger("langchain.utils.math").setLevel(logging.ERROR)
@@ -36,6 +39,9 @@ from PyPDF2 import PdfReader
 
 # === CONFIGURAZIONI ===
 CHROMA_DIR = "actions/data/chroma_db" 
+
+# === JSON con le stanze disponibili ===
+ROOMS_FILE = Path("actions/rooms.json")
 
 # Embeddings (stesso modello usato in ingest.py)
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -202,14 +208,15 @@ class ActionAnswerFromChroma(Action):
     def expand_query(q: str) -> str:
         synonyms = {
             "erogazione": ["accredito", "pagamento", "versamento"],
-            "retribuzione": ["stipendio", "salario", "busta paga"],
+            "comunicare": ["pianificare", "informare"],
+            "stipendio": ["retribuzione", "salario", "busta paga"],
             "giorno": ["data", "scadenza", "entro quando"],
             "ferie": ["vacanze", "congedo"],
-            "permessi": ["assenze", "ore di permesso"],
         }
         for k, vals in synonyms.items():
             if k in q.lower():
                 q += " " + " ".join(vals)
+
         return q
 
     def run(
@@ -256,7 +263,8 @@ class ActionAnswerFromChroma(Action):
         if ActionAnswerFromChroma.llm is None:
             try:
                 ActionAnswerFromChroma.llm = Ollama(
-                    model="phi3:3.8b",
+                    #model="phi3:3.8b",
+                    model="mistral",
                     temperature=0
                 )
             except Exception as e:
@@ -494,35 +502,98 @@ class ActionQueryContext(Action):
         dispatcher.utter_message(text=answer)
         return []
     
-# --- messaggio di conferma prenotazione sala ---
-class ActionConfirmMeetingBooking(Action):
+# --- Controllo disponibilità sala ---
+class ActionAvailabilityCheckRoom(Action):
     def name(self) -> Text:
-        return "action_confirm_meeting_booking"
+        return "action_availability_check_room"
 
-    def run(self, dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+    @staticmethod
+    def load_rooms():
+        with open(ROOMS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    @staticmethod
+    def save_rooms(data):
+        with open(ROOMS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    @staticmethod
+    def parse_datetime(date_str: str, hour_str: str) -> datetime:
+        # Combina data e ora
+        datetime_str = f"{date_str} {hour_str}"
+        dt = dateparser.parse(datetime_str, languages=['it'])
+        if dt is None:
+            raise ValueError(f"Impossibile parsare la data: {datetime_str}")
+        return dt
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
 
         # Recupera gli slot
         appointment_date = tracker.get_slot("appointment_date")
+        appointment_hour = tracker.get_slot("appointment_hour")
+        appointment_duration = tracker.get_slot("appointment_duration")
         person_picker = tracker.get_slot("person_picker")
-        room_features = tracker.get_slot("room_features")  
+        room_features = tracker.get_slot("room_features")
 
-        # Converte la lista in stringa separata da virgole
-        if room_features and isinstance(room_features, list):
-            room_features_string = ", ".join(room_features)
+        if not appointment_date or not room_features or not appointment_hour or not appointment_duration:
+            dispatcher.utter_message(
+                text="Mi servono data, ora di inizio, durata e caratteristiche richieste per verificare la disponibilità."
+            )
+            return []
+        
+        requested_start = self.parse_datetime(appointment_date, appointment_hour)
+        requested_end = requested_start + timedelta(hours=float(appointment_duration))
+
+        rooms = self.load_rooms()
+
+        def is_available(room, start, end):
+            for booking in room["prenotazioni"]:
+                booking_start = datetime.strptime(booking["start"], "%Y-%m-%d %H:%M")
+                booking_end = datetime.strptime(booking["end"], "%Y-%m-%d %H:%M")
+                if not (end <= booking_start or start >= booking_end):
+                    return False
+            return True
+        
+        room_features = [f.lower() for f in room_features]
+        # Cerca una sala disponibile
+        available_room = None
+        for name, info in rooms.items():
+            room_features_in_room = [f.lower() for f in info["caratteristiche"]]
+            if all(feature in room_features_in_room for feature in room_features):
+                if is_available(info, requested_start, requested_end):
+                    available_room = (name, info)
+                    break
+
+        if available_room:
+            name, info = available_room
+            # Salva la prenotazione
+            info["prenotazioni"].append({
+                "start": requested_start.strftime("%Y-%m-%d %H:%M"),
+                "end": requested_end.strftime("%Y-%m-%d %H:%M"),
+                "persons": person_picker
+            })
+            self.save_rooms(rooms)
+
+            # Crea il messaggio di conferma
+            features_str = ", ".join(info["caratteristiche"])
+            message = (
+                f"✅ La sala {name} (n. {info['numero']}) è stata prenotata con successo!\n\n"
+                f"📅 Data: {appointment_date}\n"
+                f"🕓 Orario: {appointment_hour} - {requested_end.strftime('%H:%M')}\n"
+                f"👥 Partecipanti: {person_picker}\n"
+                f"🏢 Caratteristiche: {features_str}\n"
+                f"👥 Capienza massima: {info['capienza']} persone."
+            )
+
+            dispatcher.utter_message(text=message)
         else:
-            room_features_string = "nessuna"
-
-        # Messaggio formattato
-        message = (
-            f"La sala è stata prenotata.\n"
-            f"Ecco i dettagli:\n"
-            f"• 📅 Data e ora: {appointment_date}\n"
-            f"• 👥 Numero partecipanti: {person_picker}\n"
-            f"• 🏢 Caratteristiche: {room_features_string}"
-        )
-
-        dispatcher.utter_message(text=message)
+            dispatcher.utter_message(
+                text="Mi dispiace, non ci sono sale disponibili con le caratteristiche richieste in questo orario."
+            )
 
         return []

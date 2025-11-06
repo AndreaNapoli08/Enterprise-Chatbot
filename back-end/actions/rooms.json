@@ -1,0 +1,208 @@
+{
+  "Sala Rossa": {
+    "numero": 101,
+    "capienza": 6,
+    "caratteristiche": [
+      "Monitor",
+      "Prese di corrente multiple",
+      "Accesso per disabili"
+    ],
+    "prenotazioni": [
+      {
+        "start": "2025-11-18 14:15",
+        "end": "2025-11-18 14:45",
+        "persons": "5"
+      }
+    ]
+  },
+  "Sala Blu": {
+    "numero": 102,
+    "capienza": 10,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Microfono",
+      "Aria condizionata"
+    ],
+    "prenotazioni": [
+      {
+        "start": "2025-11-16 14:00",
+        "end": "2025-11-16 14:30",
+        "persons": "3"
+      },
+      {
+        "start": "2025-11-19 14:11",
+        "end": "2025-11-19 14:41",
+        "persons": "4"
+      }
+    ]
+  },
+  "Sala Verde": {
+    "numero": 103,
+    "capienza": 8,
+    "caratteristiche": [
+      "Monitor",
+      "Aria condizionata"
+    ],
+    "prenotazioni": [
+      {
+        "start": "2025-11-16 13:00",
+        "end": "2025-11-16 15:00",
+        "persons": "5"
+      }
+    ]
+  },
+  "Sala Gialla": {
+    "numero": 104,
+    "capienza": 20,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Microfono",
+      "Prese di corrente multiple",
+      "Aria condizionata",
+      "Accesso per disabili"
+    ],
+    "prenotazioni": [
+      {
+        "start": "2025-11-16 13:00",
+        "end": "2025-11-16 15:00",
+        "persons": "10"
+      }
+    ]
+  },
+  "Sala Viola": {
+    "numero": 105,
+    "capienza": 12,
+    "caratteristiche": [
+      "Monitor",
+      "Microfono",
+      "Accesso per disabili"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Arancione": {
+    "numero": 106,
+    "capienza": 16,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Lavagna digitale",
+      "Aria condizionata"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Bianca": {
+    "numero": 107,
+    "capienza": 5,
+    "caratteristiche": [
+      "Monitor",
+      "Prese di corrente multiple"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Nera": {
+    "numero": 108,
+    "capienza": 25,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Microfono",
+      "Lavagna digitale",
+      "Aria condizionata",
+      "Accesso per disabili"
+    ],
+    "prenotazioni": [
+      {
+        "start": "2025-11-19 14:30",
+        "end": "2025-11-19 15:00",
+        "persons": "20"
+      }
+    ]
+  },
+  "Sala Grigia": {
+    "numero": 109,
+    "capienza": 14,
+    "caratteristiche": [
+      "Monitor",
+      "Prese di corrente multiple",
+      "Lavagna digitale"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Azzurra": {
+    "numero": 110,
+    "capienza": 18,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Microfono",
+      "Aria condizionata"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Oro": {
+    "numero": 111,
+    "capienza": 9,
+    "caratteristiche": [
+      "Monitor",
+      "Aria condizionata",
+      "Prese di corrente multiple"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Argento": {
+    "numero": 112,
+    "capienza": 7,
+    "caratteristiche": [
+      "Lavagna digitale",
+      "Accesso per disabili"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Bronzo": {
+    "numero": 113,
+    "capienza": 15,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Prese di corrente multiple",
+      "Aria condizionata"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Turchese": {
+    "numero": 114,
+    "capienza": 11,
+    "caratteristiche": [
+      "Monitor",
+      "Microfono",
+      "Accesso per disabili",
+      "Aria condizionata"
+    ],
+    "prenotazioni": []
+  },
+  "Sala Smeraldo": {
+    "numero": 115,
+    "capienza": 22,
+    "caratteristiche": [
+      "Videoproiettore",
+      "Lavagna digitale",
+      "Microfono",
+      "Accesso per disabili",
+      "Aria condizionata",
+      "Prese di corrente multiple"
+    ],
+    "prenotazioni": [
+      {
+        "start": "2025-11-16 14:30",
+        "end": "2025-11-16 15:30",
+        "persons": "20"
+      },
+      {
+        "start": "2025-11-19 14:00",
+        "end": "2025-11-19 16:00",
+        "persons": "20"
+      },
+      {
+        "start": "2025-11-19 16:00",
+        "end": "2025-11-19 17:30",
+        "persons": "20"
+      }
+    ]
+  }
+}

@@ -422,10 +422,15 @@ nlu:
 
 - intent: provide_date
   examples: |
-    - Devo prenotare la sala per [mercoledì 19 novembre 2025 alle 17:00 per 0.5 ore](appointment_date)
-    - La riunione è [mercoledì 19 novembre 2025 alle 09:30 per 1 ore](appointment_date)
-    - La riunione è il [21 dicembre 2025 dalle 15:30 per 2 ore](appointment_date)
-
+    - La riunione è [lunedì 09 novembre 2025](appointment_date) alle [13:00](appointment_hour) per [0.5](appointment_duration) ore.
+    - La riunione è [mercoledì 25 gennaio 2026](appointment_date) alle [16:30](appointment_hour) per [2](appointment_duration) ore.
+    - La riunione è [venerdì 18 dicembre 2025](appointment_date) alle [09:00](appointment_hour) per [1.5](appointment_duration) ore.
+    - La riunione è [martedì 10 novembre 2025](appointment_date) alle [9:00](appointment_hour) per [2](appointment_duration) ore
+    - L'incontro è previsto per [15 dicembre 2025](appointment_date) alle [14:30](appointment_hour)
+    - Possiamo fare la riunione [venerdì 21 febbraio 2026](appointment_date)
+    - Prenota la sala per [1 marzo 2026](appointment_date)
+    - La riunione si terrà [giovedì 7 maggio 2026](appointment_date)
+    
 - intent: provide_participants_number
   examples: |
     - Saremo in [4](person_picker) persone alla riunione 
@@ -435,6 +440,8 @@ nlu:
 - intent: provide_room_features
   examples: |
     - Le caratteristiche richieste per la sala sono: [Prese di corrente multiple, Accesso per disabili](room_features)
+    - Le caratteristiche richieste per la sala sono: [Aria condizionata, Lavagna digitale](room_features)
+    - Le caratteristiche richieste per la sala sono: [Monitor, Videoproiettore, Microfono](room_features)
     - La sala deve avere un [proiettore e microfono](room_features)
     - Mi serve una sala con [monitor e prese di corrente](room_features)
     - Vorrei una stanza con [accesso per disabili](room_features)
