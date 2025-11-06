@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta
 import dateparser
+import requests
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 logging.getLogger("langchain.utils.math").setLevel(logging.ERROR)
@@ -22,7 +23,7 @@ import threading
 # import per rasa
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import SlotSet
+from rasa_sdk.events import SlotSet, FollowupAction
 
 # LangChain / Chroma / Embeddings / LLMs
 from langchain.vectorstores import Chroma
@@ -540,6 +541,8 @@ class ActionAvailabilityCheckRoom(Action):
         person_picker = tracker.get_slot("person_picker")
         room_features = tracker.get_slot("room_features")
 
+        print(appointment_date, appointment_hour, appointment_duration, person_picker, room_features)
+        
         if not appointment_date or not room_features or not appointment_hour or not appointment_duration:
             dispatcher.utter_message(
                 text="Mi servono data, ora di inizio, durata e caratteristiche richieste per verificare la disponibilità."
@@ -560,6 +563,7 @@ class ActionAvailabilityCheckRoom(Action):
             return True
         
         room_features = [f.lower() for f in room_features]
+        
         # Cerca una sala disponibile
         available_room = None
         for name, info in rooms.items():
@@ -597,3 +601,46 @@ class ActionAvailabilityCheckRoom(Action):
             )
 
         return []
+    
+
+# === Azione che controlla il ruolo dell'utente loggato ===
+class ActionCheckUserRole(Action):
+    def name(self) -> Text:
+        return "action_check_user_role"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> list:
+
+        # 1️⃣ Prendi l'email dall'ultimo messaggio
+        email = tracker.latest_message.get("metadata", {}).get("email")
+        
+        if not email:
+            dispatcher.utter_message(text="Non riesco a identificare chi sei. Per favore loggati.")
+            return []
+
+        # 2️⃣ Chiamata HTTP al server per ottenere la lista utenti
+        try:
+            response = requests.get("http://localhost:3000/users") 
+            response.raise_for_status()
+            users = response.json()  # lista di utenti
+        except Exception as e:
+            dispatcher.utter_message(text="Errore nel recuperare gli utenti dal server.")
+            return []
+
+        # 3️⃣ Trova l'utente con la mail corretta
+        user = next((u for u in users if u["email"] == email), None)
+        if not user:
+            dispatcher.utter_message(text="Utente non trovato.")
+            return []
+
+        if user["role"] != "Manager":
+            dispatcher.utter_message(
+                text=f"Mi dispiace, solo gli utenti con ruolo 'manager' possono eseguire questa azione."
+            )
+            return []
+
+        # 5️⃣ Utente autorizzato
+        dispatcher.utter_message(text=f"Accesso autorizzato come {user['role']} ✅")
+         # Esegue un'altra azione subito dopo
+        return [FollowupAction(name="utter_ask_meeting_date")]

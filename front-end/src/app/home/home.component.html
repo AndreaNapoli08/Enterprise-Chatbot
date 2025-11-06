@@ -22,6 +22,8 @@
       >
         <chat-bubble *ngFor="let msg of messages" 
           [message]="msg" 
+          [name]="name"
+          [surname]="surname"
           (stateChangeLoading)="loading = $event" 
           (stateChangeConversation)="conversationEnded = $event" 
           (botResponse)="handleMessage($event)" 

@@ -17,7 +17,6 @@ export class AuthService {
   login(email: string, password: string): Observable<boolean> {
     return this.http.get<User[]>(this.apiUrl).pipe(
       map((users) => {
-        console.log(users);
         const user = users.find(u => u.email === email && u.password === password);
         this.loggedIn = !!user;
         if (this.loggedIn) {

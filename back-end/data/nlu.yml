@@ -29,7 +29,6 @@ nlu:
     - ci sentiamo
     - alla prossima
     - addio
-    - ciao ciao
     - a più tardi
     - ci vediamo
     - a domani
@@ -439,9 +438,9 @@ nlu:
 
 - intent: provide_room_features
   examples: |
-    - Le caratteristiche richieste per la sala sono: [Prese di corrente multiple, Accesso per disabili](room_features)
+    - Le caratteristiche richieste per la sala sono: [Prese di corrente multiple, Accesso disabili](room_features)
     - Le caratteristiche richieste per la sala sono: [Aria condizionata, Lavagna digitale](room_features)
     - Le caratteristiche richieste per la sala sono: [Monitor, Videoproiettore, Microfono](room_features)
     - La sala deve avere un [proiettore e microfono](room_features)
     - Mi serve una sala con [monitor e prese di corrente](room_features)
-    - Vorrei una stanza con [accesso per disabili](room_features)
+    - Vorrei una stanza con [accesso disabili](room_features)

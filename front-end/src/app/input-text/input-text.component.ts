@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Message } from '../interfaces/message';  
 import { ChatService } from '../services/chat.service';  
 import { take } from 'rxjs/operators';
-import { MessageBusService } from '../services/message-bus.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'input-text',
@@ -21,7 +21,7 @@ export class InputText {
   @Input() conversationEnded = false;
   @Input() humanOperator = false;
 
-  constructor(private chatService: ChatService, private messageBus: MessageBusService) {}
+  constructor(private chatService: ChatService, private authService: AuthService) {}
   
   ngOnChanges(changes: SimpleChanges) {
     // Quando humanOperator diventa true → disabilita subito la barra
@@ -56,21 +56,24 @@ export class InputText {
     this.submitAnswer.emit(message);
 
     // invio a Rasa
-    this.chatService.sendMessage(text).pipe(take(1)).subscribe(responses => {
-      responses.forEach(resp => {
-        const botMessage: Message = {
-          text: resp.text || resp.custom?.text || '',
-          image: resp.image || '',
-          custom: resp.custom || {},
-          buttons: resp.buttons || [],
-          attachment: resp.attachment || undefined,
-          role: 'bot',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        this.submitAnswer.emit(botMessage); 
-      });
-    });
-    this.answer = '';
-  }
+    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
+      const email = typeof user === 'string' ? user : user.email;
 
+      this.chatService.sendMessage(text, email).pipe(take(1)).subscribe(responses => {
+        responses.forEach(resp => {
+          const botMessage: Message = {
+            text: resp.text || resp.custom?.text || '',
+            image: resp.image || '',
+            custom: resp.custom || {},
+            buttons: resp.buttons || [],
+            attachment: resp.attachment || undefined,
+            role: 'bot',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          this.submitAnswer.emit(botMessage); 
+        });
+      });
+      this.answer = '';
+    });
+  }
 }

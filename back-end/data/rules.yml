@@ -103,7 +103,7 @@ rules:
 - rule: Prenotazione sala riunioni - chiedi data e ora
   steps:
     - intent: book_meeting_room
-    - action: utter_ask_meeting_date
+    - action: action_check_user_role
 
 - rule: Prenotazione sala riunioni - chiedi numero di partecipanti
   steps:

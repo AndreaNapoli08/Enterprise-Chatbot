@@ -62,6 +62,7 @@ export class Home implements AfterViewChecked {
   }
 
   handleMessage(message: any) {
+    console.log(message);
     this.loading = true;
     this.shouldScroll = true;
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
