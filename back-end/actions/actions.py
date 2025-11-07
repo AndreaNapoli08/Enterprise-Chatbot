@@ -264,8 +264,8 @@ class ActionAnswerFromChroma(Action):
         if ActionAnswerFromChroma.llm is None:
             try:
                 ActionAnswerFromChroma.llm = Ollama(
-                    #model="phi3:3.8b",
-                    model="mistral",
+                    model="phi3:3.8b",
+                    #model="mistral",
                     temperature=0
                 )
             except Exception as e:
@@ -540,7 +540,7 @@ class ActionAvailabilityCheckRoom(Action):
         appointment_duration = tracker.get_slot("appointment_duration")
         person_picker = tracker.get_slot("person_picker")
         room_features = tracker.get_slot("room_features")
-
+        
         print(appointment_date, appointment_hour, appointment_duration, person_picker, room_features)
         
         if not appointment_date or not room_features or not appointment_hour or not appointment_duration:

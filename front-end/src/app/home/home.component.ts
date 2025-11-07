@@ -99,7 +99,6 @@ export class Home implements AfterViewChecked {
         ...message,
         elapsedSeconds: elapsedSeconds > 20 ? elapsedSeconds : null
       });
-
       // Se il messaggio del bot non ha pulsanti, non è in attesa di risposta
       this.waiting_answer = message.buttons.length > 0;
       this.loading = this.waiting_answer;
@@ -112,11 +111,7 @@ export class Home implements AfterViewChecked {
       if(message.custom?.type == "date_picker" || message.custom?.type == "number_partecipants" || message.custom?.type == "features_meeting_room") {
         this.waiting_answer = true;
         this.loading = true;
-      }else{
-        this.waiting_answer = false;
-        this.loading = false;
       }
-
     } else {
       // Messaggio utente
       this.messages.push(message);

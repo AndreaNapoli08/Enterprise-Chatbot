@@ -436,6 +436,10 @@ nlu:
     - La riunione sarà per [10](person_picker) persone
     - Ci saranno [2](person_picker) partecipanti
 
+- regex: appointment_date
+  examples: |
+    - \b(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)? ?\d{1,2} (gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre) \d{4}\b
+
 - intent: provide_room_features
   examples: |
     - Le caratteristiche richieste per la sala sono: [Prese di corrente multiple, Accesso disabili](room_features)
