@@ -119,3 +119,13 @@ rules:
   steps:
     - intent: provide_room_features
     - action: action_availability_check_room
+
+- rule: L'utente chiede le proprie prenotazioni
+  steps:
+    - intent: ask_my_reservations
+    - action: action_get_reservation
+
+- rule: L'utente vuole cancellare una prenotazione
+  steps:
+    - intent: delete_reservation
+    - action: action_delete_reservation

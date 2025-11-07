@@ -25,6 +25,8 @@ intents:
   - provide_date
   - provide_participants_number
   - provide_room_features
+  - ask_my_reservations
+  - delete_reservation
 
 entities:
   - option
@@ -34,6 +36,7 @@ entities:
   - appointment_duration
   - person_picker
   - room_features
+  - id_reservation
 
 actions:
   - action_handle_fallback
@@ -43,8 +46,10 @@ actions:
   - action_query_context
   - action_send_local_pdf
   - action_list_available_documents
-  - action_availability_check_room
   - action_check_user_role
+  - action_availability_check_room
+  - action_get_reservation
+  - action_delete_reservation
 
 slots:
   option:
@@ -106,6 +111,13 @@ slots:
     mappings:
       - type: from_entity
         entity: room_features
+  
+  id_reservation:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: id_reservation
 
 responses:
   utter_greet:

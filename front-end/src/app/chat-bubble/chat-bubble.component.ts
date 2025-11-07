@@ -208,6 +208,27 @@ export class ChatBubble {
     });
   }
 
+  deleteReservation(id: string) {
+    const message = `Elimina la prenotazione con id: ${id}`;
+    this.disabledInputs = true;
+    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
+      const email = typeof user === 'string' ? user : user.email;
+      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
+        responses.forEach(resp => {
+          const botMessage: Message = {
+            text: resp.text || '',
+            image: resp.image || '',
+            custom: resp.custom || {},
+            buttons: resp.buttons || [],
+            role: 'bot',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          this.botResponse.emit(botMessage);
+        });
+      });
+    });
+  }
+
   downloadFile(fileUrl: string, fileName: string) {
     const link = document.createElement('a');
     link.href = fileUrl;

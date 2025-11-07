@@ -26,6 +26,7 @@ export class Home implements AfterViewChecked {
   loading = false;
   buttons = false;
   waiting_answer = false;
+  reservationInProgress = false;
   conversationEnded = false;
   human_operator = false;
 
@@ -62,7 +63,6 @@ export class Home implements AfterViewChecked {
   }
 
   handleMessage(message: any) {
-    console.log(message);
     this.loading = true;
     this.shouldScroll = true;
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
@@ -109,8 +109,9 @@ export class Home implements AfterViewChecked {
         this.startTime = Date.now();
       }
       if(message.custom?.type == "date_picker" || message.custom?.type == "number_partecipants" || message.custom?.type == "features_meeting_room") {
-        this.waiting_answer = true;
-        this.loading = true;
+        this.reservationInProgress = true;
+      }else{
+        this.reservationInProgress = false;
       }
     } else {
       // Messaggio utente

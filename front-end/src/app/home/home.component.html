@@ -52,7 +52,7 @@
       </div>
       <input-text 
         (submitAnswer)="handleMessage($event)" 
-        [disabled]="loading" 
+        [disabled]="loading || reservationInProgress" 
         [conversationEnded]="conversationEnded"
         [humanOperator]="human_operator">
       </input-text>

@@ -448,3 +448,22 @@ nlu:
     - La sala deve avere un [proiettore e microfono](room_features)
     - Mi serve una sala con [monitor e prese di corrente](room_features)
     - Vorrei una stanza con [accesso disabili](room_features)
+
+- intent: ask_my_reservations
+  examples: |
+    - Voglio vedere le mie prenotazioni
+    - Mostrami le mie prenotazioni delle sale riunioni
+    - Quali sono le mie prenotazioni attuali?
+    - Ho delle prenotazioni per le sale riunioni?
+    - Puoi elencare le mie prenotazioni delle sale?
+    - Vorrei controllare le mie prenotazioni delle stanze
+    - Fammi vedere le mie prenotazioni delle sale riunioni
+    - Mostrami le prenotazioni che ho fatto
+    - Posso vedere le mie prenotazioni delle sale riunioni?
+
+- intent: delete_reservation
+  examples: |
+    - Elimina la prenotazione con id: [037feade-203e-43d6-9f68-12039f0b88f4](id_reservation)
+    - Cancella la mia prenotazione con id: [2ef1a458-6a24-4790-a159-5736063b10a6](id_reservation)
+    - Rimuovi la prenotazione con id: [397abe07-8b7a-49d0-b6b4-491b52b07ae8](id_reservation)
+    - Voglio cancellare la prenotazione con id: [037feade-203e-43d6-9f68-12039f0b88f4](id_reservation)

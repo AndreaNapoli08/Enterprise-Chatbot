@@ -275,7 +275,28 @@
         </button>
       </div>
 
-      
+      <!-- Mostra prenotazioni dell'utente -->
+      <div *ngIf="message.custom?.type === 'lista_prenotazioni'">
+        <div *ngFor="let p of message.custom?.['prenotazioni']" class="mt-1 px-4 py-2 border rounded-xl break-words whitespace-pre-wrap bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 rounded-xl">
+          <p class="text-gray-900 dark:text-white font-medium">🏢 {{ p.sala }} (n. {{ p.numero }})</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300">⏰ Inizio: {{ p.inizio }}</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300">🕓 Fine: {{ p.fine }}</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300">👥 Partecipanti: {{ p.persone }}</p>
+          <button type="button"
+                  (click)="deleteReservation(p.id)"
+                  class="mt-4 w-full py-2 px-4 bg-gray-300 hover:bg-red-600 hover:text-white 
+                        dark:bg-gray-700 dark:hover:bg-red-600 focus:bg-red-900 
+                        text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
+                        font-semibold rounded-xl shadow transition duration-200 
+                        disabled:opacity-50 disabled:cursor-not-allowed 
+                        disabled:hover:bg-gray-300 disabled:hover:text-gray-900 
+                        disabled:dark:hover:bg-gray-700 disabled:dark:hover:text-white"
+                  [disabled]="disabledInputs">
+            Elimina
+          </button>
+        </div>
+      </div>
+
       <!-- Orario -->
       <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
         {{ message.time }} 
