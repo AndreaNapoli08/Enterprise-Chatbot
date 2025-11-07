@@ -721,8 +721,14 @@ class ActionDeleteReservation(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        reservation_id = tracker.get_slot("id_reservation")
-        print("ID prenotazione da cancellare:", reservation_id)
+        text = tracker.latest_message.get("text", "")
+        match = re.search(r"[0-9a-fA-F-]{36}", text)
+
+        if not match:
+            dispatcher.utter_message(text="Non ho trovato un ID prenotazione nel messaggio.")
+            return []
+
+        reservation_id = match.group(0)
 
         if not reservation_id:
             dispatcher.utter_message(text="Non ho ricevuto l'ID della prenotazione da cancellare.")
@@ -737,7 +743,7 @@ class ActionDeleteReservation(Action):
                 if p.get("id") == reservation_id:
                     prenotazioni.remove(p)
                     self.save_rooms(rooms)
-                    dispatcher.utter_message(text="La prenotazione è stata cancellata con successo.")
+                    dispatcher.utter_message(text=f"La prenotazione per {sala} (n.{info.get('numero')}) è stata cancellata con successo.")
                     return []
            
         dispatcher.utter_message(text="Non ho trovato nessuna prenotazione con l'ID fornito.")

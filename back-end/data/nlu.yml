@@ -467,3 +467,18 @@ nlu:
     - Cancella la mia prenotazione con id: [2ef1a458-6a24-4790-a159-5736063b10a6](id_reservation)
     - Rimuovi la prenotazione con id: [397abe07-8b7a-49d0-b6b4-491b52b07ae8](id_reservation)
     - Voglio cancellare la prenotazione con id: [037feade-203e-43d6-9f68-12039f0b88f4](id_reservation)
+    - Elimina la prenotazione con id: [80ef9d66-4293-4604-954c-417bce5c1c42](id_reservation)
+    - Elimina la mia prenotazione
+    - Elimina la prenotazione con id: 1234-5678-9abc-def0
+    - Cancella la prenotazione numero [id]
+    - Rimuovi prenotazione id [id]
+    - Voglio cancellare una prenotazione
+    - Elimina la prenotazione 1111-2222-3333-4444
+    - Cancella quella con codice [id]
+    - Elimina quella prenotazione
+    - Voglio togliere una prenotazione dal sistema
+    - Cancella la mia prenotazione attiva
+
+- regex: id_reservation
+  examples: |
+    - [0-9a-fA-F-]{36}

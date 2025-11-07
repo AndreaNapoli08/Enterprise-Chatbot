@@ -125,7 +125,7 @@
         </label>      
         <div class="flex sm:flex-row flex-col sm:space-x-5 rtl:space-x-reverse">
           <!-- Calendario -->
-          <div [id]="'date-picker-' + countId" inline-datepicker datepicker-buttons datepicker-autoselect-today class="mx-auto sm:mx-0"></div>
+          <div [id]="'date-picker-' + uniqueId" inline-datepicker datepicker-buttons datepicker-autoselect-today class="mx-auto sm:mx-0"></div>
           <!-- Selezione orario + pulsante -->
           <div class="sm:ms-7 sm:ps-5 sm:border-s border-gray-200 dark:border-gray-800 w-full sm:max-w-[16rem] mt-5 sm:mt-0 flex flex-col">
             <h3 class="text-gray-900 dark:text-white text-base font-medium mb-3 text-center">{{ formatted }}</h3>
@@ -245,18 +245,18 @@
       <!-- Selettore caratteristiche sala -->
       <div *ngIf="message.custom?.type == 'features_meeting_room'" class="pt-5 border-t border-gray-200 dark:border-gray-800">
         <label for="features" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seleziona le caratteristiche:</label>
-        <ul class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <ul [id]="'features-' + uniqueId" class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
 
           <li *ngFor="let feature of featuresList" class="w-full border-b border-gray-200 dark:border-gray-600">
             <div class="flex items-center ps-3">
               <input 
                 type="checkbox"
-                [id]="feature.id"
+                [id]="feature.id + '-' + uniqueId"
                 [(ngModel)]="feature.selected"
-                name="{{ feature.id }}"
+                [name]="feature.id + '-' + uniqueId"
                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
               />
-              <label [for]="feature.id" class="w-full py-3 ms-2 text-sm font-medium">
+              <label [for]="feature.id + '-' + uniqueId" class="w-full py-3 ms-2 text-sm font-medium">
                 {{ feature.label }}
               </label>
             </div>
@@ -282,7 +282,7 @@
           <p class="text-sm text-gray-700 dark:text-gray-300">⏰ Inizio: {{ p.inizio }}</p>
           <p class="text-sm text-gray-700 dark:text-gray-300">🕓 Fine: {{ p.fine }}</p>
           <p class="text-sm text-gray-700 dark:text-gray-300">👥 Partecipanti: {{ p.persone }}</p>
-          <button type="button"
+          <button type="button" id="delete-reservation-{{p.id}}"
                   (click)="deleteReservation(p.id)"
                   class="mt-4 w-full py-2 px-4 bg-gray-300 hover:bg-red-600 hover:text-white 
                         dark:bg-gray-700 dark:hover:bg-red-600 focus:bg-red-900 

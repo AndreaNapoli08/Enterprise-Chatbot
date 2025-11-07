@@ -37,7 +37,7 @@ export class ChatBubble {
   startTime?: string = '';
   duration: number = 0.5; // valore selezionato in minuti
   disabledInputs = false;
-  countId: number = 0;
+  uniqueId = Math.random().toString(36).substring(2, 9);
   peopleCount = 1;
 
   featuresList = [
@@ -52,7 +52,7 @@ export class ChatBubble {
 
   ngAfterViewInit() {
     if(this.message.custom?.type === 'date_picker') {
-      const inputEl = document.getElementById('date-picker-' + this.countId);
+      const inputEl = document.getElementById('date-picker-' + this.uniqueId);
       if (inputEl) {
         const today = new Date();
 
@@ -73,8 +73,8 @@ export class ChatBubble {
           }) ?? '';
         });
       }
-      this.countId += 1;
       this.cd.detectChanges(); 
+      console.log("uniqueId ", this.uniqueId);
     }
   }
 
@@ -210,7 +210,9 @@ export class ChatBubble {
 
   deleteReservation(id: string) {
     const message = `Elimina la prenotazione con id: ${id}`;
-    this.disabledInputs = true;
+    const button = document.getElementById('delete-reservation-' + id) as HTMLButtonElement;
+    if(button) { button.disabled = true; }
+    console.log(message);
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       const email = typeof user === 'string' ? user : user.email;
       this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
