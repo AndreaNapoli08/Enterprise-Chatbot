@@ -23,19 +23,11 @@ export class ChatBubble {
   @Output() stateChangeLoading = new EventEmitter<boolean>();
   @Output() stateChangeConversation = new EventEmitter<boolean>();
 
-  buttonsDisabled: boolean = false;
-  
-  constructor(
-    private chatService: ChatService, 
-    private messageBus: MessageBusService,
-    private cd: ChangeDetectorRef,
-    private authService: AuthService
-  ) {}
-
+  buttonsDisabled = false;
   selectedDate: Date | null = null;
-  formatted: string = '';
+  formatted = '';
   startTime?: string = '';
-  duration: number = 0.5; // valore selezionato in minuti
+  duration = 0.5;
   disabledInputs = false;
   uniqueId = Math.random().toString(36).substring(2, 9);
   peopleCount = 1;
@@ -50,19 +42,23 @@ export class ChatBubble {
     { id: 'aria_condizionata', label: 'Aria condizionata', selected: false },
   ];
 
+  constructor(
+    private chatService: ChatService,
+    private messageBus: MessageBusService,
+    private cd: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
+
   ngAfterViewInit() {
-    if(this.message.custom?.type === 'date_picker') {
+    if (this.message.custom?.type === 'date_picker') {
       const inputEl = document.getElementById('date-picker-' + this.uniqueId);
       if (inputEl) {
         const today = new Date();
-
-        const datepicker = new Datepicker (inputEl, {
+        const datepicker = new Datepicker(inputEl, {
           autohide: true,
           format: 'dd/mm/yyyy',
           minDate: today,
         });
-
-        // Esempio: catturare evento di cambio data
         inputEl.addEventListener('changeDate', (event: any) => {
           this.selectedDate = event.detail.date;
           this.formatted = this.selectedDate?.toLocaleDateString('it-IT', {
@@ -73,162 +69,97 @@ export class ChatBubble {
           }) ?? '';
         });
       }
-      this.cd.detectChanges(); 
+      this.cd.detectChanges();
       console.log("uniqueId ", this.uniqueId);
     }
   }
 
-  sendButtonPayload(payload: string) {
-    this.buttonsDisabled = true;
-    if(payload.startsWith("/choose_document")) {
-      const botMessage: Message = {
-          text: "Perfetto, cerco subito nei documenti",
-          image:'',
-          buttons: [],
-          role: 'bot',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        this.botResponse.emit(botMessage); 
-        this.stateChangeLoading.emit(true);
-    }
-    if(payload == "/yes_close_conversation") {
-      this.stateChangeConversation.emit(true);
-    }
-
+  /** 🔧 Metodo riutilizzabile per inviare messaggi */
+  private sendMessageToChat(message: string) {
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       const email = typeof user === 'string' ? user : user.email;
-      this.chatService.sendMessage(payload, email).pipe(take(1)).subscribe(responses => {
+      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
         responses.forEach(resp => {
           const botMessage: Message = {
             text: resp.text || '',
             image: resp.image || '',
-          buttons: resp.buttons || [],
-          role: 'bot',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        console.log('📤 Risposta bot:', botMessage);
-        this.botResponse.emit(botMessage); 
+            custom: resp.custom || {},
+            buttons: resp.buttons || [],
+            attachment: resp.attachment || undefined,
+            role: 'bot',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          console.log('📤 Risposta bot:', botMessage);
+          this.botResponse.emit(botMessage);
         });
       });
     });
   }
 
+  sendButtonPayload(payload: string) {
+    this.buttonsDisabled = true;
+
+    if (payload.startsWith("/choose_document")) {
+      const botMessage: Message = {
+        text: "Perfetto, cerco subito nei documenti",
+        image: '',
+        buttons: [],
+        role: 'bot',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      this.botResponse.emit(botMessage);
+      this.stateChangeLoading.emit(true);
+    }
+
+    if (payload === "/yes_close_conversation") {
+      this.stateChangeConversation.emit(true);
+    }
+
+    this.sendMessageToChat(payload);
+  }
+
   sendDate() {
     if (this.selectedDate && this.startTime && this.duration) {
-      // Combina data e orario in formato leggibile
+      this.disabledInputs = true;
       const dateString = this.selectedDate.toLocaleDateString('it-IT', {
         weekday: 'long',
         day: '2-digit',
         month: 'long',
         year: 'numeric'
       });
-       // Disabilita input
-      this.disabledInputs = true;
-
       const message = `La riunione è ${dateString} alle ${this.startTime} per ${this.duration} ore.`;
       console.log(message);
-      // invio la data selezionata a RASA
-      this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-        const email = typeof user === 'string' ? user : user.email;
-        this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
-          responses.forEach(resp => {
-            const botMessage: Message = {
-              text: resp.text || '',
-              image: resp.image || '',
-              custom: resp.custom || {},
-              buttons: resp.buttons || [],
-              attachment: resp.attachment || undefined,
-              role: 'bot',
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-            this.botResponse.emit(botMessage); 
-          });
-        });
-      });
-    }      
+      this.sendMessageToChat(message);
+    }
   }
 
   incrementPeople() {
-    if (this.peopleCount < 20) {
-      this.peopleCount++;
-    }
+    if (this.peopleCount < 20) this.peopleCount++;
   }
 
   decrementPeople() {
-    if (this.peopleCount > 1) {
-      this.peopleCount--;
-    }
+    if (this.peopleCount > 1) this.peopleCount--;
   }
 
   sendPeopleCount() {
     this.disabledInputs = true;
-
     const message = `Saremo in ${this.peopleCount} persone alla riunione`;
-
-    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      const email = typeof user === 'string' ? user : user.email;
-      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
-        responses.forEach(resp => {
-          const botMessage: Message = {
-            text: resp.text || '',
-            image: resp.image || '',
-            custom: resp.custom || {},
-            buttons: resp.buttons || [],
-            role: 'bot',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          };
-          this.botResponse.emit(botMessage);
-        });
-      });
-    });
+    this.sendMessageToChat(message);
   }
 
   sendSelectedFeatures() {
-    const selectedFeatures = this.featuresList
-      .filter(f => f.selected)
-      .map(f => f.label);
-
+    const selectedFeatures = this.featuresList.filter(f => f.selected).map(f => f.label);
     const message = `Le caratteristiche richieste per la sala sono: ${selectedFeatures.join(', ')}`;
     this.disabledInputs = true;
-    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      const email = typeof user === 'string' ? user : user.email;
-      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
-        responses.forEach(resp => {
-          const botMessage: Message = {
-            text: resp.text || '',
-            image: resp.image || '',
-            custom: resp.custom || {},
-            buttons: resp.buttons || [],
-            role: 'bot',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          };
-          this.botResponse.emit(botMessage);
-        });
-      });
-    });
+    this.sendMessageToChat(message);
   }
 
   deleteReservation(id: string) {
     const message = `Elimina la prenotazione con id: ${id}`;
     const button = document.getElementById('delete-reservation-' + id) as HTMLButtonElement;
-    if(button) { button.disabled = true; }
+    if (button) button.disabled = true;
     console.log(message);
-    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      const email = typeof user === 'string' ? user : user.email;
-      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
-        responses.forEach(resp => {
-          const botMessage: Message = {
-            text: resp.text || '',
-            image: resp.image || '',
-            custom: resp.custom || {},
-            buttons: resp.buttons || [],
-            role: 'bot',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          };
-          this.botResponse.emit(botMessage);
-        });
-      });
-    });
+    this.sendMessageToChat(message);
   }
 
   downloadFile(fileUrl: string, fileName: string) {
@@ -244,5 +175,4 @@ export class ChatBubble {
   isLongButtonLayout(buttons: any[]): boolean {
     return buttons.some(b => b.title.length > 10);
   }
-  
 }

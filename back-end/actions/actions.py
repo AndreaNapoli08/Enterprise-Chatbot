@@ -17,6 +17,14 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 logging.getLogger("langchain.utils.math").setLevel(logging.ERROR)
 os.environ["CHROMA_TELEMETRY_DISABLED"] = "1"
 
+# import per invio automatico dell'email
+import base64
+from email.mime.text import MIMEText
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from dotenv import load_dotenv
+
 # import per server Flask per documenti
 from flask import Flask, send_from_directory
 import threading
@@ -41,6 +49,8 @@ from PyPDF2 import PdfReader
 
 # === CONFIGURAZIONI ===
 CHROMA_DIR = "actions/data/chroma_db" 
+load_dotenv()
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 # === JSON con le stanze disponibili ===
 ROOMS_FILE = Path("actions/rooms.json")
@@ -569,6 +579,33 @@ class ActionAvailabilityCheckRoom(Action):
         if dt is None:
             raise ValueError(f"Impossibile parsare la data: {datetime_str}")
         return dt
+    
+    def send_gmail_email(to_email, subject, body):
+        creds_file = os.getenv("GMAIL_CREDENTIALS")  # path dal .env
+        token_file = 'token.json'  # verrà generato alla prima autorizzazione
+
+        creds = None
+        # Prova a caricare token già salvato
+        if os.path.exists(token_file):
+            creds = Credentials.from_authorized_user_file(token_file, SCOPES)
+
+        # Se non c’è token valido, fai flusso OAuth
+        if not creds or not creds.valid:
+            flow = InstalledAppFlow.from_client_secrets_file(creds_file, SCOPES)
+            creds = flow.run_local_server(port=8080)
+            with open(token_file, 'w') as token:
+                token.write(creds.to_json())
+
+        service = build('gmail', 'v1', credentials=creds)
+
+        # Crea messaggio
+        message = MIMEText(body)
+        message['to'] = to_email
+        message['from'] = creds.token_uri  # oppure tuo indirizzo Gmail
+        message['subject'] = subject
+
+        raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        service.users().messages().send(userId='me', body={'raw': raw}).execute()
 
     def run(
         self,
@@ -640,6 +677,20 @@ class ActionAvailabilityCheckRoom(Action):
             )
 
             dispatcher.utter_message(text=message)
+            email_subject = f"Prenotazione confermata: {name}"
+            email_body = (
+                f"Buongiorno Alessia,\n"
+                f"La sala {name} (n. {info['numero']}) è stata prenotata con successo!\n\n"
+                f"Data: {appointment_date}\n"
+                f"Orario: {appointment_hour} - {requested_end.strftime('%H:%M')}\n"
+                f"Partecipanti: {person_picker}\n"
+                f"Caratteristiche: {features_str}\n"
+                f"Capienza massima: {info['capienza']} persone."
+            )
+            try: 
+                ActionAvailabilityCheckRoom.send_gmail_email(email, email_subject, email_body)
+            except Exception as e:
+                dispatcher.utter_message(text=f"Errore nell'invio dell'email: {e}")
         else:
             dispatcher.utter_message(
                 text="Mi dispiace, non ci sono sale disponibili con le caratteristiche richieste in questo orario."
