@@ -592,7 +592,7 @@ class ActionAvailabilityCheckRoom(Action):
         # Se non c’è token valido, fai flusso OAuth
         if not creds or not creds.valid:
             flow = InstalledAppFlow.from_client_secrets_file(creds_file, SCOPES)
-            creds = flow.run_local_server(port=8080)
+            creds = flow.run_local_server(port=8080, authorization_prompt_message="Apri questo link nel browser per autorizzare", access_type="offline", prompt="consent")
             with open(token_file, 'w') as token:
                 token.write(creds.to_json())
 
@@ -679,7 +679,7 @@ class ActionAvailabilityCheckRoom(Action):
             dispatcher.utter_message(text=message)
             email_subject = f"Prenotazione confermata: {name}"
             email_body = (
-                f"Buongiorno Alessia,\n"
+                f"Buongiorno,\n"
                 f"La sala {name} (n. {info['numero']}) è stata prenotata con successo!\n\n"
                 f"Data: {appointment_date}\n"
                 f"Orario: {appointment_hour} - {requested_end.strftime('%H:%M')}\n"
@@ -687,10 +687,11 @@ class ActionAvailabilityCheckRoom(Action):
                 f"Caratteristiche: {features_str}\n"
                 f"Capienza massima: {info['capienza']} persone."
             )
-            try: 
-                ActionAvailabilityCheckRoom.send_gmail_email(email, email_subject, email_body)
-            except Exception as e:
-                dispatcher.utter_message(text=f"Errore nell'invio dell'email: {e}")
+            # Invio dell'email di conferma
+            # try: 
+            #     ActionAvailabilityCheckRoom.send_gmail_email(email, email_subject, email_body)
+            # except Exception as e:
+            #     dispatcher.utter_message(text=f"Errore nell'invio dell'email: {e}")
         else:
             dispatcher.utter_message(
                 text="Mi dispiace, non ci sono sale disponibili con le caratteristiche richieste in questo orario."

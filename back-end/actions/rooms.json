@@ -7,29 +7,7 @@
       "Prese di corrente multiple",
       "Accesso disabili"
     ],
-    "prenotazioni": [
-      {
-        "id": "aeff4093-f4b9-4640-9557-365e21481ba3",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-17 13:30",
-        "end": "2025-11-17 15:00",
-        "persons": "5"
-      },
-      {
-        "id": "36d81cf3-840c-4769-8d1a-f7556f15e5d1",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-20 14:15",
-        "end": "2025-11-20 15:15",
-        "persons": "5"
-      },
-      {
-        "id": "eb9d57bc-62fe-4bcb-bd26-fb5956618e14",
-        "user": "alessiaceleste.celentano@gmail.com",
-        "start": "2025-11-18 14:46",
-        "end": "2025-11-18 15:46",
-        "persons": "5"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Blu": {
     "numero": 102,
@@ -39,15 +17,7 @@
       "Microfono",
       "Aria condizionata"
     ],
-    "prenotazioni": [
-      {
-        "id": "47d93db2-413b-4b76-bf45-63a19cd2876d",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-23 14:31",
-        "end": "2025-11-23 15:01",
-        "persons": "4"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Verde": {
     "numero": 103,
@@ -68,15 +38,7 @@
       "Aria condizionata",
       "Accesso disabili"
     ],
-    "prenotazioni": [
-      {
-        "id": "83a071c3-8031-4b51-a0de-b17c8e4712b1",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-17 14:10",
-        "end": "2025-11-17 14:40",
-        "persons": "4"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Viola": {
     "numero": 105,
@@ -96,22 +58,7 @@
       "Lavagna digitale",
       "Aria condizionata"
     ],
-    "prenotazioni": [
-      {
-        "id": "83f10033-6b67-4778-90cc-423caadadfba",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-26 14:25",
-        "end": "2025-11-26 15:25",
-        "persons": "5"
-      },
-      {
-        "id": "617b2fd6-a6b8-4c24-be1b-54cc7fa3ce8a",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-16 14:42",
-        "end": "2025-11-16 15:12",
-        "persons": "4"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Bianca": {
     "numero": 107,
@@ -132,15 +79,7 @@
       "Aria condizionata",
       "Accesso disabili"
     ],
-    "prenotazioni": [
-      {
-        "id": "afdd6ecc-c3f5-4786-a977-f72fc642b2cc",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-25 13:40",
-        "end": "2025-11-25 14:40",
-        "persons": "4"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Grigia": {
     "numero": 109,
