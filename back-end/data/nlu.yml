@@ -482,3 +482,30 @@ nlu:
 - regex: id_reservation
   examples: |
     - [0-9a-fA-F-]{36}
+
+- intent: change_password
+  examples: |
+    - Voglio cambiare la mia password
+    - Devo aggiornare la password del mio account
+    - Come faccio a modificare la mia password?
+    - Vorrei cambiare la password di accesso
+    - Puoi aiutarmi a cambiare la mia password?
+    - Ho bisogno di aggiornare la mia password
+    - Voglio impostare una nuova password per il mio account
+    - Come posso cambiare la password del mio profilo?
+    - Aiutami a modificare la mia password di accesso
+    - Vorrei aggiornare la password del mio account
+
+- intent: receive_new_password
+  examples: |
+    - La vecchia password è [vecchiaPassword123](old_password). La nuova password è: [nuovaPassword456](new_password)
+    - Voglio cambiare la password da [oldPass!@#](old_password) a [newPass$%^](new_password)
+    - La password attuale è [mypassword](old_password) e desidero cambiarla in [mynewpassword](new_password)
+    - Devo aggiornare la mia password da [passwordVecchia](old_password) a [passwordNuova](new_password)
+    - La mia password corrente è [abc123](old_password) e voglio cambiarla in [def456](new_password)
+    - Cambia la password da [oldPassword](old_password) a [newPassword](new_password)
+    - La vecchia password è [passVecchia](old_password) e la nuova sarà [passNuova](new_password)
+    - Voglio modificare la password da [123old](old_password) a [456new](new_password)
+    - La mia password attuale è [old1234](old_password) e desidero cambiarla in [new5678](new_password)
+    - Devo cambiare la password da [vecchiaPass](old_password) a [nuovaPass](new_password)
+    - La password attuale è [oldPwd](old_password) e voglio cambiarla in [newPwd](new_password)

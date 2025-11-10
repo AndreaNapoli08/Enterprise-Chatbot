@@ -13,6 +13,10 @@ import dateparser
 import requests
 import uuid
 
+# libreria per hashing password
+import bcrypt
+
+# toglie i warnings durante la compilazione
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 logging.getLogger("langchain.utils.math").setLevel(logging.ERROR)
 os.environ["CHROMA_TELEMETRY_DISABLED"] = "1"
@@ -26,8 +30,9 @@ from googleapiclient.discovery import build
 from dotenv import load_dotenv
 
 # import per server Flask per documenti
-from flask import Flask, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 import threading
+from flask_cors import CORS
 
 # import per rasa
 from rasa_sdk import Action, Tracker
@@ -60,9 +65,11 @@ embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-
 
 # === Server Flask per servire i documenti ===
 app = Flask(__name__)
+CORS(app) # abilita CORS per tutte le rotte
 
 # cartella dove tieni i pdf
 PDF_DIR = os.path.join(os.path.dirname(__file__), "data/docs")
+USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
 
 @app.route("/documents/<filename>")
 def serve_pdf(filename):
@@ -71,6 +78,85 @@ def serve_pdf(filename):
         path=filename,
         as_attachment=True 
     )
+
+# Funzione helper per leggere gli utenti dal file
+def load_users():
+    with open(USERS_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        # Se il file contiene {"users": [...]}, restituisci solo la lista
+        if isinstance(data, dict) and "users" in data:
+            return data["users"]
+        return data
+
+# Funzione helper per salvare utenti nel file
+def save_users(users):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(users, f, ensure_ascii=False, indent=2)
+
+@app.route("/users", methods=["GET"])
+def get_users():
+    users = load_users()
+    return jsonify(users)
+
+def hash_password(plain_password: str) -> str:
+    """Restituisce l'hash della password in formato stringa UTF-8"""
+    return bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def check_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifica se la password in chiaro corrisponde all'hash"""
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+@app.route("/users/login", methods=["POST"])
+def login_user():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "email o password mancante"}), 400
+
+    users = load_users()
+    user = next((u for u in users if u["email"] == email), None)
+    if not user:
+        return jsonify({"error": "Utente non trovato"}), 404
+
+    # 🔐 verifica la password
+    if not bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
+        return jsonify({"error": "Password errata"}), 401
+
+    # ✅ accesso riuscito: restituisci le info (senza la password!)
+    user_copy = {k: v for k, v in user.items() if k != "password"}
+    return jsonify(user_copy), 200
+
+@app.route("/users/<email>", methods=["GET"])
+def get_user_by_email(email):
+    users = load_users()
+    user = next((u for u in users if u["email"] == email), None)
+    if not user:
+        return jsonify({"error": "Utente non trovato"}), 404
+    # non mandare la password
+    user_copy = {k: v for k, v in user.items() if k != "password"}
+    return jsonify(user_copy), 200
+
+@app.route("/users/update_password", methods=["PATCH"])
+def update_password():
+    data = request.get_json()
+    email = data.get("email")
+    new_password = data.get("password")
+
+    if not email or not new_password:
+        return jsonify({"error": "email o password mancante"}), 400
+
+    users = load_users()
+    user = next((u for u in users if u["email"] == email), None)
+    if not user:
+        return jsonify({"error": "utente non trovato"}), 404
+
+    # 🔒 Cifra la prima di salvarla
+    user["password"] = hash_password(new_password)
+    save_users(users)
+
+    return jsonify({"message": "password aggiornata correttamente!"})
 
 def run_flask_server():
     app.run(host="0.0.0.0", port=5050)
@@ -532,7 +618,7 @@ class ActionCheckUserRole(Action):
 
         # 2️⃣ Chiamata HTTP al server per ottenere la lista utenti
         try:
-            response = requests.get("http://localhost:3000/users") 
+            response = requests.get("http://localhost:5050/users") 
             response.raise_for_status()
             users = response.json()  # lista di utenti
         except Exception as e:
@@ -799,4 +885,47 @@ class ActionDeleteReservation(Action):
                     return []
            
         dispatcher.utter_message(text="Non ho trovato nessuna prenotazione con l'ID fornito.")
+        return []
+    
+class ActionChangePassowrd(Action):
+    def name(self) -> Text:
+        return "action_change_password"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> list:
+        
+        old_password = tracker.get_slot("old_password")
+        new_password = tracker.get_slot("new_password")
+        email = tracker.latest_message.get("metadata", {}).get("email")
+        
+        try:
+            response = requests.get("http://localhost:5050/users") 
+            response.raise_for_status()
+            users = response.json()  # lista di utenti
+        except Exception as e:
+            dispatcher.utter_message(text="Errore nel recuperare gli utenti dal server.")
+            return []
+        
+        user = next((u for u in users if u["email"] == email), None)
+
+        if not user:
+            dispatcher.utter_message(text="Utente non trovato.")
+            return []
+
+        if not check_password(old_password, user["password"]):
+            dispatcher.utter_message(text="La vecchia password non è corretta.")
+            return []
+        
+        try:
+            update_response = requests.patch(
+                "http://localhost:5050/users/update_password",
+                json={"email": email, "password": new_password},
+            )
+            update_response.raise_for_status()
+        except Exception as e:
+            dispatcher.utter_message(text="Errore durante l'aggiornamento della password.")
+            return []
+
+        dispatcher.utter_message(text="✅ La password è stata modificata con successo.")
         return []

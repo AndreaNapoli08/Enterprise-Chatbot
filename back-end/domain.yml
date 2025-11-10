@@ -27,6 +27,8 @@ intents:
   - provide_room_features
   - ask_my_reservations
   - delete_reservation
+  - change_password
+  - receive_new_password
 
 entities:
   - option
@@ -37,6 +39,8 @@ entities:
   - person_picker
   - room_features
   - id_reservation
+  - old_password
+  - new_password
 
 actions:
   - action_handle_fallback
@@ -50,6 +54,7 @@ actions:
   - action_availability_check_room
   - action_get_reservation
   - action_delete_reservation
+  - action_change_password
 
 slots:
   option:
@@ -118,6 +123,20 @@ slots:
     mappings:
       - type: from_entity
         entity: id_reservation
+
+  old_password:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: old_password
+
+  new_password:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: new_password
 
 responses:
   utter_greet:
@@ -192,6 +211,10 @@ responses:
   utter_ask_features_room:
     - custom:
         type: "features_meeting_room"
+
+  utter_change_password:
+    - custom:
+        type: "change_password"
 
 session_config:
   session_expiration_time: 60

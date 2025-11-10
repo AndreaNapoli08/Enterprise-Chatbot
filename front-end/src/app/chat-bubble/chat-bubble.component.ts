@@ -31,6 +31,9 @@ export class ChatBubble {
   disabledInputs = false;
   uniqueId = Math.random().toString(36).substring(2, 9);
   peopleCount = 1;
+  passwordVisible = false;
+  oldPassword = '';
+  newPassword = '';
 
   featuresList = [
     { id: 'proiettore', label: 'Videoproiettore', selected: false },
@@ -77,7 +80,12 @@ export class ChatBubble {
   /** 🔧 Metodo riutilizzabile per inviare messaggi */
   private sendMessageToChat(message: string) {
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      const email = typeof user === 'string' ? user : user.email;
+      if (!user) {
+        console.error('❌ Nessun utente loggato');
+        return;
+      }
+
+      const email = user.email; // ora è sempre definito
       this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
         responses.forEach(resp => {
           const botMessage: Message = {
@@ -95,6 +103,7 @@ export class ChatBubble {
       });
     });
   }
+
 
   sendButtonPayload(payload: string) {
     this.buttonsDisabled = true;
@@ -162,6 +171,13 @@ export class ChatBubble {
     this.sendMessageToChat(message);
   }
 
+  sendNewPassword() {
+    this.disabledInputs = true;
+    const message = `La vecchia password è: ${this.oldPassword}. La nuova password è: ${this.newPassword}.`;
+    console.log(message);
+    this.sendMessageToChat(message);
+  }
+
   downloadFile(fileUrl: string, fileName: string) {
     const link = document.createElement('a');
     link.href = fileUrl;
@@ -174,5 +190,9 @@ export class ChatBubble {
 
   isLongButtonLayout(buttons: any[]): boolean {
     return buttons.some(b => b.title.length > 10);
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
   }
 }

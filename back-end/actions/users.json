@@ -1,81 +1,18 @@
-{
-  "users": [
-    {
-      "firstName": "Andrea",
-      "lastName": "Napoli",
-      "email": "andre",
-      "password": "ciao",
-      "role": "Manager"
-    },
-    {
-      "firstName": "Luca",
-      "lastName": "Rossi",
-      "email": "l.rossi@reply.it",
-      "password": "password123",
-      "role": "Dipendente"
-    },
-    {
-      "firstName": "Maria",
-      "lastName": "Bianchi",
-      "email": "m.bianchi@reply.it",
-      "password": "password123",
-      "role": "Manager"
-    },
-    {
-      "firstName": "Giovanni",
-      "lastName": "Verdi",
-      "email": "g.verdi@reply.it",
-      "password": "password123",
-      "role": "Dipendente"
-    },
-    {
-      "firstName": "Francesca",
-      "lastName": "Neri",
-      "email": "f.neri@reply.it",
-      "password": "password123",
-      "role": "Manager"
-    },
-    {
-      "firstName": "Alessandro",
-      "lastName": "Ferrari",
-      "email": "a.ferrari@reply.it",
-      "password": "password123",
-      "role": "Dipendente"
-    },
-    {
-      "firstName": "Elena",
-      "lastName": "Russo",
-      "email": "e.russo@reply.it",
-      "password": "password123",
-      "role": "Dipendente"
-    },
-    {
-      "firstName": "Simone",
-      "lastName": "Fontana",
-      "email": "s.fontana@reply.it",
-      "password": "password123",
-      "role": "Manager"
-    },
-    {
-      "firstName": "Giulia",
-      "lastName": "Sala",
-      "email": "g.sala@reply.it",
-      "password": "password123",
-      "role": "Dipendente"
-    },
-    {
-      "firstName": "Davide",
-      "lastName": "Conti",
-      "email": "d.conti@reply.it",
-      "password": "password123",
-      "role": "Dipendente"
-    },
-    {
-      "firstName": "Chiara",
-      "lastName": "Martini",
-      "email": "c.martini@reply.it",
-      "password": "password123",
-      "role": "Manager"
-    }
-  ]
-}
+[
+  {
+    "id": 1,
+    "firstName": "Andrea",
+    "lastName": "Napoli",
+    "email": "andre",
+    "password": "$2b$12$yFBqOASndQAMiKO4L0xjE.izDdEd6ILtM6Pc/1K/spikNaKca1Cu.",
+    "role": "Manager"
+  },
+  {
+    "id": 2,
+    "firstName": "Luca",
+    "lastName": "Rossi",
+    "email": "l.rossi@reply.it",
+    "password": "$2b$12$yFBqOASndQAMiKO4L0xjE.izDdEd6ILtM6Pc/1K/spikNaKca1Cu.",
+    "role": "Dipendente"
+  }
+]

@@ -129,3 +129,13 @@ rules:
   steps:
     - intent: delete_reservation
     - action: action_delete_reservation
+
+- rule: L'utente vuole cambiare la password
+  steps:
+    - intent: change_password
+    - action: utter_change_password
+
+- rule: L'utente fornisce la vecchia e nuova password
+  steps:
+    - intent: receive_new_password
+    - action: action_change_password

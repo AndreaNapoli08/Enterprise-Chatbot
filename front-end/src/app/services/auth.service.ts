@@ -2,43 +2,52 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../interfaces/user';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/users';
+  private apiUrl = 'http://localhost:5050/users';
   private loggedIn: boolean = false;
 
   constructor(private router: Router, private http: HttpClient) {}
   
   login(email: string, password: string): Observable<boolean> {
-    return this.http.get<User[]>(this.apiUrl).pipe(
-      map((users) => {
-        const user = users.find(u => u.email === email && u.password === password);
-        this.loggedIn = !!user;
-        if (this.loggedIn) {
+    return this.http.post<User>(`${this.apiUrl}/login`, { email, password }).pipe(
+      map((user) => {
+        if (user && user.email) {
+          this.loggedIn = true;
           localStorage.setItem('loggedIn', 'true');
-          localStorage.setItem('email', email);
+          localStorage.setItem('email', user.email);
+          return true;
         }
-        return this.loggedIn;
+        return false;
+      }),
+      catchError((err) => {
+        console.error('Errore login:', err);
+        return of(false);
       })
     );
   }
 
   isLoggedIn() {
-    this.loggedIn = localStorage.getItem('loggedIn') === 'true';
-    return this.loggedIn;
+    return this.loggedIn = localStorage.getItem('loggedIn') === 'true';
   }
 
-  getCurrentUser(): Observable<User | string> {
+  getCurrentUser(): Observable<User | null> {
     const email = localStorage.getItem('email');
-    if (!email) return new Observable(obs => obs.next(""));
+    if (!email) {
+      return of(null);
+    }
 
-    return this.http.get<User[]>(this.apiUrl).pipe(
-      map(users => users.find(u => u.email === email) || "")
+    return this.http.get<User>(`${this.apiUrl}/${email}`).pipe(
+      map(user => user || null),
+      catchError(err => {
+        console.error('Errore nel recupero utente:', err);
+        return of(null);
+      })
     );
   }
   

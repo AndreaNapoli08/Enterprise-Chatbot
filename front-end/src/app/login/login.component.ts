@@ -22,7 +22,6 @@ export class Login {
     if (this.email === '' || this.password === '') {
       this.showToast("Compilare tutti i campi");
     } else {
-      const success = this.authService.login(this.email, this.password);
       this.authService.login(this.email, this.password).subscribe(success => {
         if (success) {
           localStorage.setItem('email', this.email);

@@ -57,8 +57,12 @@ export class InputText {
 
     // invio a Rasa
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      const email = typeof user === 'string' ? user : user.email;
+      if (!user) {
+        console.error('❌ Nessun utente loggato');
+        return;
+      }
 
+      const email = user.email; // ora è sempre definito
       this.chatService.sendMessage(text, email).pipe(take(1)).subscribe(responses => {
         responses.forEach(resp => {
           const botMessage: Message = {
