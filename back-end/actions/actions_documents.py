@@ -49,7 +49,7 @@ class ActionSendLocalPDF(Action):
             elif intent_name == "ask_information_aziendale":
                 selected_pdf = "informazioni_aziendali.pdf" 
             else:
-                dispatcher.utter_message(text="Non ho trovato un documento corrispondente alla tua richiesta.")
+                dispatcher.utter_message(text="Indicami il nome o l'argomento del documento che desideri visualizzare")
                 return []
         
         # path del file PDF

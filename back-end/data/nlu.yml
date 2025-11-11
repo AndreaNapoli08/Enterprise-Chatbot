@@ -118,6 +118,8 @@ nlu:
     - mi mandi il documento riguardo le informazioni aziendali?
     - mandami il documento sulle linee guida
     - puoi inviarmi il documento sulle politiche aziendali?
+    - informazioni aziendali
+    - linee guida
 
 - intent: nlu_fallback
   examples: |
