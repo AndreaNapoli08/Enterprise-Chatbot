@@ -169,6 +169,7 @@ export class ChatBubble {
     const selectedFeatures = this.featuresList.filter(f => f.selected).map(f => f.label);
     const message = `Le caratteristiche richieste per la sala sono: ${selectedFeatures.join(', ')}`;
     this.disabledInputs = true;
+    this.stateChangeLoading.emit(true);
     this.sendMessageToChat(message);
   }
 
@@ -176,7 +177,7 @@ export class ChatBubble {
     const message = `Elimina la prenotazione con id: ${id}`;
     const button = document.getElementById('delete-reservation-' + id) as HTMLButtonElement;
     if (button) button.disabled = true;
-    console.log(message);
+    this.stateChangeLoading.emit(true);
     this.sendMessageToChat(message);
   }
 

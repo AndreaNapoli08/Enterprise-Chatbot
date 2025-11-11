@@ -58,7 +58,15 @@
       "Lavagna digitale",
       "Aria condizionata"
     ],
-    "prenotazioni": []
+    "prenotazioni": [
+      {
+        "id": "7a9962be-f850-4439-951e-e8b17af79078",
+        "user": "andre",
+        "start": "2025-11-25 17:55",
+        "end": "2025-11-25 19:25",
+        "persons": "6"
+      }
+    ]
   },
   "Sala Bianca": {
     "numero": 107,
