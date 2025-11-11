@@ -7,7 +7,15 @@
       "Prese di corrente multiple",
       "Accesso disabili"
     ],
-    "prenotazioni": []
+    "prenotazioni": [
+      {
+        "id": "09511681-32dd-4c0b-ab68-02ff26186542",
+        "user": "andre",
+        "start": "2025-11-27 21:03",
+        "end": "2025-11-27 21:33",
+        "persons": "4"
+      }
+    ]
   },
   "Sala Blu": {
     "numero": 102,
@@ -24,6 +32,13 @@
         "start": "2025-11-12 20:25",
         "end": "2025-11-12 20:55",
         "persons": "6"
+      },
+      {
+        "id": "645af592-023d-4a08-9da8-d37b13a99390",
+        "user": "andre",
+        "start": "2025-11-26 19:56",
+        "end": "2025-11-26 20:26",
+        "persons": "4"
       }
     ]
   },

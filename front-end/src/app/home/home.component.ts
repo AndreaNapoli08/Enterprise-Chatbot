@@ -194,5 +194,49 @@ export class Home implements AfterViewChecked {
     this.sendMessageToChat(message);
   }
 
+  show_bookings() {
+    this.loading = true;
+    const message = "Mi mostri le mie prenotazioni";
+    this.messages.push(
+      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    });
+    this.startTime = Date.now();
+    this.sendMessageToChat(message);
+  }
+
+  change_password() {
+    this.loading = true;
+    const message = "Vorrei cambiare la mia password";
+    this.messages.push(
+      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    });
+    this.startTime = Date.now();
+    this.sendMessageToChat(message);
+  }
+
+  frequently_asked_questions() {
+    this.loading = true;
+    const faqs = [
+      "Quanti giorni di ferie ha un lavoratore full time?",
+      "Entro quando devo pianificare le mie ferie?",
+      "Come posso richiedere un permesso per visita medica?",
+      "A quanto ammonta il valore dei buoni pasto elettronici?",
+      "Cosa devo fare se perdo la mia card dei buoni pasto?",
+      "Come posso aggiornare i miei dati bancari o anagrafici?",
+      "Quando viene accreditato lo stipendio mensile?",
+      "Che cos'è la VPN aziendale?",
+      "Chi devo contattare se ho problemi con la vpn?",
+      "Mi puoi elencare tutti i benefit a cui hanno diritto i dipendenti?"
+    ];
+
+    // Estrae una domanda casuale
+    const randomIndex = Math.floor(Math.random() * faqs.length);
+    const message = faqs[randomIndex];
+    this.messages.push(
+      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    });
+    this.startTime = Date.now();
+    this.sendMessageToChat(message);
+  }
 
 }
