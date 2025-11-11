@@ -31,9 +31,18 @@ export class ChatBubble {
   disabledInputs = false;
   uniqueId = Math.random().toString(36).substring(2, 9);
   peopleCount = 1;
-  passwordVisible = false;
-  oldPassword = '';
-  newPassword = '';
+  passwordFields = [
+    { key: 'old', label: 'Vecchia password', model: 'oldPassword' },
+    { key: 'new', label: 'Nuova password', model: 'newPassword' }
+  ];
+  passwordVisibility: { [key: string]: boolean } = {
+    old: false,
+    new: false
+  };
+  passwords: { [key: string]: string } = {
+    oldPassword: '',
+    newPassword: ''
+  };
 
   featuresList = [
     { id: 'proiettore', label: 'Videoproiettore', selected: false },
@@ -81,7 +90,7 @@ export class ChatBubble {
   private sendMessageToChat(message: string) {
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       if (!user) {
-        console.error('❌ Nessun utente loggato');
+        console.error('Nessun utente loggato');
         return;
       }
 
@@ -173,8 +182,9 @@ export class ChatBubble {
 
   sendNewPassword() {
     this.disabledInputs = true;
-    const message = `La vecchia password è: ${this.oldPassword} La nuova password è: ${this.newPassword}`;
+    const message = `La vecchia password è: ${this.passwords['oldPassword']} La nuova password è: ${this.passwords['newPassword']}`;
     console.log(message);
+    this.stateChangeLoading.emit(true);
     this.sendMessageToChat(message);
   }
 
@@ -192,7 +202,7 @@ export class ChatBubble {
     return buttons.some(b => b.title.length > 10);
   }
 
-  togglePasswordVisibility(): void {
-    this.passwordVisible = !this.passwordVisible;
+  togglePasswordVisibility(fieldKey: string) {
+    this.passwordVisibility[fieldKey] = !this.passwordVisibility[fieldKey];
   }
 }
