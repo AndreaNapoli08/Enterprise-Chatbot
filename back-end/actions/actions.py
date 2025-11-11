@@ -895,10 +895,17 @@ class ActionChangePassowrd(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> list:
         
-        old_password = tracker.get_slot("old_password")
-        new_password = tracker.get_slot("new_password")
+        user_message = tracker.latest_message.get("text", "")
+        print(user_message)
+        pattern = r"vecchia password.*?:\s*([A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{4,}).*?nuova password.*?:\s*([A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{4,})"
         email = tracker.latest_message.get("metadata", {}).get("email")
-        
+        match = re.search(pattern, user_message, re.IGNORECASE)
+        if not match:
+            dispatcher.utter_message(text="Non sono riuscito a capire le password. Assicurati di scriverle così: 'La vecchia password è: ... La nuova password è: ...'")
+            return []
+
+        old_password, new_password = match.groups()
+        print(f"Old: {old_password}, New: {new_password}")
         try:
             response = requests.get("http://localhost:5050/users") 
             response.raise_for_status()
@@ -908,7 +915,7 @@ class ActionChangePassowrd(Action):
             return []
         
         user = next((u for u in users if u["email"] == email), None)
-
+        print(user)
         if not user:
             dispatcher.utter_message(text="Utente non trovato.")
             return []

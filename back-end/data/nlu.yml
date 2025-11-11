@@ -498,14 +498,47 @@ nlu:
 
 - intent: receive_new_password
   examples: |
-    - La vecchia password è [vecchiaPassword123](old_password). La nuova password è: [nuovaPassword456](new_password)
-    - Voglio cambiare la password da [oldPass!@#](old_password) a [newPass$%^](new_password)
-    - La password attuale è [mypassword](old_password) e desidero cambiarla in [mynewpassword](new_password)
-    - Devo aggiornare la mia password da [passwordVecchia](old_password) a [passwordNuova](new_password)
-    - La mia password corrente è [abc123](old_password) e voglio cambiarla in [def456](new_password)
-    - Cambia la password da [oldPassword](old_password) a [newPassword](new_password)
-    - La vecchia password è [passVecchia](old_password) e la nuova sarà [passNuova](new_password)
-    - Voglio modificare la password da [123old](old_password) a [456new](new_password)
-    - La mia password attuale è [old1234](old_password) e desidero cambiarla in [new5678](new_password)
-    - Devo cambiare la password da [vecchiaPass](old_password) a [nuovaPass](new_password)
-    - La password attuale è [oldPwd](old_password) e voglio cambiarla in [newPwd](new_password)
+    - La vecchia password è [abc123](old_password) e la nuova è [def456](new_password)
+    - Cambia la password da [xyz789](old_password) a [uvw234](new_password)
+    - Voglio aggiornare la mia password: vecchia [pass01](old_password) → nuova [p@ss02](new_password)
+    - La mia vecchia password è [a1b2c3](old_password) e la nuova sarà [d4e5f6](new_password)
+    - Aggiorna la password da [qwerty](old_password) a [ytrewq](new_password)
+    - La vecchia è [123abc](old_password), la nuova [456def](new_password)
+    - Modifica password: vecchia [abcDEF](old_password) nuova [GHI789](new_password)
+    - Devo cambiare la password da [mnopqr](old_password) a [stuvwx](new_password)
+    - La password attuale è [passw0](old_password) e desidero [passw1](new_password)
+    - Cambia da [z1x2c3](old_password) a [v4b5n6](new_password)
+    - Vecchia password: [old001](old_password). Nuova password: [new002](new_password)
+    - La mia vecchia password è [alpha12](old_password) e quella nuova [beta34](new_password)
+    - Per favore aggiorna: vecchia [ghost99](old_password) → nuova [spirit10](new_password)
+    - Voglio cambiare da [user666](old_password) a [user7777](new_password)
+    - Vecchia [code123](old_password) e nuova [code4567](new_password)
+    - Reset password: vecchia [lock99](old_password) nuova [unlock123](new_password)
+    - La vecchia password è: [abcDEF12](old_password) e la nuova è: [GHi34567](new_password)
+    - Cambia la password da [pass1234](old_password) a [pass5678](new_password)
+    - La password corrente è [a1b2c3d](old_password), voglio cambiare in [d4e5f6g](new_password)
+    - Aggiorna la mia password da [secure06](old_password) a [secure07](new_password)
+    - La vecchia password: [login88](old_password); nuova password: [login99](new_password)
+    - Devo modificare la password da [aaa111](old_password) a [bbb2222](new_password)
+    - La mia password vecchia è [xyZ1234](old_password) e la nuova [AbC5678](new_password)
+    - Cambia la password: vecchia [passwd6](old_password) nuova [passwd789](new_password)
+    - La vecchia password è [token12](old_password) e la nuova [token345](new_password)
+    - Voglio aggiornare da [piatto99](old_password) a [forchetta100](new_password)
+    - La password attuale è [alpha12345](old_password) e desidero cambiarla in [beta67890](new_password)
+    - Aggiorna da [mix1234](old_password) a [mix56789](new_password)
+    - Cambia la password da [one2345](old_password) a [two6789](new_password)
+    - Vecchia [moon1234](old_password) nuova [sun5678](new_password)
+    - La vecchia password è [abc123ABC](old_password) e la nuova sarà [xyz789XYZ](new_password)
+    - Cambio password: [p1q2r3s4](old_password) → [t5u6v7w8](new_password)
+    - La vecchia è [pass0000](old_password) e la nuova [pass9999](new_password)
+    - Devo cambiare la password da [start12](old_password) a [end3456](new_password)
+    - La mia vecchia password è [secret06](old_password) e vorrei [secret07](new_password)
+    - Modifica da [alpha999](old_password) a [omega000](new_password)
+
+- regex: old_password
+  examples: |
+    - [A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{6,}
+
+- regex: new_password
+  examples: |
+    - [A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{6,}

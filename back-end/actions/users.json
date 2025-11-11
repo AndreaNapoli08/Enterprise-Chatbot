@@ -4,7 +4,7 @@
     "firstName": "Andrea",
     "lastName": "Napoli",
     "email": "andre",
-    "password": "$2b$12$yFBqOASndQAMiKO4L0xjE.izDdEd6ILtM6Pc/1K/spikNaKca1Cu.",
+    "password": "$2b$12$zHA45oQ5n91BgykNy9zmJeUhzS5N9yS4YL2SjnHpCp5jQ5CckKOrG",
     "role": "Manager"
   },
   {
@@ -12,7 +12,7 @@
     "firstName": "Luca",
     "lastName": "Rossi",
     "email": "l.rossi@reply.it",
-    "password": "$2b$12$yFBqOASndQAMiKO4L0xjE.izDdEd6ILtM6Pc/1K/spikNaKca1Cu.",
+    "password": "$2b$12$nNZ4LqIwy9zlG8SH3SiICuxKYkkkddMNVIvNRcjruCjquEySB4ftO",
     "role": "Dipendente"
   }
 ]

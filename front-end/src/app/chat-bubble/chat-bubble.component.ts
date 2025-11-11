@@ -173,7 +173,7 @@ export class ChatBubble {
 
   sendNewPassword() {
     this.disabledInputs = true;
-    const message = `La vecchia password è: ${this.oldPassword}. La nuova password è: ${this.newPassword}.`;
+    const message = `La vecchia password è: ${this.oldPassword} La nuova password è: ${this.newPassword}`;
     console.log(message);
     this.sendMessageToChat(message);
   }
