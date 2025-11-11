@@ -113,7 +113,6 @@ export class ChatBubble {
     });
   }
 
-
   sendButtonPayload(payload: string) {
     this.buttonsDisabled = true;
 

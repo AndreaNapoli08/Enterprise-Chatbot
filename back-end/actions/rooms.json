@@ -17,7 +17,15 @@
       "Microfono",
       "Aria condizionata"
     ],
-    "prenotazioni": []
+    "prenotazioni": [
+      {
+        "id": "7894c887-79f2-42d9-81a3-54583714d7ab",
+        "user": "andre",
+        "start": "2025-11-12 20:25",
+        "end": "2025-11-12 20:55",
+        "persons": "6"
+      }
+    ]
   },
   "Sala Verde": {
     "numero": 103,
@@ -65,6 +73,13 @@
         "start": "2025-11-25 17:55",
         "end": "2025-11-25 19:25",
         "persons": "6"
+      },
+      {
+        "id": "f83a7a7c-0315-4821-90da-a9d43b874b09",
+        "user": "andre",
+        "start": "2025-11-14 20:20",
+        "end": "2025-11-14 20:50",
+        "persons": "5"
       }
     ]
   },

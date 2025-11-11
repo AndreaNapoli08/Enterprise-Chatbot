@@ -5,6 +5,8 @@ import { ChatBubble } from '../chat-bubble/chat-bubble.component';
 import { Profile } from '../profile/profile.component';
 import { AuthService } from '../services/auth.service';
 import { Message } from '../interfaces/message';
+import { take } from 'rxjs/internal/operators/take';
+import { ChatService } from '../services/chat.service';
 
 @Component({
   selector: 'app-home',
@@ -44,7 +46,10 @@ export class Home implements AfterViewChecked {
   ];
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private chatService: ChatService
+  ) {}
 
   ngOnInit() {
     // Ottieni l'utente corrente dal backend
@@ -68,6 +73,7 @@ export class Home implements AfterViewChecked {
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
       this.human_operator = true;
     }
+
     // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
     const startLongWaiting = (delay = 20000, interval = 10000) => {
       clearTimeout(this.longWaitTimer);
@@ -151,5 +157,42 @@ export class Home implements AfterViewChecked {
       .map(part => part[0]?.toUpperCase())
       .join('') || name[0].toUpperCase();
   }
+
+  sendMessageToChat(message: string) {
+    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
+      if (!user) {
+        console.error('Nessun utente loggato');
+        return;
+      }
+
+      const email = user.email;
+      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
+        responses.forEach(resp => {
+          const botMessage: Message = {
+            text: resp.text || '',
+            image: resp.image || '',
+            custom: resp.custom || {},
+            buttons: resp.buttons || [],
+            attachment: resp.attachment || undefined,
+            role: 'bot',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          console.log('📤 Risposta bot:', botMessage);
+          this.handleMessage(botMessage);
+        });
+      });
+    });
+  }
+
+  booking_room() {
+    this.loading = true;
+    const message = "Vorrei prenotare una sala riunioni";
+    this.messages.push(
+      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    });
+    this.startTime = Date.now();
+    this.sendMessageToChat(message);
+  }
+
 
 }
