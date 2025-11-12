@@ -1,4 +1,3 @@
-# actions/utils.py
 import bcrypt
 import json
 from pathlib import Path
@@ -14,6 +13,11 @@ from google_auth_oauthlib.flow import InstalledAppFlow # type: ignore
 from googleapiclient.discovery import build # type: ignore
 from dotenv import load_dotenv # type: ignore
 
+# import per il database
+from db.models import User
+from db.db import engine
+from sqlmodel import Session, select
+
 USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
 ROOMS_FILE = Path("actions/rooms.json")
 load_dotenv()
@@ -27,13 +31,14 @@ def check_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica se la password in chiaro corrisponde all'hash"""
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-def load_users():
-    with open(USERS_FILE, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        if isinstance(data, dict) and "users" in data:
-            return data["users"]
-        return data
+def get_user_by_email(email: str):
+    """Restituisce l'utente dal DB dato l'email"""
 
+    with Session(engine) as session:
+        statement = select(User).where(User.email == email)
+        result = session.exec(statement).first()
+        return result  # restituisce un oggetto User oppure None
+    
 def save_users(users):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, ensure_ascii=False, indent=2)

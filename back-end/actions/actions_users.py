@@ -1,6 +1,5 @@
 from typing import Any, Text, Dict, List
 import os, json, requests, re
-from actions.utils import check_password
 
 # import per rasa
 from rasa_sdk import Action, Tracker # type: ignore
@@ -58,45 +57,51 @@ class ActionChangePassword(Action):
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
-            domain: Dict[Text, Any]) -> list:
-        
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
         user_message = tracker.latest_message.get("text", "")
-        pattern = r"vecchia password.*?:\s*([A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{4,}).*?nuova password.*?:\s*([A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{4,})"
         email = tracker.latest_message.get("metadata", {}).get("email")
+
+        # Regex per catturare vecchia e nuova password
+        pattern = r"vecchia password.*?:\s*([A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{4,}).*?nuova password.*?:\s*([A-Za-z0-9@#\$%\^&\*\(\)_\-\+=!?\.:]{4,})"
         match = re.search(pattern, user_message, re.IGNORECASE)
+
         if not match:
-            dispatcher.utter_message(text="Non sono riuscito a capire le password. Assicurati di scriverle così: 'La vecchia password è: ... La nuova password è: ...'")
+            dispatcher.utter_message(
+                text="Non sono riuscito a capire le password. Scrivile così: 'La vecchia password è: ... La nuova password è: ...'"
+            )
             return []
 
         old_password, new_password = match.groups()
+        endpoint = os.getenv("USERS_API_URL")
+
+        # Verifica la vecchia password con il backend. Abbiamo fatto un altro endpoint perché l'endpoint che restituisce gli utenti 
+        # non restituisce le password per motivi di sicurezza.
         try:
-            endpoint = os.getenv("USERS_API_URL")
-            response = requests.get(endpoint) 
-            response.raise_for_status()
-            users = response.json()  # lista di utenti
-        except Exception as e:
-            dispatcher.utter_message(text="Errore nel recuperare gli utenti dal server.")
-            return []
-        
-        user = next((u for u in users if u["email"] == email), None)
-        if not user:
-            dispatcher.utter_message(text="Utente non trovato.")
+            verify_response = requests.post(
+                f"{endpoint}/verify_password",
+                json={"email": email, "password": old_password},
+            )
+            verify_response.raise_for_status()
+            is_correct = verify_response.json().get("success", False)
+        except Exception:
+            dispatcher.utter_message(text="Errore nel verificare la vecchia password.")
             return []
 
-        if not check_password(old_password, user["password"]):
+        if not is_correct:
             dispatcher.utter_message(text="La vecchia password non è corretta.")
             return []
-        
+
+        # Aggiorna la password con il backend
         try:
-            endpoint = os.getenv("USERS_API_URL")
             update_response = requests.patch(
                 f"{endpoint}/update_password",
                 json={"email": email, "password": new_password},
             )
             update_response.raise_for_status()
-        except Exception as e:
+        except Exception:
             dispatcher.utter_message(text="Errore durante l'aggiornamento della password.")
             return []
 
-        dispatcher.utter_message(text="✅ La password è stata modificata con successo.")
+        dispatcher.utter_message(text="La password è stata modificata con successo.")
         return []

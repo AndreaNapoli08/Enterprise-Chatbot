@@ -1,8 +1,14 @@
 from flask import Flask, jsonify, request, send_from_directory # type: ignore
 from flask_cors import CORS # type: ignore
 import os, json, uuid
-from actions.utils import load_users, save_users, hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email
+from actions.utils import save_users, hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
 from datetime import datetime, timedelta
+
+# import per il database
+from sqlmodel import Session, select
+from db.db import engine
+from db.models import User
+
 app = Flask(__name__)
 CORS(app)  # abilita CORS per tutte le rotte
 
@@ -10,7 +16,7 @@ CORS(app)  # abilita CORS per tutte le rotte
 PDF_DIR = os.path.join(os.path.dirname(__file__), "data/docs")
 
 # ============================================================
-#                     ROUTE DOCUMENTI
+#                     ENDPOINT DOCUMENTI
 # ============================================================
 
 @app.route("/documents/<filename>")
@@ -28,9 +34,20 @@ def serve_pdf(filename):
 
 @app.route("/users", methods=["GET"])
 def get_users():
-    """Restituisce la lista di tutti gli utenti"""
-    users = load_users()
-    return jsonify(users)
+    """Restituisce la lista di tutti gli utenti dal DB"""
+    with Session(engine) as session:
+        statement = select(User)
+        users = session.exec(statement).all()
+        users_list = [
+            {
+                "id": u.id,
+                "firstName": u.first_name,
+                "lastName": u.last_name,
+                "email": u.email,
+                "role": u.role
+            } for u in users
+        ]
+        return jsonify(users_list)
 
 
 @app.route("/users/login", methods=["POST"])
@@ -43,33 +60,56 @@ def login_user():
     if not email or not password:
         return jsonify({"error": "email o password mancante"}), 400
 
-    users = load_users()
-    user = next((u for u in users if u["email"] == email), None)
+    user = get_user_by_email(email)
     if not user:
         return jsonify({"error": "Utente non trovato"}), 404
 
-    # 🔐 verifica la password con la funzione importata da utils
-    if not check_password(password, user["password"]):
+    # verifica la password con la funzione importata da utils
+    if not check_password(password, user.password):
         return jsonify({"error": "Password errata"}), 401
 
-    # ✅ accesso riuscito: restituisci le info (senza password)
-    user_copy = {k: v for k, v in user.items() if k != "password"}
+    # accesso riuscito: restituisci le info (senza password)
+    user_copy = {
+        "id": user.id,
+        "firstName": user.first_name,
+        "lastName": user.last_name,
+        "email": user.email,
+        "role": user.role
+    }
     return jsonify(user_copy), 200
 
 
 @app.route("/users/<email>", methods=["GET"])
-def get_user_by_email(email):
+def get_user(email):
     """Restituisce un singolo utente per email"""
-    users = load_users()
-    user = next((u for u in users if u["email"] == email), None)
+    user = get_user_by_email(email)
     if not user:
         return jsonify({"error": "Utente non trovato"}), 404
 
-    # non includere la password nella risposta
-    user_copy = {k: v for k, v in user.items() if k != "password"}
+    user_copy = {
+        "id": user.id,
+        "firstName": user.first_name,
+        "lastName": user.last_name,
+        "email": user.email,
+        "role": user.role
+    }
     return jsonify(user_copy), 200
 
+@app.route("/users/verify_password", methods=["POST"])
+def verify_password():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
 
+    with Session(engine) as session:
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+        if not user:
+            return jsonify({"success": False, "error": "Utente non trovato"}), 404
+
+        is_correct = check_password(password, user.password)
+        return jsonify({"success": is_correct}), 200
+    
 @app.route("/users/update_password", methods=["PATCH"])
 def update_password():
     """Aggiorna la password di un utente"""
@@ -80,16 +120,21 @@ def update_password():
     if not email or not new_password:
         return jsonify({"error": "email o password mancante"}), 400
 
-    users = load_users()
-    user = next((u for u in users if u["email"] == email), None)
-    if not user:
-        return jsonify({"error": "utente non trovato"}), 404
+    with Session(engine) as session:
+        # Recupera l'utente dal DB
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+        if not user:
+            return jsonify({"error": "Utente non trovato"}), 404
 
-    # 🔒 Cifra la nuova password prima di salvarla
-    user["password"] = hash_password(new_password)
-    save_users(users)
+        # Cifra la nuova password
+        user.password = hash_password(new_password)
 
-    return jsonify({"message": "password aggiornata correttamente!"})
+        # Salva il cambiamento nel DB
+        session.add(user)
+        session.commit()
+
+    return jsonify({"message": "Password aggiornata correttamente!"}), 200
 
 
 # ============================================================
