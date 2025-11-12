@@ -31,7 +31,7 @@ export class InputText {
       return;
     }
 
-    // Se non è disabilitato, metti il focus
+    // Se non è disabilitato, metti il focus sull'input text
     if (!this.disabled) {
       setTimeout(() => {
         this.textarea?.nativeElement.focus();
@@ -58,7 +58,7 @@ export class InputText {
     // invio a Rasa
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       if (!user) {
-        console.error('❌ Nessun utente loggato');
+        console.error('Nessun utente loggato');
         return;
       }
 

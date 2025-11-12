@@ -67,73 +67,6 @@ export class Home implements AfterViewChecked {
     });
   }
 
-  handleMessage(message: any) {
-    this.loading = true;
-    this.shouldScroll = true;
-    if (!message) {
-      return;
-    }
-    if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
-      this.human_operator = true;
-    }
-
-    // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
-    const startLongWaiting = (delay = 20000, interval = 10000) => {
-      clearTimeout(this.longWaitTimer);
-      clearInterval(this.textChangeTimer);
-      this.longWaitTimer = setTimeout(() => {
-        this.long_waiting = true;
-        this.textIndex = 0;
-        this.long_waiting_text = this.waitingTexts[this.textIndex];
-
-        this.textChangeTimer = setInterval(() => {
-          // Cambia ciclicamente il testo mostrato per indicare attività
-          this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
-          this.long_waiting_text = this.waitingTexts[this.textIndex];
-        }, interval);
-      }, delay);
-    };
-
-    if (message.role === 'bot') {
-      clearTimeout(this.longWaitTimer);
-      clearInterval(this.textChangeTimer);
-
-      const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
-
-      // Reset dello stato di attesa lunga
-      this.long_waiting = false;
-      this.long_waiting_text = '';
-
-      this.messages.push({
-        ...message,
-        elapsedSeconds: elapsedSeconds > 20 ? elapsedSeconds : null
-      });
-      // Se il messaggio del bot non ha pulsanti, non è in attesa di risposta
-      this.waiting_answer = message.buttons.length > 0;
-      this.loading = this.waiting_answer;
-
-      // Se il bot inizia una ricerca, mostra il messaggio di attesa dopo un po’
-      if (message.text === "Perfetto, cerco subito nei documenti") {
-        startLongWaiting();
-        this.startTime = Date.now();
-      }
-      if(message.custom?.type == "date_picker" || message.custom?.type == "number_partecipants" || message.custom?.type == "features_meeting_room" || message.custom?.type == "change_password"){ 
-        this.reservationInProgress = true;
-      }else{
-        this.reservationInProgress = false;
-      }
-    } else {
-      // Messaggio utente
-      this.messages.push(message);
-
-      this.startTime = Date.now();
-
-      // Dopo un breve ritardo, mostra un messaggio di "Sto pensando..."
-      // e cambialo ciclicamente per indicare che il bot sta ancora elaborando
-      startLongWaiting();
-    }
-  }
-
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
       this.scrollToBottom();
@@ -141,7 +74,7 @@ export class Home implements AfterViewChecked {
     }
   }
 
-  private scrollToBottom(): void {
+  scrollToBottom(): void {
     try {
       this.scrollContainer.nativeElement.scroll({
         top: this.scrollContainer.nativeElement.scrollHeight,
@@ -151,6 +84,86 @@ export class Home implements AfterViewChecked {
       console.warn('Scroll error:', err);
     }
   }
+
+  handleMessage(message: any): void {
+    this.loading = true;
+    this.shouldScroll = true;
+    // Controllo d’ingresso
+    if (!message || typeof message !== 'object') return;
+
+    const isBot = message.role === 'bot';
+    const isHumanOperatorTrigger = isBot && message.text.toLowerCase().includes('operatore umano');
+
+    if (isHumanOperatorTrigger) {
+      this.human_operator = true;
+    }
+
+    // Gestione messaggi del bot
+    if (isBot) {
+      this.handleBotMessage(message);
+      return;
+    }
+
+    // Gestione messaggi utente
+    this.handleUserMessage(message);
+  }
+
+  handleBotMessage(message: any) {
+    this.resetLongWait();
+
+    const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+
+    this.messages.push({
+      ...message,
+      elapsedSeconds: elapsedSeconds > 20 ? elapsedSeconds : null,
+    });
+
+    this.waiting_answer = message.buttons?.length > 0;
+    this.loading = this.waiting_answer;
+
+    if (message.text === 'Perfetto, cerco subito nei documenti') {
+      this.startLongWaiting();
+      this.startTime = Date.now();
+    }
+
+    const interactiveTypes = [
+      'date_picker',
+      'number_partecipants',
+      'features_meeting_room',
+      'change_password',
+    ];
+
+    this.reservationInProgress = interactiveTypes.includes(message.custom?.type);
+  }
+
+  handleUserMessage(message: any) {
+    this.messages.push(message);
+    this.startTime = Date.now();
+    this.startLongWaiting();
+  }
+
+  resetLongWait() {
+    clearTimeout(this.longWaitTimer);
+    clearInterval(this.textChangeTimer);
+    this.long_waiting = false;
+    this.long_waiting_text = '';
+  }
+
+  // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
+  startLongWaiting (delay = 20000, interval = 10000) {
+    clearTimeout(this.longWaitTimer);
+    clearInterval(this.textChangeTimer);
+    this.longWaitTimer = setTimeout(() => {
+      this.long_waiting = true;
+      this.textIndex = 0;
+      this.long_waiting_text = this.waitingTexts[this.textIndex];
+
+      this.textChangeTimer = setInterval(() => {
+        this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
+        this.long_waiting_text = this.waitingTexts[this.textIndex];
+      }, interval);
+    }, delay);
+  };
 
   getInitialsFromEmail(email: string | null): string {
     if (!email) return '';
@@ -162,6 +175,7 @@ export class Home implements AfterViewChecked {
   }
 
   sendMessageToChat(message: string) {
+    this.loading = true;
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       if (!user) {
         console.error('Nessun utente loggato');
@@ -186,38 +200,34 @@ export class Home implements AfterViewChecked {
     });
   }
 
-  booking_room() {
-    this.loading = true;
-    const message = "Vorrei prenotare una sala riunioni";
+  insert_message(message: string) {
     this.messages.push(
-      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
     });
+  }
+
+  booking_room() {
+    const message = "Vorrei prenotare una sala riunioni";
+    this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
   }
 
   show_bookings() {
-    this.loading = true;
     const message = "Mi mostri le mie prenotazioni";
-    this.messages.push(
-      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-    });
+    this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
   }
 
   change_password() {
-    this.loading = true;
     const message = "Vorrei cambiare la mia password";
-    this.messages.push(
-      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-    });
+    this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
   }
 
   frequently_asked_questions() {
-    this.loading = true;
     const faqs = [
       "Quanti giorni di ferie ha un lavoratore full time?",
       "Entro quando devo pianificare le mie ferie?",
@@ -234,9 +244,7 @@ export class Home implements AfterViewChecked {
     // Estrae una domanda casuale
     const randomIndex = Math.floor(Math.random() * faqs.length);
     const message = faqs[randomIndex];
-    this.messages.push(
-      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-    });
+    this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
   }

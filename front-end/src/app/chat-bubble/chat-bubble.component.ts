@@ -84,8 +84,7 @@ export class ChatBubble {
       this.cd.detectChanges();
     }
   }
-
-  /** 🔧 Metodo riutilizzabile per inviare messaggi */
+  
   private sendMessageToChat(message: string) {
     this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       if (!user) {
