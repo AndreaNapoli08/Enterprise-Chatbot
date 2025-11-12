@@ -153,7 +153,7 @@ class ActionAvailabilityCheckRoom(Action):
                 f"Caratteristiche: {features_str}\n"
                 f"Capienza massima: {info['capienza']} persone."
             )
-            # Invio dell'email di conferma
+            # # Invio dell'email di conferma
             # try: 
             #     ActionAvailabilityCheckRoom.send_gmail_email(email, email_subject, email_body)
             # except Exception as e:
@@ -184,9 +184,6 @@ class ActionGetReservation(Action):
         if not user_email:
             dispatcher.utter_message(text="Non ho trovato la tua email. Puoi fornirmela per favore?")
             return []
-
-        # Percorso del file JSON (modificalo secondo la tua struttura)
-        file_path = os.path.join(os.path.dirname(__file__), "sale.json")
 
         # Leggi il file JSON
         data = self.load_rooms()

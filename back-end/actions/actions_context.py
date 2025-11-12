@@ -88,7 +88,6 @@ class ActionSaveContext(Action):
 
         new_context = json.dumps(merged, ensure_ascii=False)
 
-        print(new_context)
         # 🔹 Salva tutto nello slot
         return [SlotSet("auto_context", new_context)]
 
