@@ -28,7 +28,7 @@ export class InputText {
     if (changes['humanOperator'] && changes['humanOperator'].currentValue === true) {
       this.disabled = true;
       this.conversationEnded = true;
-      return; // evita di richiamare focus
+      return;
     }
 
     // Se non è disabilitato, metti il focus

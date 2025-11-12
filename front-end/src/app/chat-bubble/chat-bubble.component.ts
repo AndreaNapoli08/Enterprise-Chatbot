@@ -82,7 +82,6 @@ export class ChatBubble {
         });
       }
       this.cd.detectChanges();
-      console.log("uniqueId ", this.uniqueId);
     }
   }
 
@@ -93,8 +92,8 @@ export class ChatBubble {
         console.error('Nessun utente loggato');
         return;
       }
-
       const email = user.email; // ora è sempre definito
+      this.botResponse.emit();
       this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
         responses.forEach(resp => {
           const botMessage: Message = {
@@ -106,7 +105,6 @@ export class ChatBubble {
             role: 'bot',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           };
-          console.log('📤 Risposta bot:', botMessage);
           this.botResponse.emit(botMessage);
         });
       });
@@ -145,7 +143,6 @@ export class ChatBubble {
         year: 'numeric'
       });
       const message = `La riunione è ${dateString} alle ${this.startTime} per ${this.duration} ore.`;
-      console.log(message);
       this.sendMessageToChat(message);
     }
   }
@@ -183,7 +180,6 @@ export class ChatBubble {
   sendNewPassword() {
     this.disabledInputs = true;
     const message = `La vecchia password è: ${this.passwords['oldPassword']} La nuova password è: ${this.passwords['newPassword']}`;
-    console.log(message);
     this.stateChangeLoading.emit(true);
     this.sendMessageToChat(message);
   }

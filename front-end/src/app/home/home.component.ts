@@ -70,6 +70,9 @@ export class Home implements AfterViewChecked {
   handleMessage(message: any) {
     this.loading = true;
     this.shouldScroll = true;
+    if (!message) {
+      return;
+    }
     if(message.role === 'bot' && message.text.toLowerCase().includes('operatore umano')) {
       this.human_operator = true;
     }
@@ -114,7 +117,7 @@ export class Home implements AfterViewChecked {
         startLongWaiting();
         this.startTime = Date.now();
       }
-      if(message.custom?.type == "date_picker" || message.custom?.type == "number_partecipants" || message.custom?.type == "features_meeting_room") {
+      if(message.custom?.type == "date_picker" || message.custom?.type == "number_partecipants" || message.custom?.type == "features_meeting_room" || message.custom?.type == "change_password"){ 
         this.reservationInProgress = true;
       }else{
         this.reservationInProgress = false;
@@ -177,7 +180,6 @@ export class Home implements AfterViewChecked {
             role: 'bot',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           };
-          console.log('📤 Risposta bot:', botMessage);
           this.handleMessage(botMessage);
         });
       });

@@ -53,7 +53,7 @@
       <div
         #scrollContainer
         *ngIf="messages.length > 0"
-        class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh]"
+        class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh] bg-gray-50 dark:bg-gray-900"
       >
         <chat-bubble *ngFor="let msg of messages" 
           [message]="msg" 
@@ -64,14 +64,9 @@
           (botResponse)="handleMessage($event)" 
           [initials]="initials">
         </chat-bubble>
-      </div>
-
-      <!-- Loading spinner -->
-      <!-- <div *ngIf="loading && !waiting_answer" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10"> -->
-      <div class="relative">
-        <!-- Spinner in overlay -->
-        <div *ngIf="loading && !waiting_answer" 
-            class="absolute bottom-1 items-center space-x-3 h-10 mb-2 flex items-center space-x-3 h-10 mb-2">
+        
+        <!-- Loading spinner -->
+        <div *ngIf="loading && !waiting_answer" class="relative flex items-center space-x-3 h-10 mb-2">
           <!-- Spinner -->
           <div role="status">
             <svg aria-hidden="true" class="w-9 h-9 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -85,13 +80,13 @@
             {{ long_waiting_text }}
           </p>
         </div>
-      </div>
-
-      <div *ngIf="waiting_answer" class="flex flex-col mb-2 ml-10 text-sm text-gray-800 dark:text-gray-400">
-        <div class="w-48 h-10 bg-gray-300 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center text-black dark:text-gray-300">
-          In attesa di una tua risposta...
+        <div *ngIf="waiting_answer" class="flex flex-col mb-2 ml-10 text-sm text-gray-800 dark:text-gray-400">
+          <div class="w-48 h-10 bg-gray-300 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center text-black dark:text-gray-300">
+            In attesa di una tua risposta...
+          </div>
         </div>
       </div>
+
       <input-text 
         (submitAnswer)="handleMessage($event)" 
         [disabled]="loading || reservationInProgress" 
