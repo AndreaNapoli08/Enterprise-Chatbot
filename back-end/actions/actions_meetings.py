@@ -38,7 +38,8 @@ class ActionAvailabilityCheckRoom(Action):
             return []
 
         # Prepara la chiamata HTTP al server Flask
-        api_url = "http://localhost:5050/rooms/book"
+        
+        endpoint = os.getenv("BOOKING_API_URL")
         payload = {
             "appointment_date": appointment_date,
             "appointment_hour": appointment_hour,
@@ -49,7 +50,7 @@ class ActionAvailabilityCheckRoom(Action):
         }
 
         try:
-            response = requests.post(api_url, json=payload, timeout=10)
+            response = requests.post(endpoint, json=payload, timeout=10)
             data = response.json()
         except Exception as e:
             dispatcher.utter_message(text=f"⚠️ Errore di connessione al server prenotazioni: {e}")
@@ -88,71 +89,50 @@ class ActionAvailabilityCheckRoom(Action):
 class ActionGetReservation(Action):
     def name(self) -> Text:
         return "action_get_reservation"
-    
-    @staticmethod
-    def load_rooms():
-        with open(ROOMS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
 
-    def run(self, dispatcher: CollectingDispatcher,
+    def run(self,
+            dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        # Recupera l'email (o nome utente) dallo slot
-        user_email = tracker.latest_message.get("metadata", {}).get("email")
+        # Recupera l'email (dal metadata o dallo slot)
+        user_email = tracker.latest_message.get("metadata", {}).get("email") or tracker.get_slot("email")
 
         if not user_email:
             dispatcher.utter_message(text="Non ho trovato la tua email. Puoi fornirmela per favore?")
             return []
 
-        # Leggi il file JSON
-        data = self.load_rooms()
+        endpoint = os.getenv("RESERVATIONS_API_URL")
+        api_url = f"{endpoint}{user_email}"
 
-        # Cerca prenotazioni dell'utente
-        prenotazioni_utente = []
+        try:
+            response = requests.get(api_url, timeout=10)
+            data = response.json()
+        except Exception as e:
+            dispatcher.utter_message(text=f"Errore di connessione al server: {e}")
+            return []
 
-        for nome_sala, info_sala in data.items():
-            for prenotazione in info_sala.get("prenotazioni", []):
-                # Ogni prenotazione può avere 'user' o 'email'
-                if prenotazione.get("user") == user_email:
-                    prenotazioni_utente.append({
-                        "id": prenotazione.get("id"),
-                        "sala": nome_sala,
-                        "numero": info_sala.get("numero"),
-                        "inizio": prenotazione.get("start"),
-                        "fine": prenotazione.get("end"),
-                        "persone": prenotazione.get("persons")
-                    })
-
-        # Risposta all’utente
-        if not prenotazioni_utente:
-            dispatcher.utter_message(text=f"Non ho trovato prenotazioni a nome di {user_email}.")
-        else:
+        if response.status_code == 200:
+            prenotazioni = data.get("prenotazioni", [])
             dispatcher.utter_message(
-                text=f"📅 Prenotazioni trovate per {user_email}:", 
+                text=f"📅 Prenotazioni trovate per {user_email}:",
                 json_message={
                     "type": "lista_prenotazioni",
                     "email": user_email,
-                    "prenotazioni": prenotazioni_utente
+                    "prenotazioni": prenotazioni
                 }
             )
+        else:
+            dispatcher.utter_message(text=f"Non ho trovato prenotazioni a nome di {user_email}.")
+
         return []
     
 class ActionDeleteReservation(Action):
     def name(self) -> Text:
         return "action_delete_reservation"
-    
-    @staticmethod
-    def load_rooms():
-        with open(ROOMS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
 
-    @staticmethod
-    def save_rooms(data):
-        with open(ROOMS_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
-    def run(self, dispatcher: CollectingDispatcher,
+    def run(self,
+            dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
@@ -165,22 +145,19 @@ class ActionDeleteReservation(Action):
 
         reservation_id = match.group(0)
 
-        if not reservation_id:
-            dispatcher.utter_message(text="Non ho ricevuto l'ID della prenotazione da cancellare.")
+        endpoint = api_url = os.getenv("RESERVATIONS_API_URL")
+        api_url = f"{endpoint}{reservation_id}"
+
+        try:
+            response = requests.delete(api_url, timeout=10)
+            data = response.json()
+        except Exception as e:
+            dispatcher.utter_message(text=f"⚠️ Errore di connessione al server: {e}")
             return []
 
-        # Carica le sale
-        rooms = self.load_rooms()
-        
-        for sala, info in rooms.items():
-            prenotazioni = info.get("prenotazioni", [])
-            for p in prenotazioni:
-                if p.get("id") == reservation_id:
-                    prenotazioni.remove(p)
-                    self.save_rooms(rooms)
-                    dispatcher.utter_message(text=f"La prenotazione per {sala} (n.{info.get('numero')}) è stata cancellata con successo.")
-                    return []
-           
-        dispatcher.utter_message(text="Non ho trovato nessuna prenotazione con l'ID fornito.")
+        if response.status_code == 200:
+            dispatcher.utter_message(text=data.get("message", "Prenotazione cancellata con successo."))
+        else:
+            dispatcher.utter_message(text=data.get("error", "Non è stato possibile cancellare la prenotazione."))
+
         return []
-    

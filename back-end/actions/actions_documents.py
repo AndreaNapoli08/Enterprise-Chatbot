@@ -65,7 +65,8 @@ class ActionSendLocalPDF(Action):
         except Exception:
             num_pages = "N/D"
 
-        pdf_url = f"http://localhost:5050/documents/{selected_pdf}"
+        endpoint = os.getenv("DOCUMENTS_API_URL")
+        pdf_url = f"{endpoint}/{selected_pdf}"
         dispatcher.utter_message(
             text="Ecco il documento che hai richiesto:",
             attachment={

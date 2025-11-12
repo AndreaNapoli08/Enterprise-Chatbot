@@ -25,7 +25,8 @@ class ActionCheckUserRole(Action):
 
         # 2️⃣ Chiamata HTTP al server per ottenere la lista utenti
         try:
-            response = requests.get("http://localhost:5050/users") 
+            endpoint = os.getenv("USERS_API_URL")
+            response = requests.get(endpoint) 
             response.raise_for_status()
             users = response.json()  # lista di utenti
         except Exception as e:
@@ -69,7 +70,8 @@ class ActionChangePassword(Action):
 
         old_password, new_password = match.groups()
         try:
-            response = requests.get("http://localhost:5050/users") 
+            endpoint = os.getenv("USERS_API_URL")
+            response = requests.get(endpoint) 
             response.raise_for_status()
             users = response.json()  # lista di utenti
         except Exception as e:
@@ -86,8 +88,9 @@ class ActionChangePassword(Action):
             return []
         
         try:
+            endpoint = os.getenv("USERS_API_URL")
             update_response = requests.patch(
-                "http://localhost:5050/users/update_password",
+                f"{endpoint}/update_password",
                 json={"email": email, "password": new_password},
             )
             update_response.raise_for_status()

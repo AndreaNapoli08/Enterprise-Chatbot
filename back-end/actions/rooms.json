@@ -38,15 +38,7 @@
       "Aria condizionata",
       "Accesso disabili"
     ],
-    "prenotazioni": [
-      {
-        "id": "3abb118f-1cd2-4200-857c-2e803e89dd56",
-        "user": "spospociao08@gmail.com",
-        "start": "2025-11-24 14:30",
-        "end": "2025-11-24 17:00",
-        "persons": "18"
-      }
-    ]
+    "prenotazioni": []
   },
   "Sala Viola": {
     "numero": 105,

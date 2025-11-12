@@ -212,14 +212,76 @@ def book_room():
         f"Capienza massima: {info['capienza']} persone."
     )
     #(Opzionale) invia email
-    try:
-        send_gmail_email(email, email_subject, email_body)
-    except Exception as e:
-        response["email_error"] = str(e)
+    # try:
+    #     send_gmail_email(email, email_subject, email_body)
+    # except Exception as e:
+    #     response["email_error"] = str(e)
 
     return jsonify(response), 200
 
+@app.route("/rooms/reservations/<email>", methods=["GET"])
+def get_user_reservations(email):
+    """Restituisce tutte le prenotazioni associate a un utente (tramite email)"""
+    try:
+        rooms = load_rooms()
+    except FileNotFoundError:
+        return jsonify({"error": "File delle sale non trovato"}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "Errore nel formato del file delle sale"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Errore imprevisto: {e}"}), 500
 
+    prenotazioni_utente = []
+
+    # Cicla tra tutte le sale e le loro prenotazioni
+    for nome_sala, info_sala in rooms.items():
+        for prenotazione in info_sala.get("prenotazioni", []):
+            if prenotazione.get("user") == email:
+                prenotazioni_utente.append({
+                    "id": prenotazione.get("id"),
+                    "sala": nome_sala,
+                    "numero": info_sala.get("numero"),
+                    "inizio": prenotazione.get("start"),
+                    "fine": prenotazione.get("end"),
+                    "persone": prenotazione.get("persons")
+                })
+
+    if not prenotazioni_utente:
+        return jsonify({
+            "message": f"Nessuna prenotazione trovata per l'utente {email}"
+        }), 404
+
+    return jsonify({
+        "email": email,
+        "prenotazioni": prenotazioni_utente
+    }), 200
+
+@app.route("/rooms/reservations/<reservation_id>", methods=["DELETE"])
+def delete_reservation(reservation_id):
+    """Elimina una prenotazione tramite il suo ID"""
+    try:
+        rooms = load_rooms()
+    except FileNotFoundError:
+        return jsonify({"error": "File delle sale non trovato"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Errore imprevisto: {e}"}), 500
+
+    found = False
+
+    for sala, info in rooms.items():
+        prenotazioni = info.get("prenotazioni", [])
+        for p in prenotazioni:
+            if p.get("id") == reservation_id:
+                prenotazioni.remove(p)
+                found = True
+                save_rooms(rooms)
+                return jsonify({
+                    "message": f"La prenotazione per {sala} (n.{info.get('numero')}) è stata cancellata con successo."
+                }), 200
+
+    if not found:
+        return jsonify({"error": "Nessuna prenotazione trovata con l'ID fornito."}), 404
+    
 # ============================================================
 #                     AVVIO SERVER
 # ============================================================
