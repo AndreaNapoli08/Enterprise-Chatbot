@@ -131,7 +131,6 @@ export class ChatBubble {
     if (payload === "/yes_close_conversation") {
       this.stateChangeConversation.emit(true);
     }
-
     this.sendMessageToChat(payload);
   }
 

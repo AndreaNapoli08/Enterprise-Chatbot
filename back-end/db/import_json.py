@@ -65,7 +65,15 @@ def import_documents():
         session.commit()
     print("✅ Documenti importati con successo!")
 
+def clear_chat():
+    with Session(engine) as session:
+        session.exec(text("DELETE FROM chat_messages"))
+        session.exec(text("DELETE FROM chat_sessions"))
+        session.commit()
+    print("✅ Chat cancellate con successo!")
+
 if __name__ == "__main__":
-    import_users()
-    import_rooms()
-    import_documents()
+    # import_users()
+    # import_rooms()
+    # import_documents()
+    clear_chat()

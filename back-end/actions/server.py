@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends # type: ignore
+from fastapi import FastAPI, HTTPException, Depends, Query # type: ignore
 from fastapi.responses import FileResponse # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from pydantic import BaseModel, EmailStr
@@ -12,6 +12,10 @@ from datetime import datetime, timedelta
 from sqlmodel import Session, select # type: ignore
 from db.db import engine, get_session
 from db.models import User, Room, Document, ChatSession, ChatMessage
+
+# toglie i warning 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 app = FastAPI(title="Enterprise Chatbot API", version="1.0.0")
 origins = ["*"] 
@@ -367,8 +371,7 @@ def get_messages(user_email: str, session: Session = Depends(get_session)):
     # Recupera la sessione attiva dell'utente
     chat_session = session.exec(
         select(ChatSession).where(
-            ChatSession.user_email == user_email,
-            ChatSession.active == True
+            ChatSession.user_email == user_email
         )
     ).first()
 
@@ -391,4 +394,26 @@ def get_messages(user_email: str, session: Session = Depends(get_session)):
         } for m in messages
     ]
 
-    return {"messages": messages_list}
+    return {"messages": messages_list, "active": chat_session.active}
+
+@app.post("/chat/close_session")
+def close_session(user_email: str = Query(...), session: Session = Depends(get_session)):
+    """
+    Chiude la sessione attiva dell'utente impostando active=False.
+    """
+    chat_session = session.exec(
+        select(ChatSession).where(
+            ChatSession.user_email == user_email,
+            ChatSession.active == True
+        )
+    ).first()
+
+    if not chat_session:
+        raise HTTPException(status_code=404, detail="Nessuna sessione attiva trovata")
+
+    chat_session.active = False
+    chat_session.last_activity = datetime.utcnow()
+    session.add(chat_session)
+    session.commit()
+
+    return {"message": f"Sessione di {user_email} chiusa con successo"}

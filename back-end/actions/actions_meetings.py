@@ -113,7 +113,7 @@ class ActionGetReservation(Action):
         if response.status_code == 200:
             prenotazioni = data
             dispatcher.utter_message(
-                text=f"📅 Prenotazioni trovate per {user_email}:",
+                text=f"📅 Prenotazioni trovate per {user_email}",
                 json_message={
                     "type": "lista_prenotazioni",
                     "email": user_email,

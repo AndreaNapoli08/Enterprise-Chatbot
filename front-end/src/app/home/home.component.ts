@@ -86,36 +86,16 @@ export class Home implements AfterViewChecked {
     }
   }
 
-  async loadChatHistory() {
-    if (!this.email) return;
-
-    try {
-      const res = await fetch(`http://localhost:5050/chat/get_messages?user_email=${this.email}`);
-      const data = await res.json();
-      if (data.messages) {
-        // Sovrascrive i messaggi attuali con quelli salvati
-        this.messages = data.messages.map((m:any) => ({
-          role: m.sender,
-          text: m.content.text || '',
-          buttons: m.content.buttons || [],
-          image: m.content.image || '',
-          custom: m.content.custom || {},
-          attachment: m.content.attachment || null,
-          time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }));
-      }
-    } catch (err) {
-      console.error("Errore nel caricamento della chat:", err);
-    }
-    this.shouldScroll = true;
-  }
-
   handleMessage(message: any): void {
     this.loading = true;
     this.shouldScroll = true;
     // Controllo d’ingresso
     if (!message || typeof message !== 'object') return;
     
+    if(message.text.startsWith("Grazie per aver utilizzato il nostro servizio")){
+      this.closeChatSession();
+    }
+
     this.saveMessageToBackend(message);
     
     const isBot = message.role === 'bot';
@@ -133,6 +113,21 @@ export class Home implements AfterViewChecked {
 
     // Gestione messaggi utente
     this.handleUserMessage(message);
+  }
+
+  closeChatSession() {
+    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
+      if (!user) return;
+      const email = user.email;
+
+      fetch(`http://localhost:5050/chat/close_session?user_email=${email}`, {
+        method: 'POST'
+      })
+      .then(() => {
+        console.log('Chat session chiusa');
+      })
+      .catch(err => console.error('Errore nel chiudere la sessione:', err));
+    });
   }
 
   async saveMessageToBackend(message: any) {
@@ -159,6 +154,33 @@ export class Home implements AfterViewChecked {
     } catch (error) {
       console.error('Errore nel salvataggio del messaggio:', error);
     }
+  }
+
+  async loadChatHistory() {
+    if (!this.email) return;
+
+    try {
+      const res = await fetch(`http://localhost:5050/chat/get_messages?user_email=${this.email}`);
+      const data = await res.json();
+      if (data.messages) {
+        // Sovrascrive i messaggi attuali con quelli salvati
+        this.messages = data.messages.map((m:any) => ({
+          role: m.sender,
+          text: m.content.text || '',
+          buttons: m.content.buttons || [],
+          image: m.content.image || '',
+          custom: m.content.custom || {},
+          attachment: m.content.attachment || null,
+          time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }));
+      }
+      if(data.active == false){
+        this.conversationEnded = true;
+      }
+    } catch (err) {
+      console.error("Errore nel caricamento della chat:", err);
+    }
+    this.shouldScroll = true;
   }
 
   getMessageType(message: any): string {
