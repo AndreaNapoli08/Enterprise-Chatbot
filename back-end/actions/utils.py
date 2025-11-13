@@ -17,7 +17,7 @@ from dotenv import load_dotenv # type: ignore
 from db.models import User
 from db.models import Room
 from db.db import engine
-from sqlmodel import Session, select
+from sqlmodel import Session, select # type: ignore
 
 USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
 ROOMS_FILE = Path("actions/rooms.json")

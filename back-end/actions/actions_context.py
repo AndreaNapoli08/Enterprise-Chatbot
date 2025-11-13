@@ -1,13 +1,12 @@
 from typing import Any, Text, Dict, List
 import requests
-from PyPDF2 import PdfReader
 from datetime import datetime
 import os, json, requests, re
 
 # import per rasa
-from rasa_sdk import Action, Tracker
-from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import SlotSet, FollowupAction
+from rasa_sdk import Action, Tracker # type: ignore
+from rasa_sdk.executor import CollectingDispatcher # type: ignore
+from rasa_sdk.events import SlotSet # type: ignore
 
 # Salvataggio del contesto
 class ActionSaveContext(Action):
