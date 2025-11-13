@@ -19,8 +19,6 @@ from db.models import Room
 from db.db import engine
 from sqlmodel import Session, select # type: ignore
 
-USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
-ROOMS_FILE = Path("actions/rooms.json")
 load_dotenv()
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 

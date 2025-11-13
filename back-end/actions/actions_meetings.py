@@ -6,10 +6,8 @@ import json, re, os, requests
 from rasa_sdk import Action, Tracker # type: ignore
 from rasa_sdk.executor import CollectingDispatcher # type: ignore
 
-# === CONFIGURAZIONI ===
-ROOMS_FILE = Path("actions/rooms.json")
-
 # --- Controllo disponibilità sala ---
+
 class ActionAvailabilityCheckRoom(Action):
     def name(self) -> Text:
         return "action_availability_check_room"

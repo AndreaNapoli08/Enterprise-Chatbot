@@ -15,6 +15,7 @@ export class Login {
   password = '';
   loginFailed: boolean = false;
   passwordVisible = false;
+  isLoading = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -22,13 +23,15 @@ export class Login {
     if (this.email === '' || this.password === '') {
       this.showToast("Compilare tutti i campi");
     } else {
+      this.isLoading = true;
       this.authService.login(this.email, this.password).subscribe(success => {
         if (success) {
           localStorage.setItem('email', this.email);
         this.router.navigate(['/home']); 
         } else {
           this.showToast("Utente non trovato");
-        this.loginFailed = true;
+          this.isLoading = false;
+          this.loginFailed = true;
         }
       });
     }
