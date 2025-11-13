@@ -15,6 +15,7 @@ from dotenv import load_dotenv # type: ignore
 
 # import per il database
 from db.models import User
+from db.models import Room
 from db.db import engine
 from sqlmodel import Session, select
 
@@ -38,18 +39,22 @@ def get_user_by_email(email: str):
         statement = select(User).where(User.email == email)
         result = session.exec(statement).first()
         return result  # restituisce un oggetto User oppure None
-    
-def save_users(users):
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users, f, ensure_ascii=False, indent=2)
 
 def load_rooms():
-    with open(ROOMS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    with Session(engine) as session:
+        rooms = session.exec(select(Room)).all()
+        return rooms
     
-def save_rooms(data):
-        with open(ROOMS_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+def save_rooms(available_room: Room):
+    with Session(engine) as session:
+        db_room = session.get(Room, available_room.id)
+        if not db_room:
+            raise ValueError("Room non trovata nel database")
+        db_room.prenotazioni = available_room.prenotazioni
+        
+        session.add(db_room)
+        session.commit()
+        session.refresh(db_room)
 
 
 def parse_datetime(date_str: str, hour_str: str) -> datetime:

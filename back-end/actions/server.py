@@ -1,15 +1,18 @@
 from flask import Flask, jsonify, request, send_from_directory # type: ignore
+from flasgger import Swagger # type: ignore
 from flask_cors import CORS # type: ignore
 import os, json, uuid
-from actions.utils import save_users, hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
+from actions.utils import hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
 from datetime import datetime, timedelta
 
 # import per il database
 from sqlmodel import Session, select
 from db.db import engine
 from db.models import User
+from db.models import Room
 
 app = Flask(__name__)
+swagger = Swagger(app)
 CORS(app)  # abilita CORS per tutte le rotte
 
 # cartella dove tieni i PDF
@@ -34,7 +37,35 @@ def serve_pdf(filename):
 
 @app.route("/users", methods=["GET"])
 def get_users():
-    """Restituisce la lista di tutti gli utenti dal DB"""
+    """
+    Restituisce la lista di tutti gli utenti dal database
+    ---
+    tags:
+      - Utenti
+    responses:
+      200:
+        description: Lista completa degli utenti
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              firstName:
+                type: string
+                example: "Mario"
+              lastName:
+                type: string
+                example: "Rossi"
+              email:
+                type: string
+                example: "mario.rossi@example.com"
+              role:
+                type: string
+                example: "dipendente"
+    """
     with Session(engine) as session:
         statement = select(User)
         users = session.exec(statement).all()
@@ -52,7 +83,32 @@ def get_users():
 
 @app.route("/users/login", methods=["POST"])
 def login_user():
-    """Login utente: verifica email e password"""
+    """
+    Effettua il login di un utente
+    ---
+    tags:
+      - Utenti
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: mario.rossi@example.com
+            password:
+              type: string
+              example: password123
+    responses:
+      200:
+        description: Login riuscito
+      401:
+        description: Password errata
+      404:
+        description: Utente non trovato
+    """
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
@@ -81,7 +137,48 @@ def login_user():
 
 @app.route("/users/<email>", methods=["GET"])
 def get_user(email):
-    """Restituisce un singolo utente per email"""
+    """
+    Restituisce un singolo utente in base all'email
+    ---
+    tags:
+      - Utenti
+    parameters:
+      - name: email
+        in: path
+        required: true
+        type: string
+        description: Email dell'utente da cercare
+        example: mario.rossi@example.com
+    responses:
+      200:
+        description: Dati dell'utente trovato
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            firstName:
+              type: string
+              example: "Mario"
+            lastName:
+              type: string
+              example: "Rossi"
+            email:
+              type: string
+              example: "mario.rossi@example.com"
+            role:
+              type: string
+              example: "dipendente"
+      404:
+        description: Utente non trovato
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Utente non trovato"
+    """
     user = get_user_by_email(email)
     if not user:
         return jsonify({"error": "Utente non trovato"}), 404
@@ -144,31 +241,60 @@ def update_password():
 @app.route("/rooms", methods=["GET"])
 def get_rooms():
     """Restituisce la lista di tutte le sale con le rispettive caratteristiche"""
-    try:
-        rooms = load_rooms()
-    except FileNotFoundError:
-        return jsonify({"error": "File delle sale non trovato"}), 404
-    except json.JSONDecodeError:
-        return jsonify({"error": "Errore nel formato del file delle sale"}), 500
-    except Exception as e:
-        return jsonify({"error": f"Errore imprevisto: {e}"}), 500
-
-    # Trasformiamo il dizionario in una lista più leggibile
-    formatted_rooms = []
-    for name, info in rooms.items():
-        formatted_rooms.append({
-            "nome": name,
-            "numero": info.get("numero"),
-            "caratteristiche": info.get("caratteristiche", []),
-            "capienza": info.get("capienza"),
-            "prenotazioni": info.get("prenotazioni", [])
-        })
-
-    return jsonify(formatted_rooms), 200
+    rooms = load_rooms()
+    rooms_list = [
+        {
+            "id": u.id,
+            "name": u.name,
+            "numero": u.numero,
+            "capienza": u.capienza,
+            "caratteristiche": u.caratteristiche,
+            "prenotazioni": u.prenotazioni
+        } for u in rooms
+    ]
+    return jsonify(rooms_list), 200
+        
 
 @app.route("/rooms/book", methods=["POST"])
 def book_room():
-    """Effettua una prenotazione sala, se disponibile"""
+    """
+    Effettua una prenotazione di una sala
+    ---
+    tags:
+      - Stanze
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            appointment_date:
+              type: string
+              example: "2025-11-15"
+            appointment_hour:
+              type: string
+              example: "10:00"
+            appointment_duration:
+              type: number
+              example: 2
+            person_picker:
+              type: integer
+              example: 4
+            room_features:
+              type: array
+              items:
+                type: string
+              example: ["proiettore", "lavagna"]
+            email:
+              type: string
+              example: mario.rossi@example.com
+    responses:
+      200:
+        description: Prenotazione effettuata
+      404:
+        description: Nessuna sala disponibile
+    """
     data = request.get_json()
 
     appointment_date = data.get("appointment_date")
@@ -191,104 +317,95 @@ def book_room():
 
     # Carica sale
     rooms = load_rooms()
+    room_features = [f.lower() for f in room_features]
+    available_room = None
 
     def is_available(room, start, end):
-        for booking in room["prenotazioni"]:
+        for booking in room.prenotazioni:
             booking_start = datetime.strptime(booking["start"], "%Y-%m-%d %H:%M")
             booking_end = datetime.strptime(booking["end"], "%Y-%m-%d %H:%M")
             if not (end <= booking_start or start >= booking_end):
                 return False
         return True
 
-    room_features = [f.lower() for f in room_features]
-    available_room = None
-
-    for name, info in rooms.items():
-        room_features_in_room = [f.lower() for f in info["caratteristiche"]]
-        if all(feature in room_features_in_room for feature in room_features):
+    for room in rooms:
+        features = [f.lower() for f in room.caratteristiche]
+        if all(feature in features for feature in room_features):
             # Controlla disponibilità oraria
-            if is_available(info, requested_start, requested_end):
+            if is_available(room, requested_start, requested_end):
                 # Controlla capienza
                 try:
                     persone = int(person_picker)
                 except (ValueError, TypeError):
                     return jsonify({"error": "Numero partecipanti non valido"}), 400
                 
-                if persone <= info["capienza"]:
-                    available_room = (name, info)
+                if persone <= room.capienza:
+                    available_room = room
                     break
 
     if not available_room:
         return jsonify({"message": "Nessuna sala disponibile con le caratteristiche richieste"}), 404
 
-    # Prenota
-    name, info = available_room
+    prenotazioni = available_room.prenotazioni or []
     booking_id = str(uuid.uuid4())
-    info["prenotazioni"].append({
-        "id": booking_id,
+    prenotazioni.append({
+        "id": booking_id,    
         "user": email,
         "start": requested_start.strftime("%Y-%m-%d %H:%M"),
         "end": requested_end.strftime("%Y-%m-%d %H:%M"),
         "persons": person_picker
     })
-    save_rooms(rooms)
+    available_room.prenotazioni = prenotazioni
+    save_rooms(available_room)
 
-    
     response = {
         "message": "Prenotazione effettuata con successo",
-        "room_name": name,
-        "numero": info["numero"],
-        "caratteristiche": info["caratteristiche"],
-        "capienza": info["capienza"],
+        "room_name": available_room.name,
+        "numero": available_room.numero,
+        "caratteristiche": available_room.caratteristiche,
+        "capienza": available_room.capienza,
         "start": requested_start.strftime("%Y-%m-%d %H:%M"),
         "end": requested_end.strftime("%Y-%m-%d %H:%M"),
         "booking_id": booking_id
     }
 
-    features_str = ", ".join(info["caratteristiche"])
-    email_subject = f"Prenotazione confermata: {name}"
+    features_str = ", ".join(available_room.caratteristiche)
+    email_subject = f"Prenotazione confermata: {available_room.name}"
     email_body = (
         f"Buongiorno,\n"
-        f"La sala {name} (n. {info['numero']}) è stata prenotata con successo!\n\n"
+        f"La sala {available_room.name} (n. {available_room.numero}) è stata prenotata con successo!\n\n"
         f"Data: {appointment_date}\n"
         f"Orario: {appointment_hour} - {requested_end.strftime('%H:%M')}\n"
         f"Partecipanti: {person_picker}\n"
         f"Caratteristiche: {features_str}\n"
-        f"Capienza massima: {info['capienza']} persone."
+        f"Capienza massima: {available_room.capienza} persone."
     )
     #(Opzionale) invia email
-    # try:
-    #     send_gmail_email(email, email_subject, email_body)
-    # except Exception as e:
-    #     response["email_error"] = str(e)
+    try:
+        send_gmail_email(email, email_subject, email_body)
+    except Exception as e:
+        response["email_error"] = str(e)
 
     return jsonify(response), 200
 
 @app.route("/rooms/reservations/<email>", methods=["GET"])
 def get_user_reservations(email):
     """Restituisce tutte le prenotazioni associate a un utente (tramite email)"""
-    try:
-        rooms = load_rooms()
-    except FileNotFoundError:
-        return jsonify({"error": "File delle sale non trovato"}), 404
-    except json.JSONDecodeError:
-        return jsonify({"error": "Errore nel formato del file delle sale"}), 500
-    except Exception as e:
-        return jsonify({"error": f"Errore imprevisto: {e}"}), 500
-
+    
+    rooms = load_rooms()
     prenotazioni_utente = []
 
     # Cicla tra tutte le sale e le loro prenotazioni
-    for nome_sala, info_sala in rooms.items():
-        for prenotazione in info_sala.get("prenotazioni", []):
-            if prenotazione.get("user") == email:
+    for room in rooms:
+        for prenotazione in room.prenotazioni or []:
+            if prenotazione["user"] == email:
                 prenotazioni_utente.append({
-                    "id": prenotazione.get("id"),
-                    "sala": nome_sala,
-                    "numero": info_sala.get("numero"),
-                    "inizio": prenotazione.get("start"),
-                    "fine": prenotazione.get("end"),
-                    "persone": prenotazione.get("persons")
+                    "id": prenotazione["id"],
+                    "sala": room.name,
+                    "numero": room.numero,
+                    "inizio": prenotazione["start"],
+                    "fine": prenotazione["end"],
+                    "persone": prenotazione["persons"]
                 })
 
     if not prenotazioni_utente:
@@ -304,24 +421,19 @@ def get_user_reservations(email):
 @app.route("/rooms/reservations/<reservation_id>", methods=["DELETE"])
 def delete_reservation(reservation_id):
     """Elimina una prenotazione tramite il suo ID"""
-    try:
-        rooms = load_rooms()
-    except FileNotFoundError:
-        return jsonify({"error": "File delle sale non trovato"}), 404
-    except Exception as e:
-        return jsonify({"error": f"Errore imprevisto: {e}"}), 500
-
+    
+    rooms = load_rooms()
     found = False
 
-    for sala, info in rooms.items():
-        prenotazioni = info.get("prenotazioni", [])
+    for room in rooms:
+        prenotazioni = room.prenotazioni or []
         for p in prenotazioni:
-            if p.get("id") == reservation_id:
+            if p["id"] == reservation_id:
                 prenotazioni.remove(p)
                 found = True
-                save_rooms(rooms)
+                save_rooms(room)
                 return jsonify({
-                    "message": f"La prenotazione per {sala} (n.{info.get('numero')}) è stata cancellata con successo."
+                    "message": f"La prenotazione per {room.name} (n.{room.numero}) è stata cancellata con successo."
                 }), 200
 
     if not found:
