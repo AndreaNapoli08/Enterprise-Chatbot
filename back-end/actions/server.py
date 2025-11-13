@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException # type: ignore
+from fastapi import FastAPI, HTTPException, Depends # type: ignore
 from fastapi.responses import FileResponse # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from pydantic import BaseModel, EmailStr
@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 
 # import per il database
 from sqlmodel import Session, select # type: ignore
-from db.db import engine
-from db.models import User, Room, Document
+from db.db import engine, get_session
+from db.models import User, Room, Document, ChatSession, ChatMessage
 
 app = FastAPI(title="Enterprise Chatbot API", version="1.0.0")
 origins = ["*"] 
@@ -148,7 +148,6 @@ def update_password(data: CredentialRequest):
         session.commit()
 
     return {"message": "Password aggiornata con successo"}
-
 
 # ============================================================
 #                     ENDPOINT STANZE
@@ -314,3 +313,82 @@ def delete_reservation(reservation_id: str):
 
     if not found:
         raise HTTPException(status_code=404, detail="Nessuna prenotazione trovata con l'ID fornito.")
+    
+# ============================================================
+#                     ENDPOINT CHAT
+# ============================================================
+
+@app.post("/chat/save_message")
+def save_message(payload: dict, session: Session = Depends(get_session)):
+    """
+    Salva un messaggio nella chat dell'utente.
+    payload deve contenere: user_email, sender, type, content
+    """
+    user_email = payload.get("user_email")
+    sender = payload.get("sender")
+    type_ = payload.get("type", "text")
+    content = payload.get("content")
+
+    if not user_email or not sender or content is None:
+        raise HTTPException(status_code=400, detail="Dati mancanti nel payload")
+
+    # Recupera o crea una sessione attiva per l'utente
+    chat_session = session.exec(
+        select(ChatSession).where(
+            ChatSession.user_email == user_email,
+            ChatSession.active == True
+        )
+    ).first()
+
+    if not chat_session:
+        chat_session = ChatSession(user_email=user_email)
+        session.add(chat_session)
+        session.commit()
+        session.refresh(chat_session)
+
+    # Salva il messaggio
+    chat_message = ChatMessage(
+        session_id=chat_session.id,
+        sender=sender,
+        type=type_,
+        content=content,
+        timestamp=datetime.utcnow()
+    )
+    session.add(chat_message)
+
+    # Aggiorna last_activity della sessione
+    chat_session.last_activity = datetime.utcnow()
+    session.commit()
+
+    return {"message": "Messaggio salvato con successo"}
+
+@app.get("/chat/get_messages")
+def get_messages(user_email: str, session: Session = Depends(get_session)):
+    # Recupera la sessione attiva dell'utente
+    chat_session = session.exec(
+        select(ChatSession).where(
+            ChatSession.user_email == user_email,
+            ChatSession.active == True
+        )
+    ).first()
+
+    if not chat_session:
+        return {"messages": []}  # nessuna chat attiva
+
+    # Recupera tutti i messaggi della sessione
+    messages = session.exec(
+        select(ChatMessage).where(ChatMessage.session_id == chat_session.id)
+    ).all()
+
+    # Trasforma in un formato JSON-friendly
+    messages_list = [
+        {
+            "id": m.id,
+            "sender": m.sender,
+            "type": m.type,
+            "content": m.content,
+            "timestamp": m.timestamp.isoformat()
+        } for m in messages
+    ]
+
+    return {"messages": messages_list}

@@ -60,6 +60,7 @@ export class Home implements AfterViewChecked {
         this.name = user.firstName;
         this.surname = user.lastName;
         this.role = user.role;
+        this.loadChatHistory();
       } else {
         this.email = null;
         this.initials = '';
@@ -85,12 +86,38 @@ export class Home implements AfterViewChecked {
     }
   }
 
+  async loadChatHistory() {
+    if (!this.email) return;
+
+    try {
+      const res = await fetch(`http://localhost:5050/chat/get_messages?user_email=${this.email}`);
+      const data = await res.json();
+      if (data.messages) {
+        // Sovrascrive i messaggi attuali con quelli salvati
+        this.messages = data.messages.map((m:any) => ({
+          role: m.sender,
+          text: m.content.text || '',
+          buttons: m.content.buttons || [],
+          image: m.content.image || '',
+          custom: m.content.custom || {},
+          attachment: m.content.attachment || null,
+          time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }));
+      }
+    } catch (err) {
+      console.error("Errore nel caricamento della chat:", err);
+    }
+    this.shouldScroll = true;
+  }
+
   handleMessage(message: any): void {
     this.loading = true;
     this.shouldScroll = true;
     // Controllo d’ingresso
     if (!message || typeof message !== 'object') return;
-
+    
+    this.saveMessageToBackend(message);
+    
     const isBot = message.role === 'bot';
     const isHumanOperatorTrigger = isBot && message.text.toLowerCase().includes('operatore umano');
 
@@ -106,6 +133,39 @@ export class Home implements AfterViewChecked {
 
     // Gestione messaggi utente
     this.handleUserMessage(message);
+  }
+
+  async saveMessageToBackend(message: any) {
+    if (!this.email) return;
+
+    try {
+      await fetch('http://localhost:5050/chat/save_message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_email: this.email,
+          sender: message.role,          // "user" o "bot"
+          type: this.getMessageType(message),
+          content: {
+            text: message.text || '',
+            buttons: message.buttons || [],
+            image: message.image || '',
+            custom: message.custom || {},
+            attachment: message.attachment || null,
+          },
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    } catch (error) {
+      console.error('Errore nel salvataggio del messaggio:', error);
+    }
+  }
+
+  getMessageType(message: any): string {
+    if (message.buttons?.length) return 'buttons';
+    if (message.attachment) return 'file';
+    if (message.custom?.type) return message.custom.type;
+    return 'text';
   }
 
   handleBotMessage(message: any) {
@@ -208,6 +268,7 @@ export class Home implements AfterViewChecked {
 
   booking_room() {
     const message = "Vorrei prenotare una sala riunioni";
+    this.handleMessage(message);
     this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
@@ -215,6 +276,7 @@ export class Home implements AfterViewChecked {
 
   show_bookings() {
     const message = "Mi mostri le mie prenotazioni";
+    this.handleMessage(message);
     this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
@@ -222,6 +284,7 @@ export class Home implements AfterViewChecked {
 
   change_password() {
     const message = "Vorrei cambiare la mia password";
+    this.handleMessage(message);
     this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);
@@ -244,6 +307,7 @@ export class Home implements AfterViewChecked {
     // Estrae una domanda casuale
     const randomIndex = Math.floor(Math.random() * faqs.length);
     const message = faqs[randomIndex];
+    this.handleMessage(message);
     this.insert_message(message);
     this.startTime = Date.now();
     this.sendMessageToChat(message);

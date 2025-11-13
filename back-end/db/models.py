@@ -1,7 +1,7 @@
 # back-end/db/models.py
-from sqlmodel import SQLModel, Field, Column
-from sqlalchemy.dialects.postgresql import JSONB
-from typing import Optional
+from sqlmodel import SQLModel, Field, Column, JSON # type: ignore
+from sqlalchemy.dialects.postgresql import JSONB # type: ignore
+from typing import Optional, Dict, Any
 from datetime import datetime
 import uuid
 
@@ -14,7 +14,6 @@ class User(SQLModel, table=True):
     email: str
     password: str
     role: str
-
 
 class Room(SQLModel, table=True):
     __tablename__ = "rooms"
@@ -34,3 +33,23 @@ class Document(SQLModel, table=True):
     description: Optional[str] = None
     filename: str  # nome file salvato sul server
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ChatSession(SQLModel, table=True):
+    __tablename__ = "chat_sessions"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_email: str = Field(index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_activity: datetime = Field(default_factory=datetime.utcnow)
+    active: bool = Field(default=True)
+
+
+class ChatMessage(SQLModel, table=True):
+    __tablename__ = "chat_messages"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="chat_sessions.id")
+    sender: str
+    type: str = Field(default="text")
+    content: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
