@@ -60,6 +60,7 @@
           [name]="name"
           [surname]="surname"
           (stateChangeLoading)="loading = $event" 
+          (stateChangeWaitingAnswer)="waiting_answer = $event" 
           (stateChangeConversation)="conversationEnded = $event" 
           (botResponse)="handleMessage($event)" 
           [initials]="initials">

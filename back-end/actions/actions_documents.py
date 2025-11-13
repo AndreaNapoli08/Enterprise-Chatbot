@@ -1,6 +1,6 @@
 import os
 from typing import Any, Text, Dict, List
-import re
+import re, requests
 from PyPDF2 import PdfReader # type: ignore
 
 # import per rasa
@@ -91,23 +91,28 @@ class ActionListAvailableDocuments(Action):
 
         # Elenco dei file PDF nella cartella
         pdf_files = [f for f in os.listdir(PDF_DIR) if f.lower().endswith(".pdf")]
+        endpoint = os.getenv("DOCUMENTS_API_URL")
 
-        if not pdf_files:
-            dispatcher.utter_message(text="Non ci sono documenti disponibili al momento.")
+        try:
+            response = requests.get(endpoint, timeout=10)
+            data = response.json()
+        except Exception as e:
+            dispatcher.utter_message(text=f"Errore di connessione al server: {e}")
             return []
 
-        # Crea i bottoni per ogni PDF
         buttons = []
-        for f in pdf_files:
-            title = os.path.splitext(f)[0].replace("_", " ").title()  # es. "policy_aziendale.pdf" -> "Policy Aziendale"
-            payload = f'/choose_document{{"file_name":"{f}"}}'
+
+        for doc in data:
+            title = doc.get("title")
+            filename = doc.get("filename")
+            payload = f'/choose_document{{"file_name":"{filename}"}}'
             buttons.append({"title": title, "payload": payload})
 
-        # Invia il messaggio con i bottoni
         dispatcher.utter_message(
             text="Ecco i documenti disponibili. Dove vuoi che cerco la risposta?",
             buttons=buttons
         )
+    
         return []
     
 # --- Recupero risposte dai documenti ---

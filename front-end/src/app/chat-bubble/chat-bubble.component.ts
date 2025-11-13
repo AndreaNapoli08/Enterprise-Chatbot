@@ -21,6 +21,7 @@ export class ChatBubble {
   @Input() surname: string | null = null;
   @Output() botResponse = new EventEmitter<Message>();
   @Output() stateChangeLoading = new EventEmitter<boolean>();
+  @Output() stateChangeWaitingAnswer = new EventEmitter<boolean>();
   @Output() stateChangeConversation = new EventEmitter<boolean>();
 
   buttonsDisabled = false;
@@ -112,7 +113,6 @@ export class ChatBubble {
 
   sendButtonPayload(payload: string) {
     this.buttonsDisabled = true;
-
     if (payload.startsWith("/choose_document")) {
       const botMessage: Message = {
         text: "Perfetto, cerco subito nei documenti",
@@ -123,6 +123,9 @@ export class ChatBubble {
       };
       this.botResponse.emit(botMessage);
       this.stateChangeLoading.emit(true);
+    }else if(payload.startsWith("/choose_yes") || payload.startsWith("/choose_no")) {
+      this.stateChangeLoading.emit(true);
+      this.stateChangeWaitingAnswer.emit(false);
     }
 
     if (payload === "/yes_close_conversation") {

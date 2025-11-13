@@ -2,6 +2,7 @@
 from sqlmodel import SQLModel, Field, Column
 from sqlalchemy.dialects.postgresql import JSONB
 from typing import Optional
+from datetime import datetime
 import uuid
 
 class User(SQLModel, table=True):
@@ -24,3 +25,12 @@ class Room(SQLModel, table=True):
     capienza: int
     caratteristiche: list[str] = Field(sa_column=Column(JSONB))
     prenotazioni: list[dict] = Field(default_factory=list, sa_column=Column(JSONB))
+
+class Document(SQLModel, table=True):
+    __tablename__ = "documents"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    title: str
+    description: Optional[str] = None
+    filename: str  # nome file salvato sul server
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)

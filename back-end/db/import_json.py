@@ -1,7 +1,7 @@
 import json
 from sqlmodel import Session
 from db.db import engine
-from db.models import User, Room
+from db.models import User, Room, Document
 import os
 
 def import_users():
@@ -41,6 +41,24 @@ def import_rooms():
         session.commit()
     print("✅ Stanze importate con successo!")
 
+def import_documents():
+    DOCUMENTS_FILE = os.path.join(os.path.dirname(__file__), "documents.json")
+    with open(DOCUMENTS_FILE, encoding="utf-8") as f:
+        documents = json.load(f)
+
+    with Session(engine) as session:
+        for document_data in documents:
+            document = Document(
+                title=document_data["title"],
+                description=document_data.get("description"),
+                filename=document_data["filename"],
+                uploaded_at=document_data["uploaded_at"]
+            )
+            session.add(document)
+        session.commit()
+    print("✅ Documenti importati con successo!")
+
 if __name__ == "__main__":
-    import_users()
-    import_rooms()
+    # import_users()
+    # import_rooms()
+    import_documents()

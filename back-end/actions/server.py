@@ -1,19 +1,28 @@
-from flask import Flask, jsonify, request, send_from_directory # type: ignore
-from flasgger import Swagger # type: ignore
-from flask_cors import CORS # type: ignore
+from fastapi import FastAPI, HTTPException # type: ignore
+from fastapi.responses import FileResponse # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from pydantic import BaseModel, EmailStr
+from typing import List
+
 import os, json, uuid
-from actions.utils import hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
+from actions.utils import load_users, hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
 from datetime import datetime, timedelta
 
 # import per il database
-from sqlmodel import Session, select
+from sqlmodel import Session, select # type: ignore
 from db.db import engine
-from db.models import User
-from db.models import Room
+from db.models import User, Room, Document
 
-app = Flask(__name__)
-swagger = Swagger(app)
-CORS(app)  # abilita CORS per tutte le rotte
+app = FastAPI(title="Enterprise Chatbot API", version="1.0.0")
+origins = ["*"] 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],
+)
 
 # cartella dove tieni i PDF
 PDF_DIR = os.path.join(os.path.dirname(__file__), "data/docs")
@@ -22,107 +31,68 @@ PDF_DIR = os.path.join(os.path.dirname(__file__), "data/docs")
 #                     ENDPOINT DOCUMENTI
 # ============================================================
 
-@app.route("/documents/<filename>")
-def serve_pdf(filename):
-    """Serve un documento PDF dalla cartella data/docs"""
-    return send_from_directory(
-        directory=PDF_DIR,
-        path=filename,
-        as_attachment=True
-    )
+@app.get("/documents")
+def list_documents():
+    with Session(engine) as session:
+        docs = session.exec(select(Document)).all()
+        return [
+            {
+                "id": d.id,
+                "title": d.title,
+                "description": d.description,
+                "filename": d.filename
+            } for d in docs
+        ]
+    
+@app.get("/documents/{filename}")
+def serve_pdf(filename: str):
+    """Serve un documento PDF usando l'ID del documento dal database"""
+    with Session(engine) as session:
+        statement = select(Document).where(Document.filename == filename)
+        document = session.exec(statement).first()
+
+        if not document:
+            raise HTTPException(status_code=404, detail="Documento non trovato")
+
+        # Percorso del file fisico
+        file_path = os.path.join(PDF_DIR, document.filename)
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="File fisico non trovato")
+
+        return FileResponse(file_path, filename=document.filename)
 
 # ============================================================
 #                     ENDPOINT UTENTI
 # ============================================================
 
-@app.route("/users", methods=["GET"])
+@app.get("/users")
 def get_users():
-    """
-    Restituisce la lista di tutti gli utenti dal database
-    ---
-    tags:
-      - Utenti
-    responses:
-      200:
-        description: Lista completa degli utenti
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: integer
-                example: 1
-              firstName:
-                type: string
-                example: "Mario"
-              lastName:
-                type: string
-                example: "Rossi"
-              email:
-                type: string
-                example: "mario.rossi@example.com"
-              role:
-                type: string
-                example: "dipendente"
-    """
-    with Session(engine) as session:
-        statement = select(User)
-        users = session.exec(statement).all()
-        users_list = [
-            {
-                "id": u.id,
-                "firstName": u.first_name,
-                "lastName": u.last_name,
-                "email": u.email,
-                "role": u.role
-            } for u in users
-        ]
-        return jsonify(users_list)
+    users = load_users()
+    users_list = [
+        {
+            "id": u.id,
+            "firstName": u.first_name,
+            "lastName": u.last_name,
+            "email": u.email,
+            "role": u.role
+        } for u in users
+    ]
+    return users_list
 
+class CredentialRequest(BaseModel):
+    email: EmailStr
+    password: str
 
-@app.route("/users/login", methods=["POST"])
-def login_user():
-    """
-    Effettua il login di un utente
-    ---
-    tags:
-      - Utenti
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            email:
-              type: string
-              example: mario.rossi@example.com
-            password:
-              type: string
-              example: password123
-    responses:
-      200:
-        description: Login riuscito
-      401:
-        description: Password errata
-      404:
-        description: Utente non trovato
-    """
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+@app.post("/users/login")
+def login_user(data: CredentialRequest):
+    user = get_user_by_email(data.email)
 
-    if not email or not password:
-        return jsonify({"error": "email o password mancante"}), 400
-
-    user = get_user_by_email(email)
     if not user:
-        return jsonify({"error": "Utente non trovato"}), 404
-
+        raise HTTPException(status_code=404, detail="Utente non trovato")
+    
     # verifica la password con la funzione importata da utils
-    if not check_password(password, user.password):
-        return jsonify({"error": "Password errata"}), 401
+    if not check_password(data.password, user.password):
+        raise HTTPException(status_code=401, detail="Password errata")
 
     # accesso riuscito: restituisci le info (senza password)
     user_copy = {
@@ -132,56 +102,14 @@ def login_user():
         "email": user.email,
         "role": user.role
     }
-    return jsonify(user_copy), 200
+    return user_copy
 
 
-@app.route("/users/<email>", methods=["GET"])
-def get_user(email):
-    """
-    Restituisce un singolo utente in base all'email
-    ---
-    tags:
-      - Utenti
-    parameters:
-      - name: email
-        in: path
-        required: true
-        type: string
-        description: Email dell'utente da cercare
-        example: mario.rossi@example.com
-    responses:
-      200:
-        description: Dati dell'utente trovato
-        schema:
-          type: object
-          properties:
-            id:
-              type: integer
-              example: 1
-            firstName:
-              type: string
-              example: "Mario"
-            lastName:
-              type: string
-              example: "Rossi"
-            email:
-              type: string
-              example: "mario.rossi@example.com"
-            role:
-              type: string
-              example: "dipendente"
-      404:
-        description: Utente non trovato
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-              example: "Utente non trovato"
-    """
+@app.get("/users/{email}")
+def get_user(email: str):
     user = get_user_by_email(email)
     if not user:
-        return jsonify({"error": "Utente non trovato"}), 404
+        raise HTTPException(status_code=404, detail="Utente non trovato")
 
     user_copy = {
         "id": user.id,
@@ -190,55 +118,43 @@ def get_user(email):
         "email": user.email,
         "role": user.role
     }
-    return jsonify(user_copy), 200
+    return user_copy
 
-@app.route("/users/verify_password", methods=["POST"])
-def verify_password():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
-
+@app.post("/users/verify_password")
+def verify_password(data: CredentialRequest):
     with Session(engine) as session:
-        statement = select(User).where(User.email == email)
+        statement = select(User).where(User.email == data.email)
         user = session.exec(statement).first()
         if not user:
-            return jsonify({"success": False, "error": "Utente non trovato"}), 404
+            raise HTTPException(status_code=404, detail="Utente non trovato")
 
-        is_correct = check_password(password, user.password)
-        return jsonify({"success": is_correct}), 200
+        is_correct = check_password(data.password, user.password)
+        return {"success": is_correct}
     
-@app.route("/users/update_password", methods=["PATCH"])
-def update_password():
+@app.patch("/users/update_password")
+def update_password(data: CredentialRequest):
     """Aggiorna la password di un utente"""
-    data = request.get_json()
-    email = data.get("email")
-    new_password = data.get("password")
-
-    if not email or not new_password:
-        return jsonify({"error": "email o password mancante"}), 400
-
     with Session(engine) as session:
-        # Recupera l'utente dal DB
-        statement = select(User).where(User.email == email)
+        statement = select(User).where(User.email == data.email)
         user = session.exec(statement).first()
         if not user:
-            return jsonify({"error": "Utente non trovato"}), 404
-
+            raise HTTPException(status_code=404, detail="Utente non trovato")
+        
         # Cifra la nuova password
-        user.password = hash_password(new_password)
+        user.password = hash_password(data.password)
 
         # Salva il cambiamento nel DB
         session.add(user)
         session.commit()
 
-    return jsonify({"message": "Password aggiornata correttamente!"}), 200
+    return {"message": "Password aggiornata con successo"}
 
 
 # ============================================================
 #                     ENDPOINT STANZE
 # ============================================================
 
-@app.route("/rooms", methods=["GET"])
+@app.get("/rooms")
 def get_rooms():
     """Restituisce la lista di tutte le sale con le rispettive caratteristiche"""
     rooms = load_rooms()
@@ -252,66 +168,33 @@ def get_rooms():
             "prenotazioni": u.prenotazioni
         } for u in rooms
     ]
-    return jsonify(rooms_list), 200
+    return rooms_list
         
+class BookRoomRequest(BaseModel):
+    appointment_date: str
+    appointment_hour: str
+    appointment_duration: float
+    person_picker: int
+    room_features: List[str]
+    email: EmailStr
 
-@app.route("/rooms/book", methods=["POST"])
-def book_room():
-    """
-    Effettua una prenotazione di una sala
-    ---
-    tags:
-      - Stanze
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            appointment_date:
-              type: string
-              example: "2025-11-15"
-            appointment_hour:
-              type: string
-              example: "10:00"
-            appointment_duration:
-              type: number
-              example: 2
-            person_picker:
-              type: integer
-              example: 4
-            room_features:
-              type: array
-              items:
-                type: string
-              example: ["proiettore", "lavagna"]
-            email:
-              type: string
-              example: mario.rossi@example.com
-    responses:
-      200:
-        description: Prenotazione effettuata
-      404:
-        description: Nessuna sala disponibile
-    """
-    data = request.get_json()
-
-    appointment_date = data.get("appointment_date")
-    appointment_hour = data.get("appointment_hour")
-    appointment_duration = data.get("appointment_duration")
-    person_picker = data.get("person_picker")
-    room_features = data.get("room_features")
-    email = data.get("email")
+@app.post("/rooms/book")
+def book_room(data: BookRoomRequest):
+    appointment_date = data.appointment_date
+    appointment_hour = data.appointment_hour
+    appointment_duration = data.appointment_duration
+    person_picker = data.person_picker
+    room_features = data.room_features
+    email = data.email
 
     if not all([appointment_date, appointment_hour, appointment_duration, room_features]):
-        return jsonify({"error": "Dati insufficienti per la prenotazione"}), 400
+        raise HTTPException(status_code=400, detail="Dati insufficienti per la prenotazione")
 
     # Parsing data e ora
     try:
         requested_start = parse_datetime(appointment_date, appointment_hour)
     except Exception as e:
-        return jsonify({"error": f"Data/ora non valida: {e}"}), 400
+        raise HTTPException(status_code=400, detail=f"Data/ora non valida: {e}")
 
     requested_end = requested_start + timedelta(hours=float(appointment_duration))
 
@@ -337,14 +220,14 @@ def book_room():
                 try:
                     persone = int(person_picker)
                 except (ValueError, TypeError):
-                    return jsonify({"error": "Numero partecipanti non valido"}), 400
+                    raise HTTPException(status_code=400, detail="Numero partecipanti non valido")
                 
                 if persone <= room.capienza:
                     available_room = room
                     break
 
     if not available_room:
-        return jsonify({"message": "Nessuna sala disponibile con le caratteristiche richieste"}), 404
+        raise HTTPException(status_code=404, detail="Nessuna sala disponibile con le caratteristiche richieste in questo orario.")
 
     prenotazioni = available_room.prenotazioni or []
     booking_id = str(uuid.uuid4())
@@ -381,15 +264,15 @@ def book_room():
         f"Capienza massima: {available_room.capienza} persone."
     )
     #(Opzionale) invia email
-    try:
-        send_gmail_email(email, email_subject, email_body)
-    except Exception as e:
-        response["email_error"] = str(e)
+    # try:
+    #     send_gmail_email(email, email_subject, email_body)
+    # except Exception as e:
+    #     response["email_error"] = str(e)
 
-    return jsonify(response), 200
+    return response
 
-@app.route("/rooms/reservations/<email>", methods=["GET"])
-def get_user_reservations(email):
+@app.get("/rooms/reservations/{email}")
+def get_user_reservations(email: str):
     """Restituisce tutte le prenotazioni associate a un utente (tramite email)"""
     
     rooms = load_rooms()
@@ -409,17 +292,12 @@ def get_user_reservations(email):
                 })
 
     if not prenotazioni_utente:
-        return jsonify({
-            "message": f"Nessuna prenotazione trovata per l'utente {email}"
-        }), 404
+        raise HTTPException(status_code=404, detail="Nessuna prenotazione trovata per questo utente.")
 
-    return jsonify({
-        "email": email,
-        "prenotazioni": prenotazioni_utente
-    }), 200
+    return prenotazioni_utente
 
-@app.route("/rooms/reservations/<reservation_id>", methods=["DELETE"])
-def delete_reservation(reservation_id):
+@app.delete("/rooms/reservations/{reservation_id}")
+def delete_reservation(reservation_id: str):
     """Elimina una prenotazione tramite il suo ID"""
     
     rooms = load_rooms()
@@ -432,22 +310,7 @@ def delete_reservation(reservation_id):
                 prenotazioni.remove(p)
                 found = True
                 save_rooms(room)
-                return jsonify({
-                    "message": f"La prenotazione per {room.name} (n.{room.numero}) è stata cancellata con successo."
-                }), 200
+                return {"message": "Prenotazione eliminata con successo"}
 
     if not found:
-        return jsonify({"error": "Nessuna prenotazione trovata con l'ID fornito."}), 404
-    
-# ============================================================
-#                     AVVIO SERVER
-# ============================================================
-
-def run_flask_server():
-    """Avvia il server Flask"""
-    app.run(host="0.0.0.0", port=5050)
-
-
-if __name__ == "__main__":
-    # Esegui questo file direttamente per avviare il server
-    run_flask_server()
+        raise HTTPException(status_code=404, detail="Nessuna prenotazione trovata con l'ID fornito.")

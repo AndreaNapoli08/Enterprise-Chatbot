@@ -40,6 +40,11 @@ def get_user_by_email(email: str):
         result = session.exec(statement).first()
         return result  # restituisce un oggetto User oppure None
 
+def load_users():
+    with Session(engine) as session:
+        users = session.exec(select(User)).all()
+        return users
+    
 def load_rooms():
     with Session(engine) as session:
         rooms = session.exec(select(Room)).all()
@@ -51,7 +56,7 @@ def save_rooms(available_room: Room):
         if not db_room:
             raise ValueError("Room non trovata nel database")
         db_room.prenotazioni = available_room.prenotazioni
-        
+
         session.add(db_room)
         session.commit()
         session.refresh(db_room)

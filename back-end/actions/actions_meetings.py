@@ -53,7 +53,7 @@ class ActionAvailabilityCheckRoom(Action):
             response = requests.post(endpoint, json=payload, timeout=10)
             data = response.json()
         except Exception as e:
-            dispatcher.utter_message(text=f"⚠️ Errore di connessione al server prenotazioni: {e}")
+            dispatcher.utter_message(text=f"Errore di connessione al server prenotazioni: {e}")
             return []
 
         # Gestione della risposta
@@ -81,8 +81,8 @@ class ActionAvailabilityCheckRoom(Action):
                 text="😞 Mi dispiace, non ci sono sale disponibili con le caratteristiche richieste in questo orario."
             )
         else:
-            error = data.get("error") or data.get("message", "Errore sconosciuto.")
-            dispatcher.utter_message(text=f"⚠️ Errore durante la prenotazione: {error}")
+            error = data.get("detail") or "Errore sconosciuto."
+            dispatcher.utter_message(text=f"Errore durante la prenotazione: {error}")
 
         return []
     
@@ -113,7 +113,7 @@ class ActionGetReservation(Action):
             return []
 
         if response.status_code == 200:
-            prenotazioni = data.get("prenotazioni", [])
+            prenotazioni = data
             dispatcher.utter_message(
                 text=f"📅 Prenotazioni trovate per {user_email}:",
                 json_message={
@@ -152,12 +152,12 @@ class ActionDeleteReservation(Action):
             response = requests.delete(api_url, timeout=10)
             data = response.json()
         except Exception as e:
-            dispatcher.utter_message(text=f"⚠️ Errore di connessione al server: {e}")
+            dispatcher.utter_message(text=f"Errore di connessione al server: {e}")
             return []
 
         if response.status_code == 200:
             dispatcher.utter_message(text=data.get("message", "Prenotazione cancellata con successo."))
         else:
-            dispatcher.utter_message(text=data.get("error", "Non è stato possibile cancellare la prenotazione."))
+            dispatcher.utter_message(text=data.get("detail", "Non è stato possibile cancellare la prenotazione."))
 
         return []
