@@ -7,4 +7,5 @@ export interface Message {
   role: 'user' | 'bot';
   time: string;
   elapsedSeconds?: number | null;
+  disabled?: boolean;
 }

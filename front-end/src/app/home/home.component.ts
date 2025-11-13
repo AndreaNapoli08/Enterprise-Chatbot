@@ -91,7 +91,7 @@ export class Home implements AfterViewChecked {
     this.shouldScroll = true;
     // Controllo d’ingresso
     if (!message || typeof message !== 'object') return;
-    
+
     if(message.text.startsWith("Grazie per aver utilizzato il nostro servizio")){
       this.closeChatSession();
     }
@@ -171,7 +171,8 @@ export class Home implements AfterViewChecked {
           image: m.content.image || '',
           custom: m.content.custom || {},
           attachment: m.content.attachment || null,
-          time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          disabled: !data.active || (m.buttons?.length > 0 || m.custom?.type)
         }));
       }
       if(data.active == false){
