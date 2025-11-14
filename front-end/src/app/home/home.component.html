@@ -13,6 +13,113 @@
     </app-profile>
   </div>
 
+  <!-- Sidebar -->
+  <div class="text-left">
+    <button 
+      class="absolute mt-4 ml-4 py-2 px-4 bg-gray-200 hover:bg-gray-300 focus:bg-gray-400 
+            dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 
+            text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
+            font-semibold rounded-xl shadow transition duration-200 
+            disabled:opacity-50 disabled:cursor-not-allowed" 
+      type="button" 
+      (click)="openDrawer()"
+    >
+      <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 10 1.99994 1.9999-1.99994 2M11 5v14m-7 0h16c.5523 0 1-.4477 1-1V6c0-.55228-.4477-1-1-1H4c-.55228 0-1 .44772-1 1v12c0 .5523.44772 1 1 1Z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- drawer component -->
+  <div #drawer id="drawer-navigation" class="fixed top-0 left-0 z-40 w-64 h-screen p-4 transition-transform -translate-x-full dark:bg-gray-800 bg-gray-200 border-e border-default" aria-labelledby="drawer-navigation-label">
+    <div class="border-b border-default pb-4 flex items-center">
+        <button 
+          class="py-2 px-4 bg-gray-200 dark:hover:bg-gray-600  
+                 dark:bg-gray-800 hover:bg-gray-300
+                text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
+                font-semibold rounded-xl shadow transition duration-200 
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          type="button"
+        >
+          <svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" 
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" 
+                  d="M8 10h.01M12 10h.01M16 10h.01M7 16h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3Zm8 4v-4m0 0h4m-4 0h-4" />
+          </svg>
+          <span>Nuova chat</span>
+        </button>
+
+        <button (click)="closeDrawer()" type="button" class="dark:text-white bg-transparent dark:hover:bg-gray-600 hover:bg-gray-300 hover:rounded-xl w-9 h-9 absolute top-2.5 end-2.5 flex items-center justify-center">
+          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>
+          <span class="sr-only">Close menu</span>
+        </button>
+    </div>
+    <div class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[90vh] py-5 overflow-y-auto">
+      <span class="dark:text-gray-400">Chat</span>
+      <ul class="mt-1 space-y-2 font-medium">
+        <li *ngFor="let title of chatTitles; let i = index">
+          <div class="group flex items-center relative">
+            <!-- Bottone della chat -->
+            <button 
+              class="w-full py-2 px-2 pr-8 bg-gray-200 dark:bg-gray-800 
+                    text-gray-900 dark:text-white font-semibold rounded-xl shadow 
+                    transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                    hover:bg-gray-300 dark:hover:bg-gray-600 text-left truncate overflow-hidden whitespace-nowrap"
+              type="button"
+            >
+              {{ title }}
+            </button>
+
+            <!-- Bottone dei 3 puntini -->
+            <button
+              #menuTrigger
+              (click)="openDropdown($event, menuTrigger, i)"
+              [class.opacity-100]="openMenu === i"
+              class="absolute right-1 p-1.5 rounded-lg 
+                    text-gray-900 dark:text-white shadow
+                    opacity-0 group-hover:opacity-100 
+                    hover:bg-gray-300 dark:hover:bg-gray-600
+                    transition duration-150"
+              type="button"
+            >
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" 
+                  fill="currentColor" viewBox="0 0 20 20">
+                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!-- MENU DROPDOWN -->
+  <div
+    *ngIf="openMenu !== null"
+    [ngStyle]="{
+      top: dropdownTop + 'px',
+      left: dropdownLeft + 'px'
+    }"
+    class="fixed z-[9999] bg-white divide-y divide-gray-100 
+          rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-40"
+  >
+    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+      <li>
+        <button class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+          Rinomina
+        </button>
+      </li>
+      <li>
+        <button class="w-full text-left block px-4 py-2 text-red-600 dark:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600">
+          Elimina
+        </button>
+      </li>
+    </ul>
+  </div>
+
+
+
+
+  <!-- Contenuto principale della home -->
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden pt-20">
     <div class="flex flex-1 flex-col max-w-3xl w-full mx-auto px-4 mb-3 transition-transform">
       <!-- Messaggio di benvenuto -->
