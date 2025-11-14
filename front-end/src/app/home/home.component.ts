@@ -89,13 +89,14 @@ export class Home implements AfterViewChecked {
   handleMessage(message: any): void {
     this.loading = true;
     this.shouldScroll = true;
+
+    console.log('Messaggio ricevuto:', message);
     // Controllo d’ingresso
     if (!message || typeof message !== 'object') return;
 
     if(message.text.startsWith("Grazie per aver utilizzato il nostro servizio")){
       this.closeChatSession();
     }
-
     this.saveMessageToBackend(message);
     
     const isBot = message.role === 'bot';
@@ -172,7 +173,7 @@ export class Home implements AfterViewChecked {
           custom: m.content.custom || {},
           attachment: m.content.attachment || null,
           time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          disabled: !data.active || (m.buttons?.length > 0 || m.custom?.type)
+          disabled: true
         }));
       }
       if(data.active == false){
@@ -283,34 +284,53 @@ export class Home implements AfterViewChecked {
     });
   }
 
-  insert_message(message: string) {
-    this.messages.push(
-      { text: message, role: 'user', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-    });
-  }
-
   booking_room() {
-    const message = "Vorrei prenotare una sala riunioni";
+    const text = "Vorrei prenotare una sala riunioni";
+    const message = {
+      text,
+      role: 'user',
+      buttons: [],
+      image: '',
+      custom: {},
+      attachment: null,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
     this.handleMessage(message);
-    this.insert_message(message);
     this.startTime = Date.now();
-    this.sendMessageToChat(message);
+    this.sendMessageToChat(text);
   }
 
   show_bookings() {
-    const message = "Mi mostri le mie prenotazioni";
+    const text = "Mi mostri le mie prenotazioni";
+    const message = {
+      text,
+      role: 'user',
+      buttons: [],
+      image: '',
+      custom: {},
+      attachment: null,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
     this.handleMessage(message);
-    this.insert_message(message);
     this.startTime = Date.now();
-    this.sendMessageToChat(message);
+    this.sendMessageToChat(text);
   }
 
   change_password() {
-    const message = "Vorrei cambiare la mia password";
+    const text = "Vorrei cambiare la mia password";
+    const message = {
+      text,
+      role: 'user',
+      buttons: [],
+      image: '',
+      custom: {},
+      attachment: null,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
     this.handleMessage(message);
-    this.insert_message(message);
     this.startTime = Date.now();
-    this.sendMessageToChat(message);
+    this.sendMessageToChat(text);
   }
 
   frequently_asked_questions() {
@@ -329,11 +349,19 @@ export class Home implements AfterViewChecked {
 
     // Estrae una domanda casuale
     const randomIndex = Math.floor(Math.random() * faqs.length);
-    const message = faqs[randomIndex];
+    const text = faqs[randomIndex];
+    const message = {
+      text,
+      role: 'user',
+      buttons: [],
+      image: '',
+      custom: {},
+      attachment: null,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
     this.handleMessage(message);
-    this.insert_message(message);
     this.startTime = Date.now();
-    this.sendMessageToChat(message);
+    this.sendMessageToChat(text);
   }
 
 }

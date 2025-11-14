@@ -267,10 +267,10 @@ def book_room(data: BookRoomRequest):
         f"Capienza massima: {available_room.capienza} persone."
     )
     #(Opzionale) invia email
-    # try:
-    #     send_gmail_email(email, email_subject, email_body)
-    # except Exception as e:
-    #     response["email_error"] = str(e)
+    try:
+        send_gmail_email(email, email_subject, email_body)
+    except Exception as e:
+        response["email_error"] = str(e)
 
     return response
 
@@ -313,7 +313,7 @@ def delete_reservation(reservation_id: str):
                 prenotazioni.remove(p)
                 found = True
                 save_rooms(room)
-                return {"message": "Prenotazione eliminata con successo"}
+                return {"message": f"Prenotazione per {room.name} (n.{room.numero}) eliminata con successo"}
 
     if not found:
         raise HTTPException(status_code=404, detail="Nessuna prenotazione trovata con l'ID fornito.")
@@ -380,7 +380,7 @@ def get_messages(user_email: str, session: Session = Depends(get_session)):
 
     # Recupera tutti i messaggi della sessione
     messages = session.exec(
-        select(ChatMessage).where(ChatMessage.session_id == chat_session.id)
+        select(ChatMessage).where(ChatMessage.session_id == chat_session.id).order_by(ChatMessage.timestamp.asc())
     ).all()
 
     # Trasforma in un formato JSON-friendly
