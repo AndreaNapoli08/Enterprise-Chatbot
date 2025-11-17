@@ -1,44 +1,38 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { take } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { ChatSession } from '../interfaces/chatSession';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'sidebar',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrls: ['./sidebar.component.css']
 })
 export class Sidebar {
+  @Input() sessions: any;
   @ViewChild('drawer') drawer!: ElementRef;
+  @ViewChild('renameInputField') renameInputField!: ElementRef<HTMLInputElement>;
+
+  constructor( 
+    private authService: AuthService, 
+    private router: Router
+  ) {}
 
   // menu rinomina o cancella chat
   openMenu: number | null = null;
   dropdownTop = 0;
   dropdownLeft = 0;
+  showRenameModal: boolean = false;
+  currentSessionToRename: any = null;
+  renameInput: string = "";
 
-  // simulazione diverse chat
-  chatTitles: string[] = [
-    'Prenotazione stanza',
-    'Supporto clienti',
-    'Help Desk',
-    'Ordine prodotto',
-    'Aggiornamento spedizione',
-    'Appuntamento medico',
-    'Check-in hotel',
-    'Risoluzione problemi',
-    'Conferma prenotazione',
-    'Pagamenti e fatture',
-    'Promozioni e offerte',
-    'Resi e rimborsi',
-    'Riunione progetto',
-    'Task e attività',
-    'Annunci aziendali',
-    'Brainstorming team',
-    'Chat familiare',
-    'Gruppo amici',
-    'Suggerimenti',
-    'Domande frequenti'
-  ];
-
+  showDeleteModal: boolean = false;
+  currentSessionToDelete: any = null;
+  
   openDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.remove('-translate-x-full');
@@ -75,4 +69,81 @@ export class Sidebar {
   close() {
     this.openMenu = null;
   }
+
+  // Metodo per aprire il modale
+  openRenameModal(session: ChatSession) {
+    this.currentSessionToRename = session;
+    this.showRenameModal = true;
+    this.renameInput = session.title && session.title.trim() !== "" 
+    ? session.title 
+    : session.id;
+
+    setTimeout(() => {
+      this.renameInputField.nativeElement.focus();
+      this.renameInputField.nativeElement.select(); 
+    }, 0);
+  }
+
+  closeRenameModal() {
+    this.showRenameModal = false;
+    this.currentSessionToRename = null;
+  }
+
+  renameSession() {
+    if (!this.currentSessionToRename) return;
+
+    const sessionId = this.currentSessionToRename.id;
+    const newTitle = this.renameInput.trim();
+
+    fetch(`http://localhost:5050/chat/update_session_title/${sessionId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_title: newTitle })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Errore durante l’update");
+      return res.json();
+    })
+    .then(data => {
+      console.log("Titolo aggiornato nel DB:", data);
+
+      // Aggiorna la UI locale
+      this.currentSessionToRename!.title = newTitle;
+
+      // Chiudi modale
+      this.closeRenameModal();
+    })
+    .catch(err => {
+      console.error("Errore update title:", err);
+    });
+  }
+
+  openDeleteModal(session: ChatSession) {
+    this.showDeleteModal = true;
+    this.currentSessionToDelete = session;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.currentSessionToDelete = null;
+  }
+
+  deleteSession(sessionId: string) {
+    fetch(`http://localhost:5050/chat/delete_session/${sessionId}`, {
+      method: 'DELETE'
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Errore nell'eliminazione");
+      return res.json();
+    })
+    .then(() => {
+      // Aggiorno localmente l'elenco delle sessioni
+      this.sessions = this.sessions.filter((s: ChatSession) => s.id !== sessionId);
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate(['/home']);
+      });
+    })
+    .catch(err => console.error(err));
+  }
+
 }

@@ -37,8 +37,9 @@ class Document(SQLModel, table=True):
 class ChatSession(SQLModel, table=True):
     __tablename__ = "chat_sessions"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
     user_email: str = Field(index=True)
+    title: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_activity: datetime = Field(default_factory=datetime.utcnow)
     active: bool = Field(default=True)
@@ -48,7 +49,7 @@ class ChatMessage(SQLModel, table=True):
     __tablename__ = "chat_messages"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    session_id: int = Field(foreign_key="chat_sessions.id")
+    session_id: Optional[uuid.UUID] = Field(foreign_key="chat_sessions.id")
     sender: str
     type: str = Field(default="text")
     content: Dict[str, Any] = Field(sa_column=Column(JSONB))

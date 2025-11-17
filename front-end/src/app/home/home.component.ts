@@ -32,7 +32,9 @@ export class Home implements AfterViewChecked {
   reservationInProgress = false;
   conversationEnded = false;
   human_operator = false;
+
   empty_input = true;
+  sessions: any[] = [];
 
   // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
   long_waiting = false;
@@ -55,6 +57,7 @@ export class Home implements AfterViewChecked {
   ) {}
 
   ngOnInit() {
+    this.getSession();
     // Ottieni l'utente corrente dal backend
     this.authService.getCurrentUser().subscribe(user => {
       if (user && typeof user !== 'string') { 
@@ -68,6 +71,24 @@ export class Home implements AfterViewChecked {
         this.email = null;
         this.initials = '';
       }
+    });
+  }
+
+  getSession() {
+    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
+      if (!user) return;
+      const email = user.email;
+
+      fetch(`http://localhost:5050/chat/get_sessions/${email}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Errore nella richiesta');
+          return response.json(); 
+        })
+        .then(sessions => {
+          this.sessions = sessions;
+          console.log('Sessioni recuperate:', this.sessions);
+        })
+        .catch(err => console.error('Errore nel recuperare le sessioni:', err));
     });
   }
 
@@ -92,6 +113,7 @@ export class Home implements AfterViewChecked {
   handleMessage(message: any): void {
     this.loading = true;
     this.shouldScroll = true;
+    this.getSession();
 
     console.log('Messaggio ricevuto:', message);
     // Controllo d’ingresso
@@ -384,5 +406,5 @@ export class Home implements AfterViewChecked {
     this.closeChatSession();
     this.conversationEnded = true;
   }
-
+  
 }

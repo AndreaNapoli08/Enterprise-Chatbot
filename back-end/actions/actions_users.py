@@ -103,5 +103,5 @@ class ActionChangePassword(Action):
             dispatcher.utter_message(text="Errore durante l'aggiornamento della password.")
             return []
 
-        dispatcher.utter_message(text="La password è stata modificata con successo.")
+        dispatcher.utter_message(text="✅La password è stata modificata con successo.")
         return []
