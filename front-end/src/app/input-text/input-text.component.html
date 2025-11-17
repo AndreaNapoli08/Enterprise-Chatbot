@@ -1,10 +1,18 @@
-<div *ngIf="conversationEnded === true" class="flex flex-col items-center mb-2">
-  <p class="text-sm text-gray-800 dark:text-gray-400 text-center">
-    La conversazione è terminata. Per ulteriori domande crea un'altra conversazione
-  </p>
+<div *ngIf="conversationEnded === true" class="flex items-center justify-center gap-2">
+  <span class="text-sm text-gray-800 dark:text-gray-400 text-center">
+    La conversazione è terminata. Per ulteriori domande
+  </span>
+  <button
+    class="text-xs px-2 py-2 bg-gray-200 dark:hover:bg-gray-600  
+          dark:bg-gray-800 hover:bg-gray-400
+          text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
+          font-semibold rounded-xl shadow transition duration-200"
+  >
+    Nuova chat
+  </button>
 </div>
 
-<form (ngSubmit)="onSubmit()" class="flex items-center">
+<form (ngSubmit)="onSubmit()" *ngIf="conversationEnded === false" class="flex items-center">
   <label for="simple-search" class="sr-only">Ask me something...</label>
   
   <textarea
@@ -12,6 +20,7 @@
     id="answer"
     name="answer"
     [(ngModel)]="answer"
+    (ngModelChange)="onTextChange($event)"
     [disabled]="disabled || conversationEnded"
     rows="1"
     (keydown.enter)="onSubmit(); $event.preventDefault()"

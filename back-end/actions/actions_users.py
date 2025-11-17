@@ -85,11 +85,11 @@ class ActionChangePassword(Action):
             verify_response.raise_for_status()
             is_correct = verify_response.json().get("success", False)
         except Exception:
-            dispatcher.utter_message(text="Errore nel verificare la vecchia password.")
+            dispatcher.utter_message(text="Errore nel verificare la password corrente.")
             return []
 
         if not is_correct:
-            dispatcher.utter_message(text="La vecchia password non è corretta.")
+            dispatcher.utter_message(text="La password corrente non è corretta.")
             return []
 
         # Aggiorna la password con il backend

@@ -31,6 +31,7 @@ export class Home implements AfterViewChecked {
   reservationInProgress = false;
   conversationEnded = false;
   human_operator = false;
+  empty_input = true;
 
   // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
   long_waiting = false;
@@ -277,6 +278,8 @@ export class Home implements AfterViewChecked {
       this.startLongWaiting();
       this.startTime = Date.now();
     }
+    this.empty_input = true;
+    this.shouldScroll = true;
 
     const interactiveTypes = [
       'date_picker',
@@ -430,6 +433,22 @@ export class Home implements AfterViewChecked {
     this.handleMessage(message);
     this.startTime = Date.now();
     this.sendMessageToChat(text);
+  }
+
+  closeConversation() {
+    const text = "Grazie per aver utilizzato il nostro servizio. Buona giornata!";
+    const message = {
+      text,
+      role: 'bot',
+      buttons: [],
+      image: '',
+      custom: {},
+      attachment: null,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    this.handleMessage(message);
+    this.closeChatSession();
+    this.conversationEnded = true;
   }
 
 }

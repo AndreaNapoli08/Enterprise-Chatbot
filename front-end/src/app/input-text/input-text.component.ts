@@ -20,6 +20,7 @@ export class InputText {
   @ViewChild('textarea') textarea!: ElementRef<HTMLTextAreaElement>;
   @Input() conversationEnded = false;
   @Input() humanOperator = false;
+  @Output() stateEmptyInput = new EventEmitter<boolean>();
 
   constructor(private chatService: ChatService, private authService: AuthService) {}
   
@@ -37,6 +38,11 @@ export class InputText {
         this.textarea?.nativeElement.focus();
       }, 0);
     }
+  }
+
+  onTextChange(value: string) {
+    console.log('Input text changed:', value);
+    this.stateEmptyInput.emit(value.trim().length === 0);
   }
 
   onSubmit() {

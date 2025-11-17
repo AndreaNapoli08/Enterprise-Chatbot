@@ -33,7 +33,7 @@ export class ChatBubble {
   uniqueId = Math.random().toString(36).substring(2, 9);
   peopleCount = 1;
   passwordFields = [
-    { key: 'old', label: 'Vecchia password', model: 'oldPassword' },
+    { key: 'old', label: 'Password corrente', model: 'oldPassword' },
     { key: 'new', label: 'Nuova password', model: 'newPassword' }
   ];
   passwordVisibility: { [key: string]: boolean } = {
