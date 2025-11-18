@@ -392,7 +392,7 @@ def save_message(session_id: str, payload: dict):
             "session_id": session_id 
         }
 
-@app.get("/chat/get_messages")
+@app.get("/chat/get_messages/{session_id}")
 def get_messages(session_id: str):
     with Session(engine) as session:
         # Recupera la sessione attiva dell'utente
@@ -423,7 +423,7 @@ def get_messages(session_id: str):
 
         return {"messages": messages_list, "active": chat_session.active}
 
-@app.post("/chat/close_session")
+@app.post("/chat/close_session/{session_id}")
 def close_session(session_id: str):
     """
     Chiude la sessione attiva dell'utente impostando active=False.

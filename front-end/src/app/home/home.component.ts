@@ -151,7 +151,7 @@ export class Home implements AfterViewChecked {
       if (!user) return;
       const email = user.email;
 
-      fetch(`http://localhost:5050/chat/close_session?session_id=${this.current_session}`, {
+      fetch(`http://localhost:5050/chat/close_session/${this.current_session}`, {
         method: 'POST'
       })
       .then(() => {
@@ -201,7 +201,7 @@ export class Home implements AfterViewChecked {
     if (!this.email) return;
 
     try {
-      const res = await fetch(`http://localhost:5050/chat/get_messages?session_id=${sessionId}`);
+      const res = await fetch(`http://localhost:5050/chat/get_messages/${sessionId}`);
       const data = await res.json();
       if (data.messages) {
         // Sovrascrive i messaggi attuali con quelli salvati
@@ -213,7 +213,7 @@ export class Home implements AfterViewChecked {
           custom: m.content.custom || {},
           attachment: m.content.attachment || null,
           time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          disabled: true
+          disabled: !data.active
         }));
       }
       if(data.active == false){
