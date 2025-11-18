@@ -17,153 +17,220 @@ import { Sidebar } from '../sidebar/sidebar.component';
   styleUrls: ['./home.component.css']
 })
 export class Home implements AfterViewChecked {
-  // dati utente
+  /* ----------------- USER DATA ----------------- */
   email: string | null = null;
-  initials: string = '';
   name: string | null = null;
   surname: string | null = null;
+  initials = '';
   role: string | null = null;
-  // chat
+
+  /* ----------------- CHAT STATE ---------------- */
   messages: Message[] = [];
-  shouldScroll = false;
-  loading = false;
-  buttons = false;
-  waiting_answer = false;
-  reservationInProgress = false;
+  sessions: any[] = [];
+  current_session = '';
   conversationEnded = false;
   human_operator = false;
-
+  reservationInProgress = false;
+  shouldScroll = false;
+  loading = false;
+  waiting_answer = false;
   empty_input = true;
-  sessions: any[] = [];
-  current_session = "";
 
-  // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
+  /* ----------------- LONG WAITING INDICATOR ----- */
   long_waiting = false;
   long_waiting_text = '';
+  waitingTexts = [
+    'Sto pensando...',
+    'Lettura dei documenti...',
+    'Sto cercando una risposta...',
+  ];
   longWaitTimer: any = null;
   textChangeTimer: any = null;
   textIndex = 0;
   startTime = 0;
-  waitingTexts = [
-    'Sto pensando...',
-    'Lettura dei documenti...',
-    'Sto cercando una risposta...'
-  ];
 
-  @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
   constructor(
-    private authService: AuthService,
+    private auth: AuthService,
     private chatService: ChatService
   ) {}
 
+  /* ------------------------------------------------------*/
+  /*  INIZIALIZZAZIONE COMPONENTE                          */
+  /*  -----------------------------------------------------*/
+  
   ngOnInit() {
-    this.getSession();
-    // Ottieni l'utente corrente dal backend
-    this.authService.getCurrentUser().subscribe(user => {
-      if (user && typeof user !== 'string') { 
-        this.email = user.email;
-        this.initials = this.getInitialsFromEmail(this.email);
-        this.name = user.firstName;
-        this.surname = user.lastName;
-        this.role = user.role;
-        //this.loadChatHistory();
-      } else {
-        this.email = null;
-        this.initials = '';
-      }
+    this.loadUser();
+    this.getSessions();
+  }
+
+  loadUser() {
+    this.auth.getCurrentUser().subscribe((u) => {
+      if (!u || typeof u === 'string') return;
+
+      this.email = u.email;
+      this.name = u.firstName;
+      this.surname = u.lastName;
+      this.role = u.role;
+      this.initials = this.getInitialsFromEmail(this.email);
     });
   }
 
-  getSession() {
-    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
+  /* -------------------------------------------------------- */
+  /*  SESSIONS                                                */
+  /* -------------------------------------------------------- */
+
+  getSessions() {
+    this.auth.getCurrentUser().pipe(take(1)).subscribe((user) => {
       if (!user) return;
-      const email = user.email;
 
-      fetch(`http://localhost:5050/chat/get_sessions/${email}`)
-        .then(response => {
-          if (response.status === 404) {
-            return []; // non  un errore, vuol dire solo che l'utente non ha chat attualmente
-          }
-          if (!response.ok) throw new Error('Errore nella richiesta');
-          return response.json(); 
-        })
-        .then(sessions => {
-          this.sessions = sessions;
-          console.log('Sessioni recuperate:', this.sessions);
-        })
-        .catch(err => console.error('Errore nel recuperare le sessioni:', err));
+      fetch(`http://localhost:5050/chat/get_sessions/${user.email}`)
+        .then((res) => (res.status === 404 ? [] : res.json()))
+        .then((s) => (this.sessions = s))
+        .catch((e) => console.error('Errore sessioni:', e));
     });
   }
 
-  ngAfterViewChecked(): void {
-    if (this.shouldScroll) {
-      this.scrollToBottom();
-      this.shouldScroll = false;
-    }
+  closeChatSession() {
+    fetch(`http://localhost:5050/chat/close_session/${this.current_session}`, {
+      method: 'POST',
+    }).catch((e) =>
+      console.error('Errore nel chiudere la sessione:', e)
+    );
   }
 
-  scrollToBottom(): void {
+  async loadChatHistory(sessionId: string) {
+    this.current_session = sessionId;
+
     try {
-      this.scrollContainer.nativeElement.scroll({
-        top: this.scrollContainer.nativeElement.scrollHeight,
-        behavior: 'smooth'
-      });
+      const res = await fetch(
+        `http://localhost:5050/chat/get_messages/${sessionId}`
+      );
+      const data = await res.json();
+
+      this.messages = data.messages?.map((m: any) => ({
+        role: m.sender,
+        text: m.content.text,
+        buttons: m.content.buttons,
+        image: m.content.image,
+        custom: m.content.custom,
+        attachment: m.content.attachment,
+        time: new Date(m.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        disabled: !data.active,
+      }));
+
+      this.conversationEnded = !data.active;
+      this.shouldScroll = true;
     } catch (err) {
-      console.warn('Scroll error:', err);
+      console.error('Errore caricando chat:', err);
     }
   }
 
-  handleMessage(message: any): void {
+  /* -------------------------------------------------------- */
+  /*  MESSAGE HELPERS                                         */
+  /* -------------------------------------------------------- */
+
+  createMessage(text: string | undefined, role: 'user' | 'bot'): Message {
+    return {
+      text,
+      role,
+      buttons: [],
+      image: '',
+      custom: {},
+      attachment: undefined,
+      time: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    };
+  }
+
+  getMessageType(m: any): string {
+    if (m.buttons?.length) return 'buttons';
+    if (m.attachment) return 'file';
+    if (m.custom?.type) return m.custom.type;
+    return 'text';
+  }
+
+  /* -------------------------------------------------------- */
+  /*  HANDLE INCOMING MESSAGE                                 */
+  /* -------------------------------------------------------- */
+
+  handleMessage(message: Message): void {
     this.loading = true;
     this.shouldScroll = true;
-    this.getSession();
+    this.getSessions();
 
-    console.log('Messaggio ricevuto:', message);
-    // Controllo d’ingresso
     if (!message || typeof message !== 'object') return;
 
-    if(message.text.startsWith("Grazie per aver utilizzato il nostro servizio")){
+    if(message.text?.startsWith("Grazie per aver utilizzato il nostro servizio")){
       this.closeChatSession();
     }
+
     console.log(message);
     this.saveMessageToBackend(message);
-    
+
     const isBot = message.role === 'bot';
-    const isHumanOperatorTrigger = isBot && message.text.toLowerCase().includes('operatore umano');
+    const isHumanOperatorTrigger = isBot && message.text?.toLowerCase().includes('operatore umano');
 
     if (isHumanOperatorTrigger) {
       this.human_operator = true;
     }
 
-    // Gestione messaggi del bot
     if (isBot) {
       this.handleBotMessage(message);
       return;
     }
 
-    // Gestione messaggi utente
     this.handleUserMessage(message);
   }
 
-  closeChatSession() {
-    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      if (!user) return;
-      const email = user.email;
+   handleBotMessage(message: Message) {
+    this.resetLongWait();
 
-      fetch(`http://localhost:5050/chat/close_session/${this.current_session}`, {
-        method: 'POST'
-      })
-      .then(() => {
-        console.log('Chat session chiusa');
-      })
-      .catch(err => console.error('Errore nel chiudere la sessione:', err));
+    const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+
+    this.messages.push({
+      ...message,
+      elapsedSeconds: elapsedSeconds > 20 ? elapsedSeconds : null,
     });
+
+    this.waiting_answer = !!message.buttons?.length;
+    this.loading = this.waiting_answer;
+
+    if (message.text === 'Perfetto, cerco subito nei documenti') {
+      this.startLongWaiting();
+      this.startTime = Date.now();
+    }
+
+    this.empty_input = true;
+    this.shouldScroll = true;
+
+    const interactiveTypes = [
+      'date_picker',
+      'number_partecipants',
+      'features_meeting_room',
+      'change_password',
+    ];
+
+    this.reservationInProgress = interactiveTypes.includes(message.custom?.type ?? '');
   }
 
-  async saveMessageToBackend(message: any) {
-    if (!this.email) return;
+  handleUserMessage(message: Message) {
+    this.messages.push(message);
+    this.startTime = Date.now();
+    this.startLongWaiting();
+  }
 
+  /* ------------------------------------------------------*/
+  /*  SALVATAGGIO MESSAGGI NEL BACKEND                     */ 
+  /* ------------------------------------------------------*/
+
+  async saveMessageToBackend(message: Message) {
     try {
       const res = await fetch(`http://localhost:5050/chat/save_message/${this.current_session}`, {
         method: 'POST',
@@ -185,7 +252,6 @@ export class Home implements AfterViewChecked {
 
       const data = await res.json();
 
-      // 🔥 se è stata creata una nuova sessione → aggiornala
       if (data.session_id && this.current_session !== data.session_id) {
         this.current_session = data.session_id;
       }
@@ -195,80 +261,9 @@ export class Home implements AfterViewChecked {
     }
   }
 
-
-  async loadChatHistory(sessionId: string) {
-    this.current_session = sessionId;
-    if (!this.email) return;
-
-    try {
-      const res = await fetch(`http://localhost:5050/chat/get_messages/${sessionId}`);
-      const data = await res.json();
-      if (data.messages) {
-        // Sovrascrive i messaggi attuali con quelli salvati
-        this.messages = data.messages.map((m:any) => ({
-          role: m.sender,
-          text: m.content.text || '',
-          buttons: m.content.buttons || [],
-          image: m.content.image || '',
-          custom: m.content.custom || {},
-          attachment: m.content.attachment || null,
-          time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          disabled: !data.active
-        }));
-      }
-      if(data.active == false){
-        this.conversationEnded = true;
-      }else{
-        this.conversationEnded = false;
-      }
-    } catch (err) {
-      console.error("Errore nel caricamento della chat:", err);
-    }
-    this.shouldScroll = true;
-  }
-
-  getMessageType(message: any): string {
-    if (message.buttons?.length) return 'buttons';
-    if (message.attachment) return 'file';
-    if (message.custom?.type) return message.custom.type;
-    return 'text';
-  }
-
-  handleBotMessage(message: any) {
-    this.resetLongWait();
-
-    const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
-
-    this.messages.push({
-      ...message,
-      elapsedSeconds: elapsedSeconds > 20 ? elapsedSeconds : null,
-    });
-
-    this.waiting_answer = message.buttons?.length > 0;
-    this.loading = this.waiting_answer;
-
-    if (message.text === 'Perfetto, cerco subito nei documenti') {
-      this.startLongWaiting();
-      this.startTime = Date.now();
-    }
-    this.empty_input = true;
-    this.shouldScroll = true;
-
-    const interactiveTypes = [
-      'date_picker',
-      'number_partecipants',
-      'features_meeting_room',
-      'change_password',
-    ];
-
-    this.reservationInProgress = interactiveTypes.includes(message.custom?.type);
-  }
-
-  handleUserMessage(message: any) {
-    this.messages.push(message);
-    this.startTime = Date.now();
-    this.startLongWaiting();
-  }
+  /* -------------------------------------------------------- */
+  /*  LONG WAITING                                            */
+  /* -------------------------------------------------------- */
 
   resetLongWait() {
     clearTimeout(this.longWaitTimer);
@@ -277,151 +272,117 @@ export class Home implements AfterViewChecked {
     this.long_waiting_text = '';
   }
 
-  // Funzione di utilità per avviare l'indicatore di "attesa prolungata"
   startLongWaiting (delay = 20000, interval = 10000) {
     clearTimeout(this.longWaitTimer);
     clearInterval(this.textChangeTimer);
     this.longWaitTimer = setTimeout(() => {
       this.long_waiting = true;
       this.textIndex = 0;
-      this.long_waiting_text = this.waitingTexts[this.textIndex];
+      this.long_waiting_text = this.waitingTexts[0];
 
       this.textChangeTimer = setInterval(() => {
         this.textIndex = (this.textIndex + 1) % this.waitingTexts.length;
         this.long_waiting_text = this.waitingTexts[this.textIndex];
       }, interval);
     }, delay);
-  };
-
-  getInitialsFromEmail(email: string | null): string {
-    if (!email) return '';
-    const [name] = email.split('@');
-    return name
-      .split('.')
-      .map(part => part[0]?.toUpperCase())
-      .join('') || name[0].toUpperCase();
   }
 
-  sendMessageToChat(message: string) {
-    this.loading = true;
-    this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
-      if (!user) {
-        console.error('Nessun utente loggato');
-        return;
-      }
 
-      const email = user.email;
-      this.chatService.sendMessage(message, email).pipe(take(1)).subscribe(responses => {
-        responses.forEach(resp => {
-          const botMessage: Message = {
-            text: resp.text || '',
-            image: resp.image || '',
-            custom: resp.custom || {},
-            buttons: resp.buttons || [],
-            attachment: resp.attachment || undefined,
-            role: 'bot',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          };
-          this.handleMessage(botMessage);
+  /* ------------------------------------------------------*/
+  /*  INVIO MESSAGGI ALLA CHATBOT                          */  
+  /*  -----------------------------------------------------*/
+
+  sendMessageToChat(text: string) {
+    this.loading = true;
+    this.auth.getCurrentUser().pipe(take(1)).subscribe((user) => {
+      if (!user) return;
+
+      this.chatService.sendMessage(text, user.email).pipe(take(1)).subscribe((res) => {
+        res.forEach((r) => {
+          const msg = this.createMessage(r.text, 'bot');
+          msg.buttons = r.buttons || [];
+          msg.custom = r.custom || {};
+          msg.image = r.image || '';
+          msg.attachment = r.attachment;
+          this.handleMessage(msg);
         });
       });
     });
   }
 
-  booking_room() {
-    const text = "Vorrei prenotare una sala riunioni";
-    const message = {
-      text,
-      role: 'user',
-      buttons: [],
-      image: '',
-      custom: {},
-      attachment: null,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+  /* -------------------------------------------------------- */
+  /*  QUICK ACTIONS (COMPATTATE)                              */
+  /* -------------------------------------------------------- */
 
-    this.handleMessage(message);
+  quickSend(text: string) {
+    this.handleMessage(this.createMessage(text, 'user'));
     this.startTime = Date.now();
     this.sendMessageToChat(text);
+  }
+
+  booking_room() {
+    this.quickSend('Vorrei prenotare una sala riunioni');
   }
 
   show_bookings() {
-    const text = "Mi mostri le mie prenotazioni";
-    const message = {
-      text,
-      role: 'user',
-      buttons: [],
-      image: '',
-      custom: {},
-      attachment: null,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    this.handleMessage(message);
-    this.startTime = Date.now();
-    this.sendMessageToChat(text);
+    this.quickSend('Mi mostri le mie prenotazioni');
   }
 
   change_password() {
-    const text = "Vorrei cambiare la mia password";
-    const message = {
-      text,
-      role: 'user',
-      buttons: [],
-      image: '',
-      custom: {},
-      attachment: null,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    this.handleMessage(message);
-    this.startTime = Date.now();
-    this.sendMessageToChat(text);
+    this.quickSend('Vorrei cambiare la mia password');
   }
-
+  
   frequently_asked_questions() {
     const faqs = [
-      "Quanti giorni di ferie ha un lavoratore full time?",
-      "Entro quando devo pianificare le mie ferie?",
-      "Come posso richiedere un permesso per visita medica?",
-      "A quanto ammonta il valore dei buoni pasto elettronici?",
-      "Cosa devo fare se perdo la mia card dei buoni pasto?",
-      "Come posso aggiornare i miei dati bancari o anagrafici?",
-      "Quando viene accreditato lo stipendio mensile?",
+      'Quanti giorni di ferie ha un lavoratore full time?',
+      'Entro quando devo pianificare le mie ferie?',
+      'Come posso richiedere un permesso per visita medica?',
+      'A quanto ammonta il valore dei buoni pasto elettronici?',
+      'Cosa devo fare se perdo la mia card dei buoni pasto?',
+      'Come posso aggiornare i miei dati bancari o anagrafici?',
+      'Quando viene accreditato lo stipendio mensile?',
       "Che cos'è la VPN aziendale?",
-      "Chi devo contattare se ho problemi con la vpn?",
-      "Mi puoi elencare tutti i benefit a cui hanno diritto i dipendenti?"
+      'Chi devo contattare se ho problemi con la vpn?',
+      'Mi puoi elencare tutti i benefit a cui hanno diritto i dipendenti?',
     ];
-
-    // Estrae una domanda casuale
-    const randomIndex = Math.floor(Math.random() * faqs.length);
-    const text = faqs[randomIndex];
-    const message = {
-      text,
-      role: 'user',
-      buttons: [],
-      image: '',
-      custom: {},
-      attachment: null,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    this.handleMessage(message);
-    this.startTime = Date.now();
-    this.sendMessageToChat(text);
+    this.quickSend(faqs[Math.floor(Math.random() * faqs.length)]);
   }
 
   closeConversation() {
-    const text = "Grazie per aver utilizzato il nostro servizio. Buona giornata!";
-    const message = {
-      text,
-      role: 'bot',
-      buttons: [],
-      image: '',
-      custom: {},
-      attachment: null,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    this.handleMessage(message);
+    this.handleMessage(
+      this.createMessage(
+        'Grazie per aver utilizzato il nostro servizio. Buona giornata!',
+        'bot'
+      )
+    );
     this.closeChatSession();
     this.conversationEnded = true;
   }
-  
+
+ /* -------------------------------------------------------- */
+ /*  UTILS                                                   */
+ /* -------------------------------------------------------  */
+
+  ngAfterViewChecked() {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
+
+  scrollToBottom() {
+    this.scrollContainer?.nativeElement.scroll({
+      top: this.scrollContainer.nativeElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+
+  getInitialsFromEmail(email: string | null) {
+    if (!email) return '';
+    const [name] = email.split('@');
+    return name
+      .split('.')
+      .map((p) => p[0]?.toUpperCase())
+      .join('');
+  }
 }

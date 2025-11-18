@@ -47,6 +47,7 @@
           <!-- Bottone della chat -->
           <button 
             (click)="loadSession(session.id)"
+            [ngClass]="{ '!bg-gray-400 text-white dark:!bg-gray-600': currentSession === session.id }"
             class="w-full py-2 px-2 pr-8 bg-gray-200 dark:bg-gray-800 
                   text-gray-900 dark:text-white font-semibold rounded-xl shadow 
                   transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed

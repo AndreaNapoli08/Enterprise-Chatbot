@@ -11,8 +11,9 @@ from datetime import datetime, timedelta
 
 # import per il database
 from sqlmodel import Session, select # type: ignore
-from db.db import engine, get_session
+from db.db import engine
 from db.models import User, Room, Document, ChatSession, ChatMessage
+from sqlalchemy import desc #type: ignore
 
 # toglie i warning 
 import warnings
@@ -451,6 +452,7 @@ def get_sessions(email: str):
     with Session(engine) as session:
         chat_sessions = session.exec(
             select(ChatSession).where(ChatSession.user_email == email)
+            .order_by(desc(ChatSession.last_activity), desc(ChatSession.created_at))
         ).all()
 
         sessions_list = []

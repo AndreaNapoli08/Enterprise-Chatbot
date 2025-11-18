@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, I
 import { AuthService } from '../services/auth.service';
 import { take } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { ChatSession } from '../interfaces/chatSession';
+import { ChatSession } from '../interfaces/chat_session';
 import { Router } from '@angular/router';
 
 @Component({
@@ -20,7 +20,6 @@ export class Sidebar {
   @Input() currentSession!: string;
 
   constructor( 
-    private authService: AuthService, 
     private router: Router
   ) {}
 
@@ -34,7 +33,7 @@ export class Sidebar {
 
   showDeleteModal: boolean = false;
   currentSessionToDelete: string = "";
-  
+
   openDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.remove('-translate-x-full');
@@ -159,6 +158,7 @@ export class Sidebar {
   }
 
   loadSession(sessionId: string) {
+    this.currentSession = sessionId;
     this.loadHistory.emit(sessionId);
   }
 
