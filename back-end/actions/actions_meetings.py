@@ -48,7 +48,7 @@ class ActionAvailabilityCheckRoom(Action):
         }
 
         try:
-            response = requests.post(endpoint, json=payload, timeout=10)
+            response = requests.post(endpoint, json=payload, timeout=100)
             data = response.json()
         except Exception as e:
             dispatcher.utter_message(text=f"Errore di connessione al server prenotazioni: {e}")
@@ -104,7 +104,7 @@ class ActionGetReservation(Action):
         api_url = f"{endpoint}{user_email}"
 
         try:
-            response = requests.get(api_url, timeout=10)
+            response = requests.get(api_url, timeout=100)
             data = response.json()
         except Exception as e:
             dispatcher.utter_message(text=f"Errore di connessione al server: {e}")

@@ -14,7 +14,12 @@
   </div>
 
   <!-- Sidebar -->
-  <sidebar [sessions]="sessions"></sidebar>
+  <sidebar 
+    [sessions]="sessions"
+    (loadHistory)="loadChatHistory($event)"
+    [currentSession]="current_session"
+  >
+  </sidebar>
 
   <!-- Contenuto principale della home -->
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden pt-20">
@@ -89,7 +94,7 @@
             In attesa di una tua risposta...
           </div>
         </div>
-        <div *ngIf="messages.length > 0 && empty_input && conversationEnded === false" class="flex justify-end w-full">
+        <div *ngIf="messages.length > 0 && empty_input && conversationEnded === false && reservationInProgress === false && loading === false" class="flex justify-end w-full">
           <button
             (click)="closeConversation()"
             class="mr-4 py-2 px-2 bg-gray-200 hover:bg-red-600 hover:text-white 

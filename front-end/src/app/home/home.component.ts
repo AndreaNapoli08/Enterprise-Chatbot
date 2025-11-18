@@ -35,6 +35,7 @@ export class Home implements AfterViewChecked {
 
   empty_input = true;
   sessions: any[] = [];
+  current_session = "";
 
   // Visualizzazione elementi dopo un'attesa prolungata e tempo di ragionamento
   long_waiting = false;
@@ -66,7 +67,7 @@ export class Home implements AfterViewChecked {
         this.name = user.firstName;
         this.surname = user.lastName;
         this.role = user.role;
-        this.loadChatHistory();
+        //this.loadChatHistory();
       } else {
         this.email = null;
         this.initials = '';
@@ -81,6 +82,9 @@ export class Home implements AfterViewChecked {
 
       fetch(`http://localhost:5050/chat/get_sessions/${email}`)
         .then(response => {
+          if (response.status === 404) {
+            return []; // non  un errore, vuol dire solo che l'utente non ha chat attualmente
+          }
           if (!response.ok) throw new Error('Errore nella richiesta');
           return response.json(); 
         })
@@ -122,6 +126,7 @@ export class Home implements AfterViewChecked {
     if(message.text.startsWith("Grazie per aver utilizzato il nostro servizio")){
       this.closeChatSession();
     }
+    console.log(message);
     this.saveMessageToBackend(message);
     
     const isBot = message.role === 'bot';
@@ -146,7 +151,7 @@ export class Home implements AfterViewChecked {
       if (!user) return;
       const email = user.email;
 
-      fetch(`http://localhost:5050/chat/close_session?user_email=${email}`, {
+      fetch(`http://localhost:5050/chat/close_session?session_id=${this.current_session}`, {
         method: 'POST'
       })
       .then(() => {
@@ -160,12 +165,12 @@ export class Home implements AfterViewChecked {
     if (!this.email) return;
 
     try {
-      await fetch('http://localhost:5050/chat/save_message', {
+      const res = await fetch(`http://localhost:5050/chat/save_message/${this.current_session}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_email: this.email,
-          sender: message.role,          // "user" o "bot"
+          sender: message.role,
           type: this.getMessageType(message),
           content: {
             text: message.text || '',
@@ -177,16 +182,26 @@ export class Home implements AfterViewChecked {
           timestamp: new Date().toISOString(),
         }),
       });
+
+      const data = await res.json();
+
+      // 🔥 se è stata creata una nuova sessione → aggiornala
+      if (data.session_id && this.current_session !== data.session_id) {
+        this.current_session = data.session_id;
+      }
+
     } catch (error) {
       console.error('Errore nel salvataggio del messaggio:', error);
     }
   }
 
-  async loadChatHistory() {
+
+  async loadChatHistory(sessionId: string) {
+    this.current_session = sessionId;
     if (!this.email) return;
 
     try {
-      const res = await fetch(`http://localhost:5050/chat/get_messages?user_email=${this.email}`);
+      const res = await fetch(`http://localhost:5050/chat/get_messages?session_id=${sessionId}`);
       const data = await res.json();
       if (data.messages) {
         // Sovrascrive i messaggi attuali con quelli salvati
@@ -203,6 +218,8 @@ export class Home implements AfterViewChecked {
       }
       if(data.active == false){
         this.conversationEnded = true;
+      }else{
+        this.conversationEnded = false;
       }
     } catch (err) {
       console.error("Errore nel caricamento della chat:", err);

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Query # type: ignore
+from fastapi import FastAPI, HTTPException, Depends, Query, Body # type: ignore
 from fastapi.responses import FileResponse # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from pydantic import BaseModel, EmailStr
@@ -323,11 +323,16 @@ def delete_reservation(reservation_id: str):
 #                     ENDPOINT CHAT
 # ============================================================
 
+# 1️⃣ Rotta SENZA session_id → crea nuova sessione
 @app.post("/chat/save_message")
-def save_message(payload: dict):
+def save_message_no_id(payload: dict = Body(...)):
+    return save_message(session_id="", payload=payload)
+
+@app.post("/chat/save_message/{session_id}")
+def save_message(session_id: str, payload: dict):
     """
-    Salva un messaggio nella chat dell'utente.
-    payload deve contenere: user_email, sender, type, content
+    Salva un messaggio nella sessione specificata.
+    Se session_id == "" viene creata una nuova sessione.
     """
     user_email = payload.get("user_email")
     sender = payload.get("sender")
@@ -336,47 +341,64 @@ def save_message(payload: dict):
 
     if not user_email or not sender or content is None:
         raise HTTPException(status_code=400, detail="Dati mancanti nel payload")
-    
+
     with Session(engine) as session:
-        # Recupera o crea una sessione attiva per l'utente
-        chat_session = session.exec(
-            select(ChatSession).where(
-                ChatSession.user_email == user_email,
-                ChatSession.active == True
+        # -------------------------
+        # 1️⃣ SE session_id È VUOTO → CREA UNA SESSIONE NUOVA
+        # -------------------------
+        if not session_id or session_id == "" or session_id == "null":
+            new_session = ChatSession(
+                user_email=user_email,
+                active=True,
+                last_activity=datetime.utcnow(),
             )
-        ).first()
-
-        if not chat_session:
-            chat_session = ChatSession(
-                user_email=user_email
-            )
-            session.add(chat_session)
+            session.add(new_session)
             session.commit()
-            session.refresh(chat_session)
+            session.refresh(new_session)
 
-        # Salva il messaggio
+            session_id = new_session.id
+
+        # -------------------------
+        # 2️⃣ SE session_id NON È VUOTO → RECUPERA LA SESSIONE
+        # -------------------------
+        else:
+            chat_session = session.exec(
+                select(ChatSession).where(ChatSession.id == session_id)
+            ).first()
+
+            if not chat_session:
+                raise HTTPException(status_code=404, detail="Sessione non trovata")
+
+            # Aggiorna timestamp attività
+            chat_session.last_activity = datetime.utcnow()
+            session.add(chat_session)
+
+        # -------------------------
+        # 3️⃣ SALVA IL MESSAGGIO
+        # -------------------------
         chat_message = ChatMessage(
-            session_id=chat_session.id,
+            session_id=session_id,
             sender=sender,
             type=type_,
             content=content,
             timestamp=datetime.utcnow()
         )
-        session.add(chat_message)
 
-        # Aggiorna last_activity della sessione
-        chat_session.last_activity = datetime.utcnow()
+        session.add(chat_message)
         session.commit()
 
-        return {"message": "Messaggio salvato con successo"}
+        return {
+            "message": "Messaggio salvato con successo",
+            "session_id": session_id 
+        }
 
 @app.get("/chat/get_messages")
-def get_messages(user_email: str):
+def get_messages(session_id: str):
     with Session(engine) as session:
         # Recupera la sessione attiva dell'utente
         chat_session = session.exec(
             select(ChatSession).where(
-                ChatSession.user_email == user_email
+                ChatSession.id == session_id
             )
         ).first()
 
@@ -402,15 +424,14 @@ def get_messages(user_email: str):
         return {"messages": messages_list, "active": chat_session.active}
 
 @app.post("/chat/close_session")
-def close_session(user_email: str = Query(...)):
+def close_session(session_id: str):
     """
     Chiude la sessione attiva dell'utente impostando active=False.
     """
     with Session(engine) as session:
         chat_session = session.exec(
             select(ChatSession).where(
-                ChatSession.user_email == user_email,
-                ChatSession.active == True
+                ChatSession.id == session_id
             )
         ).first()
 
@@ -422,7 +443,7 @@ def close_session(user_email: str = Query(...)):
         session.add(chat_session)
         session.commit()
 
-        return {"message": f"Sessione di {user_email} chiusa con successo"}
+        return {"message": f"Sessione {session_id} chiusa con successo"}
 
 @app.get("/chat/get_sessions/{email}")
 def get_sessions(email: str):
@@ -442,9 +463,6 @@ def get_sessions(email: str):
                 "created_at": chat_session.created_at.isoformat(),
                 "last_activity": chat_session.last_activity.isoformat() if chat_session.last_activity else None
             })
-
-        if not sessions_list:
-            raise HTTPException(status_code=404, detail="Nessuna sessione trovata per questo utente.")
 
         return sessions_list
 
@@ -466,7 +484,7 @@ def update_session_title(session_id: uuid.UUID, data: TitleUpdateRequest):
         return {"message": "Title updated", "session": chat_session}
 
 @app.delete("/chat/delete_session/{session_id}")
-def delete_session(session_id: uuid.UUID):
+def delete_session(session_id: str):
     with Session(engine) as session:
         chat_session = session.exec(
             select(ChatSession).where(ChatSession.id == session_id)

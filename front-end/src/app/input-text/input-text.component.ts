@@ -5,6 +5,7 @@ import { Message } from '../interfaces/message';
 import { ChatService } from '../services/chat.service';  
 import { take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'input-text',
@@ -22,7 +23,11 @@ export class InputText {
   @Input() humanOperator = false;
   @Output() stateEmptyInput = new EventEmitter<boolean>();
 
-  constructor(private chatService: ChatService, private authService: AuthService) {}
+  constructor(
+    private chatService: ChatService, 
+    private authService: AuthService,
+    private router: Router
+  ) {}
   
   ngOnChanges(changes: SimpleChanges) {
     // Quando humanOperator diventa true → disabilita subito la barra
@@ -84,6 +89,12 @@ export class InputText {
         });
       });
       this.answer = '';
+    });
+  }
+
+  createNewChat() {
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate(['/home']);
     });
   }
 }

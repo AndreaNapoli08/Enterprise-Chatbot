@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { take } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +16,8 @@ export class Sidebar {
   @Input() sessions: any;
   @ViewChild('drawer') drawer!: ElementRef;
   @ViewChild('renameInputField') renameInputField!: ElementRef<HTMLInputElement>;
+  @Output() loadHistory = new EventEmitter<string>();
+  @Input() currentSession!: string;
 
   constructor( 
     private authService: AuthService, 
@@ -27,11 +29,11 @@ export class Sidebar {
   dropdownTop = 0;
   dropdownLeft = 0;
   showRenameModal: boolean = false;
-  currentSessionToRename: any = null;
+  currentSessionToRename: string = "";
   renameInput: string = "";
 
   showDeleteModal: boolean = false;
-  currentSessionToDelete: any = null;
+  currentSessionToDelete: string = "";
   
   openDrawer() {
     const el = this.drawer.nativeElement;
@@ -71,13 +73,13 @@ export class Sidebar {
   }
 
   // Metodo per aprire il modale
-  openRenameModal(session: ChatSession) {
-    this.currentSessionToRename = session;
+  openRenameModal(sessionId: string, sessionTitle: string) {
+    console.log("Rinomina sessione:", sessionId);
+    this.currentSessionToRename = sessionId;
     this.showRenameModal = true;
-    this.renameInput = session.title && session.title.trim() !== "" 
-    ? session.title 
-    : session.id;
-
+    this.renameInput = sessionTitle && sessionTitle.trim() !== "" 
+    ? sessionTitle 
+    : sessionId;
     setTimeout(() => {
       this.renameInputField.nativeElement.focus();
       this.renameInputField.nativeElement.select(); 
@@ -86,13 +88,13 @@ export class Sidebar {
 
   closeRenameModal() {
     this.showRenameModal = false;
-    this.currentSessionToRename = null;
+    this.currentSessionToRename = "";
   }
 
   renameSession() {
     if (!this.currentSessionToRename) return;
 
-    const sessionId = this.currentSessionToRename.id;
+    const sessionId = this.currentSessionToRename;
     const newTitle = this.renameInput.trim();
 
     fetch(`http://localhost:5050/chat/update_session_title/${sessionId}`, {
@@ -108,7 +110,10 @@ export class Sidebar {
       console.log("Titolo aggiornato nel DB:", data);
 
       // Aggiorna la UI locale
-      this.currentSessionToRename!.title = newTitle;
+      const session = this.sessions.find((s: ChatSession) => s.id === sessionId);
+      if (session) {
+        session.title = newTitle;
+      }
 
       // Chiudi modale
       this.closeRenameModal();
@@ -118,14 +123,14 @@ export class Sidebar {
     });
   }
 
-  openDeleteModal(session: ChatSession) {
+  openDeleteModal(sessionId: string) {
     this.showDeleteModal = true;
-    this.currentSessionToDelete = session;
+    this.currentSessionToDelete = sessionId;
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
-    this.currentSessionToDelete = null;
+    this.currentSessionToDelete = "";
   }
 
   deleteSession(sessionId: string) {
@@ -144,6 +149,17 @@ export class Sidebar {
       });
     })
     .catch(err => console.error(err));
+  }
+
+  createNewChat() {
+    this.currentSession = "";
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate(['/home']);
+    });
+  }
+
+  loadSession(sessionId: string) {
+    this.loadHistory.emit(sessionId);
   }
 
 }

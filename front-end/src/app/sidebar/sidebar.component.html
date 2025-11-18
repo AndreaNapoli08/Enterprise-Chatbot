@@ -18,6 +18,7 @@
 <div #drawer id="drawer-navigation" class="fixed top-0 left-0 z-40 w-64 h-screen p-4 transition-transform -translate-x-full dark:bg-gray-800 bg-gray-200 border-e border-default" aria-labelledby="drawer-navigation-label">
   <div class="border-b border-default pb-4 flex items-center">
       <button 
+      (click)="createNewChat()"
         class="py-2 px-4 bg-gray-200 dark:hover:bg-gray-600  
               dark:bg-gray-800 hover:bg-gray-300
               text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
@@ -45,6 +46,7 @@
         <div class="group flex items-center relative">
           <!-- Bottone della chat -->
           <button 
+            (click)="loadSession(session.id)"
             class="w-full py-2 px-2 pr-8 bg-gray-200 dark:bg-gray-800 
                   text-gray-900 dark:text-white font-semibold rounded-xl shadow 
                   transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed
@@ -74,7 +76,7 @@
         </div>
         <!-- MENU DROPDOWN -->
         <div
-          *ngIf="openMenu !== null"
+          *ngIf="openMenu === i"
           [ngStyle]="{
             top: dropdownTop + 'px',
             left: dropdownLeft + 'px'
@@ -85,14 +87,14 @@
           <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
             <li>
               <button 
-                (click)="openRenameModal(session)"
+                (click)="openRenameModal(session.id, session.title)"
                 class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
                 Rinomina
               </button>
             </li>
             <li>
               <button 
-                (click)="openDeleteModal(session)" 
+                (click)="openDeleteModal(session.id)" 
                 class="w-full text-left block px-4 py-2 text-red-600 dark:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600">
                 Elimina
               </button>
@@ -106,7 +108,7 @@
 
 
 <!-- modale rinomina chat -->
-<div *ngIf="showRenameModal"  id="rename-chat-modal" tabindex="-1" class="fixed inset-0 z-50 flex justify-center items-center bg-black/50">
+<div *ngIf="showRenameModal"  id="rename-chat-modal" tabindex="-1" class="fixed inset-0 z-50 flex justify-center items-center dark:bg-black/50 bg-black/20">
   <div class="relative p-4 w-full max-w-md max-h-full">
       <!-- Modal content -->
       <div class="relative bg-gray-800 border border-default rounded-3xl shadow-sm p-4 md:p-6">
@@ -128,7 +130,7 @@
               </div>
               <button 
                 (click)="renameSession()" 
-                type="submit" 
+                type="button" 
                 class="mt-4 w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 focus:bg-gray-400 
                 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 
                 text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
@@ -142,29 +144,29 @@
 </div> 
 
 <!-- Modale per conferma eliminazione chat -->
- <div id="delete-chat" *ngIf="showDeleteModal" class="fixed inset-0 flex justify-center items-center dark:bg-black/50 bg-black/20">
-    <div class="relative p-4 w-full max-w-md max-h-full">
-        <div class="relative bg-gray-100 dark:bg-gray-800 border border-default rounded-3xl">
-            <div class="p-4 md:p-5 text-center dark:text-white">
-                <svg class="mx-auto mb-4 text-fg-disabled w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V8m0 8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                <h3 class="mb-6 text-body">Sei sicuro di voler cancellare la chat?</h3>
-                <div class="flex items-center space-x-4 justify-center">
-                    <button type="button" 
-                      (click)="closeDeleteModal()"
-                      class="py-2 px-4 bg-gray-200 hover:bg-gray-300
-                      dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 
-                      text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
-                      focus:ring-3 focus:ring-gray-600 font-semibold rounded-xl shadow transition duration-200">
-                      Annulla
-                    </button>
-                    <button (click)="deleteSession(currentSessionToDelete.id)" type="button" 
-                      class="text-white bg-red-600 box-border rounded-xl border border-transparent 
-                      hover:bg-red-700 focus:ring-3 focus:ring-red-600 shadow-xs font-medium leading-5 
-                      rounded-base text-sm px-4 py-2.5 focus:outline-none">
-                      Conferma
-                    </button>
-                </div>
-            </div>
+<div id="delete-chat" *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex justify-center items-center dark:bg-black/50 bg-black/20">
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <div class="relative bg-gray-100 dark:bg-gray-800 border border-default rounded-3xl">
+      <div class="p-4 md:p-5 text-center dark:text-white">
+        <svg class="mx-auto mb-4 text-fg-disabled w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V8m0 8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        <h3 class="mb-6 text-body">Sei sicuro di voler cancellare la chat?</h3>
+        <div class="flex items-center space-x-4 justify-center">
+          <button type="button" 
+            (click)="closeDeleteModal()"
+            class="py-2 px-4 bg-gray-200 hover:bg-gray-300
+            dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 
+            text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
+            focus:ring-3 focus:ring-gray-600 font-semibold rounded-xl shadow transition duration-200">
+            Annulla
+          </button>
+          <button (click)="deleteSession(currentSessionToDelete)" type="button" 
+            class="text-white bg-red-600 box-border rounded-xl border border-transparent 
+            hover:bg-red-700 focus:ring-3 focus:ring-red-600 shadow-xs font-medium leading-5 
+            rounded-base text-sm px-4 py-2.5 focus:outline-none">
+            Conferma
+          </button>
         </div>
+      </div>
     </div>
+  </div>
 </div>
