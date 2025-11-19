@@ -2,9 +2,9 @@
     <div id="toast"></div>
     
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <a href="#" class="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-            <img class="w-17 h-17 mr-2" src="logo.png" alt="logo">
-            Enterprise Chatbot    
+        <a href="#" class="flex items-center mb-6">
+            <img class="w-70 h-22 mr-2 hidden dark:block" src="andronex_dark.png" alt="logo">
+            <img class="w-70 h-22 mr-2block dark:hidden" src="andronex_light.png" alt="logo">
         </a>
         <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
             <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -39,7 +39,11 @@
                         </div>
                     </div>
                     <button type="submit" 
-                        class="w-full text-black bg-gray-200 hover:bg-gray-300 dark:text-white dark:bg-blue-700 dark:hover:bg-blue-800 focus:ring-2 focus:ring-gray-600 dark:focus:ring-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                        class="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 focus:bg-gray-400 
+                        dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:bg-gray-500 
+                        text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
+                        font-semibold rounded-xl shadow transition duration-200 
+                        disabled:opacity-50 disabled:cursor-not-allowed">
                         Sign in
                     </button>
                 </form>                

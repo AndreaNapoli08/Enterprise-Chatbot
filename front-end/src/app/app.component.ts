@@ -27,6 +27,8 @@ export class AppComponent implements OnInit {
       // forza il browser a ricalcolare lo stile
       void document.body.offsetHeight;
       document.body.style.display = '';
+
+      this.updateFavicon(isDark);
     };
 
     // Applica subito il tema
@@ -41,5 +43,19 @@ export class AppComponent implements OnInit {
         initFlowbite();
       }
     });
+  }
+
+  // Funzione per cambiare la favicon
+  updateFavicon(isDark: boolean) {
+    let favicon = document.getElementById('favicon') as HTMLLinkElement;
+    // Se non esiste, creala
+    favicon = document.createElement('link');
+    favicon.id = 'favicon';
+    favicon.rel = 'icon';
+    favicon.type = 'image/x-icon';
+    document.head.appendChild(favicon);
+
+    favicon.href = isDark ? 'favicon_dark.ico' : 'favicon_light.ico';
+    console.log("Favicon updated to: " + favicon.href);
   }
 }
