@@ -1,125 +1,168 @@
-<div class="relative">
-  
-  <div class="absolute left-1/2 -translate-x-1/2 top-2">
-    <img class="w-60 h-18 hidden dark:block" src="andronex_dark.png" alt="logo">
-    <img class="w-60 h-18 block dark:hidden" src="andronex_light.png" alt="logo">
-  </div>
+<div class="flex min-h-screen bg-gray-50 dark:bg-gray-900">
 
-  <div class="absolute top-5 right-5">
-    <app-profile 
-      [initials]="initials"
-      [name]="name"
-      [surname]="surname"
-      [email]="email"
-      [role]="role">
-    </app-profile>
-  </div>
-
-  <!-- Sidebar -->
+  <!-- SIDEBAR -->
   <sidebar 
     [sessions]="sessions"
     (loadHistory)="loadChatHistory($event)"
     [currentSession]="current_session"
-  >
+    [initials]="initials"
+    [name]="name"
+    [surname]="surname"
+    [email]="email"
+    [role]="role"
+    (sidebarState)="sidebarOpen = $event"
+    class="z-30">
   </sidebar>
 
-  <!-- Contenuto principale della home -->
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden pt-20">
-    <div class="flex flex-1 flex-col max-w-3xl w-full mx-auto px-4 mb-3 transition-transform">
-      <!-- Messaggio di benvenuto -->
-      <div *ngIf="messages.length === 0" class="flex-3"></div>
-      <div *ngIf="messages.length === 0" class="text-center">
-        <p class="text-3xl font-semibold leading-normal text-gray-900 dark:text-white">
-          Benvenuto {{ name }}
-        </p>
+  <!-- CONTENUTO PRINCIPALE -->
+  <div 
+    class="flex-1 flex flex-col transition-all duration-300"
+    [class.ml-64]="sidebarOpen"   
+    [class.ml-20]="!sidebarOpen"> <!-- Sidebar chiusa -->
 
-        <div class="flex justify-center space-x-3 mt-8">
-          <button (click)="booking_room()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800">
-            <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
-              Prenotazione stanza
-            </span>
-          </button>
-          <button (click)="show_bookings()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-lime-800">
-            <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
-              Gestione prenotazioni
-            </span>
-          </button>
-          <button (click)="change_password()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800">
-            <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
-              Cambio password
-            </span>
-          </button>
-          <button (click)="frequently_asked_questions()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
-            <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
-              Domande frequenti
-            </span>
-          </button>
-        </div>
+    <!-- Logo centrale -->
+    <div class="relative">
+      <div class="absolute left-1/2 -translate-x-1/2 top-2">
+        <img class="w-60 h-18 hidden dark:block" src="andronex_dark.png" alt="logo">
+        <img class="w-60 h-18 block dark:hidden" src="andronex_light.png" alt="logo">
       </div>
-
-      <!-- Spacer inferiore per lasciare distanza dall'input -->
-      <div class="flex-1"></div>
-      <!-- Chat messages -->
-      <div
-        #scrollContainer
-        *ngIf="messages.length > 0"
-        class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh] bg-gray-50 dark:bg-gray-900"
-      >
-        <chat-bubble *ngFor="let msg of messages" 
-          [message]="msg" 
-          [name]="name"
-          [surname]="surname"
-          (stateChangeLoading)="loading = $event" 
-          (stateChangeWaitingAnswer)="waiting_answer = $event" 
-          (stateChangeConversation)="conversationEnded = $event" 
-          (botResponse)="handleMessage($event)" 
-          [initials]="initials">
-        </chat-bubble>
-        
-        <!-- Loading spinner -->
-        <div *ngIf="loading && !waiting_answer" class="relative flex items-center space-x-3 h-10 mb-2">
-          <!-- Spinner -->
-          <div role="status">
-            <svg aria-hidden="true" class="w-9 h-9 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-            </svg>
-            <span class="sr-only">Loading...</span>
-          </div>
-          <!-- Testo animato -->
-          <p *ngIf="long_waiting" class="text-gray-600 dark:text-gray-300 text-lg font-medium animate-pulse">
-            {{ long_waiting_text }}
-          </p>
-        </div>
-        <div *ngIf="waiting_answer" class="flex flex-col mb-2 ml-10 text-sm text-gray-800 dark:text-gray-400">
-          <div class="w-48 h-10 bg-gray-300 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center text-black dark:text-gray-300">
-            In attesa di una tua risposta...
-          </div>
-        </div>
-        <div *ngIf="messages.length > 0 && empty_input && conversationEnded === false && reservationInProgress === false && loading === false" class="flex justify-end w-full">
-          <button
-            (click)="closeConversation()"
-            class="mr-4 py-2 px-2 bg-gray-200 hover:bg-red-600 hover:text-white 
-                  dark:bg-gray-700 dark:hover:bg-red-600 focus:bg-red-900 
-                  text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
-                  font-semibold rounded-xl shadow transition duration-200 
-                  disabled:opacity-50 disabled:cursor-not-allowed 
-                  disabled:hover:bg-gray-300 disabled:hover:text-gray-900 
-                  disabled:dark:hover:bg-gray-700 disabled:dark:hover:text-white"
-          >
-            Termina conversazione
-          </button>
-        </div>
-      </div>
-      
-      <input-text 
-        (submitAnswer)="handleMessage($event)" 
-        [disabled]="loading || reservationInProgress" 
-        [conversationEnded]="conversationEnded"
-        [humanOperator]="human_operator"
-        (stateEmptyInput)="empty_input = $event">
-      </input-text>
-      <div *ngIf="messages.length === 0" class="flex-5"></div>
     </div>
+
+    <!-- Contenuto principale -->
+    <div class="min-h-screen flex flex-col overflow-hidden pt-20">
+      <div class="flex flex-1 flex-col max-w-3xl w-full mx-auto px-4 mb-3 transition-transform">
+
+        <!-- Messaggio di benvenuto -->
+        <div *ngIf="messages.length === 0" class="flex-3"></div>
+
+        <div *ngIf="messages.length === 0" class="text-center">
+          <p class="text-3xl font-semibold leading-normal text-gray-900 dark:text-white">
+            Benvenuto {{ name }}
+          </p>
+
+          <div class="flex justify-center space-x-3 mt-8">
+
+            <button (click)="booking_room()" 
+              class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2
+              overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
+              bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600
+              group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4
+              focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800">
+              <span class="relative px-5 py-2.5 transition-all ease-in duration-75 
+                bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent 
+                group-hover:dark:bg-transparent">
+                Prenotazione stanza
+              </span>
+            </button>
+
+            <button (click)="show_bookings()"
+              class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2
+              overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
+              bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300
+              group-hover:to-lime-300 dark:text-white dark:hover:text-gray-900
+              focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-lime-800">
+              <span class="relative px-5 py-2.5 transition-all ease-in duration-75 
+                bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent 
+                group-hover:dark:bg-transparent">
+                Gestione prenotazioni
+              </span>
+            </button>
+
+            <button (click)="change_password()" 
+              class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 
+              overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
+              bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-pink-500 
+              group-hover:to-orange-400 hover:text-white dark:text-white focus:ring-4 
+              focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800">
+              <span class="relative px-5 py-2.5 transition-all ease-in duration-75 
+                bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent 
+                group-hover:dark:bg-transparent">
+                Cambio password
+              </span>
+            </button>
+
+            <button (click)="frequently_asked_questions()" 
+              class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 
+              overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
+              bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 
+              group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 
+              focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
+              <span class="relative px-5 py-2.5 transition-all ease-in duration-75 
+                bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent 
+                group-hover:dark:bg-transparent">
+                Domande frequenti
+              </span>
+            </button>
+
+          </div>
+        </div>
+
+        <div class="flex-1"></div>
+
+        <!-- Chat -->
+        <div
+          #scrollContainer
+          *ngIf="messages.length > 0"
+          class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[75vh]
+                 bg-gray-50 dark:bg-gray-900">
+
+          <chat-bubble *ngFor="let msg of messages" 
+            [message]="msg" 
+            [name]="name"
+            [surname]="surname"
+            (stateChangeLoading)="loading = $event" 
+            (stateChangeWaitingAnswer)="waiting_answer = $event" 
+            (stateChangeConversation)="conversationEnded = $event" 
+            (botResponse)="handleMessage($event)" 
+            [initials]="initials">
+          </chat-bubble>
+
+          <!-- Loading -->
+          <div *ngIf="loading && !waiting_answer" class="relative flex items-center space-x-3 h-10 mb-2">
+          <!-- Spinner -->
+            <div role="status">
+              <svg aria-hidden="true" class="w-9 h-9 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+              </svg>
+              <span class="sr-only">Loading...</span>
+            </div>
+            <!-- Testo animato -->
+            <p *ngIf="long_waiting" class="text-gray-600 dark:text-gray-300 text-lg font-medium animate-pulse">
+              {{ long_waiting_text }}
+            </p>
+          </div>
+
+          <!-- Termina conversazione -->
+          <div *ngIf="messages.length > 0 && empty_input && conversationEnded === false && reservationInProgress === false && loading === false" class="flex justify-end w-full">
+            <button
+              (click)="closeConversation()"
+              class="mr-4 py-2 px-2 bg-gray-200 hover:bg-red-600 hover:text-white 
+                    dark:bg-gray-700 dark:hover:bg-red-600 focus:bg-red-900 
+                    text-gray-900 dark:text-white border border-gray-400 dark:border-gray-500 
+                    font-semibold rounded-xl shadow transition duration-200 
+                    disabled:opacity-50 disabled:cursor-not-allowed 
+                    disabled:hover:bg-gray-300 disabled:hover:text-gray-900 
+                    disabled:dark:hover:bg-gray-700 disabled:dark:hover:text-white"
+            >
+              Termina conversazione
+            </button>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <input-text 
+          (submitAnswer)="handleMessage($event)" 
+          [disabled]="loading || reservationInProgress" 
+          [conversationEnded]="conversationEnded"
+          [humanOperator]="human_operator"
+          (stateEmptyInput)="empty_input = $event">
+        </input-text>
+
+        <div *ngIf="messages.length === 0" class="flex-5"></div>
+
+      </div>
+    </div>
+
   </div>
 </div>

@@ -267,12 +267,12 @@ def book_room(data: BookRoomRequest):
         f"Partecipanti: {person_picker}\n"
         f"Caratteristiche: {features_str}\n"
         f"Capienza massima: {available_room.capienza} persone."
-    )
+    ) 
     #(Opzionale) invia email
-    try:
-        send_gmail_email(email, email_subject, email_body)
-    except Exception as e:
-        response["email_error"] = str(e)
+    # try:
+    #     send_gmail_email(email, email_subject, email_body)
+    # except Exception as e:
+    #     response["email_error"] = str(e)
 
     return response
 

@@ -5,10 +5,11 @@ import { take } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ChatSession } from '../interfaces/chat_session';
 import { Router } from '@angular/router';
+import { Profile } from '../profile/profile.component';
 
 @Component({
   selector: 'sidebar',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Profile],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
@@ -18,6 +19,14 @@ export class Sidebar {
   @ViewChild('renameInputField') renameInputField!: ElementRef<HTMLInputElement>;
   @Output() loadHistory = new EventEmitter<string>();
   @Input() currentSession!: string;
+  @Output() sidebarState = new EventEmitter<boolean>();
+
+  // variabili per informazioni utente
+  @Input() initials: string = '';
+  @Input() name: string | null = null;
+  @Input() surname: string | null = null;
+  @Input() email: string | null = null
+  @Input() role: string | null = null;
 
   constructor( 
     private router: Router
@@ -37,11 +46,13 @@ export class Sidebar {
   openDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.remove('-translate-x-full');
+    this.sidebarState.emit(true); 
   }
 
   closeDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.add('-translate-x-full');
+    this.sidebarState.emit(false);
   }
 
   openDropdown(event: MouseEvent, trigger: HTMLElement, index: number) {
@@ -73,7 +84,6 @@ export class Sidebar {
 
   // Metodo per aprire il modale
   openRenameModal(sessionId: string, sessionTitle: string) {
-    console.log("Rinomina sessione:", sessionId);
     this.currentSessionToRename = sessionId;
     this.showRenameModal = true;
     this.renameInput = sessionTitle && sessionTitle.trim() !== "" 

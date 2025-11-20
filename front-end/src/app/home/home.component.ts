@@ -2,7 +2,6 @@ import { Component, ElementRef, ViewChild, AfterViewChecked, HostListener } from
 import { CommonModule } from '@angular/common';
 import { InputText } from '../input-text/input-text.component';
 import { ChatBubble } from '../chat-bubble/chat-bubble.component';
-import { Profile } from '../profile/profile.component';
 import { AuthService } from '../services/auth.service';
 import { Message } from '../interfaces/message';
 import { take } from 'rxjs/internal/operators/take';
@@ -12,7 +11,7 @@ import { Sidebar } from '../sidebar/sidebar.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ChatBubble, InputText, Profile, Sidebar],
+  imports: [CommonModule, ChatBubble, InputText, Sidebar],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -48,6 +47,8 @@ export class Home implements AfterViewChecked {
   textChangeTimer: any = null;
   textIndex = 0;
   startTime = 0;
+
+  sidebarOpen = false;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
