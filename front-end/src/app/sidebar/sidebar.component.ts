@@ -43,6 +43,13 @@ export class Sidebar {
   showDeleteModal: boolean = false;
   currentSessionToDelete: string = "";
 
+  // Variabili per il modale di ricerca chat
+  showSearchModal: boolean = false;
+  searchQuery: string = '';
+  filteredSessions: ChatSession[] = [];
+
+  isChatExpanded: boolean = true; // di default aperto
+
   openDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.remove('-translate-x-full');
@@ -172,4 +179,37 @@ export class Sidebar {
     this.loadHistory.emit(sessionId);
   }
 
+  // Apri il modale di ricerca
+  searchChat() {
+    this.showSearchModal = true;
+    this.searchQuery = '';
+    this.filteredSessions = [...this.sessions]; // inizialmente tutti
+  }
+
+  // Chiudi modale
+  closeSearchModal() {
+    this.showSearchModal = false;
+    this.searchQuery = '';
+    this.filteredSessions = [];
+  }
+
+  // Filtra le sessioni in base al testo della ricerca
+  filterSessions() {
+    const query = this.searchQuery.toLowerCase().trim();
+    this.filteredSessions = this.sessions.filter((s: ChatSession) => {
+      const title = s.title ? s.title.toLowerCase() : '';
+      const id = s.id.toLowerCase();
+      return title.includes(query) || id.includes(query);
+    });
+  }
+
+  // Carica la sessione selezionata dal risultato
+  selectSession(sessionId: string) {
+    this.loadSession(sessionId);
+    this.closeSearchModal();
+  }
+
+  toggleChat() {
+    this.isChatExpanded = !this.isChatExpanded;
+  }
 }

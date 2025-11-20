@@ -1,32 +1,69 @@
 <!-- drawer component -->
-<div #drawer id="drawer-navigation" class="fixed top-0 left-0 z-40 w-64 h-screen p-4 transition-transform -translate-x-full dark:bg-gray-800 bg-gray-200 border-e border-default" aria-labelledby="drawer-navigation-label">
-  <div class="border-b border-default pb-4 flex items-center">
+<div #drawer id="drawer-navigation" class="fixed top-0 left-0 z-40 w-64 h-screen p-4 transition-transform -translate-x-full dark:bg-gray-800 bg-gray-200 border-e border-default">
+  <div class="border-b dark:border-gray-500 border-default flex items-center">
       <button 
-      title="Nuova chat"
-      (click)="createNewChat()"
-        class="py-2 px-4 bg-gray-200 dark:hover:bg-gray-600  
-              dark:bg-gray-800 hover:bg-gray-300
-              text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
-              font-semibold rounded-xl shadow transition duration-200 
-              disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-        type="button"
+        (click)="createNewChat()" 
+        title="Nuova chat"
+        class="rounded-xl mb-4 transition relative group hover:bg-gray-400 dark:hover:bg-gray-700"
       >
-        <svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" 
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" 
-                d="M8 10h.01M12 10h.01M16 10h.01M7 16h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3Zm8 4v-4m0 0h4m-4 0h-4" />
-        </svg>
-        <span>Nuova chat</span>
+        <img src="favicon_dark_remove.png" alt="logo" class="hidden dark:block w-8 h-8">
+        <img src="favicon_light_remove.png" alt="logo" class="block dark:hidden w-8 h-8">
       </button>
-
       <button (click)="closeDrawer()" type="button" class="dark:text-white bg-transparent dark:hover:bg-gray-600 hover:bg-gray-300 hover:rounded-xl w-9 h-9 absolute top-2.5 end-2.5 flex items-center justify-center">
         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>
         <span class="sr-only">Close menu</span>
       </button>
   </div>
   <div class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[90vh] py-5 overflow-y-auto">
-    <span class="dark:text-gray-400">Chat</span>
-    <ul class="mt-1 space-y-2 font-medium">
+    <button 
+      title="Nuova chat"
+      (click)="createNewChat()"
+      class="py-2 px-4 bg-gray-200 dark:hover:bg-gray-600  
+            dark:bg-gray-800 hover:bg-gray-300
+            text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
+            font-semibold rounded-xl shadow transition duration-200 
+            disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+      type="button">
+        <svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" 
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" 
+                d="M8 10h.01M12 10h.01M16 10h.01M7 16h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3Zm8 4v-4m0 0h4m-4 0h-4" />
+        </svg>
+        <span>Nuova chat</span>
+    </button>
+    <button 
+      title="Cerca chat"
+      (click)="searchChat()"
+      class="py-2 px-4 bg-gray-200 dark:hover:bg-gray-600  
+            dark:bg-gray-800 hover:bg-gray-300
+            text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
+            font-semibold rounded-xl shadow transition duration-200 
+            disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+      type="button">
+        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+        </svg>
+        <span>Cerca chat</span>
+    </button>
+
+    <div 
+      class="flex items-start cursor-pointer mt-4"
+      (click)="toggleChat()"
+    >
+      <span class="dark:text-gray-400 font-semibold">Chat</span>
+      <svg 
+        class="w-6 h-6 transition-transform duration-200 dark:text-gray-400"
+        [style.transform]="isChatExpanded ? 'rotate(90deg)' : 'rotate(0deg)'"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path fill-rule="evenodd"
+          d="M6 6l6 4-6 4V6z"
+          clip-rule="evenodd" />
+      </svg>
+    </div>
+    <ul *ngIf="isChatExpanded" class="mt-1 space-y-2 font-medium">
       <li *ngFor="let session of sessions; let i = index">
         <div class="group flex items-center relative">
           <!-- Bottone della chat -->
@@ -129,7 +166,7 @@
       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 10 1.99994 1.9999-1.99994 2M12 5v14M5 4h14c.5523 0 1 .44772 1 1v14c0 .5523-.4477 1-1 1H5c-.55228 0-1-.4477-1-1V5c0-.55228.44772-1 1-1Z"/>
     </svg>
   </button>
-
+  <div class="w-10 h-[1px] dark:bg-gray-500 bg-gray-700 rounded"></div>
   <!-- NUOVA CHAT ICONA SOLA -->
   <button 
     (click)="createNewChat()" 
@@ -141,6 +178,19 @@
       <path stroke-linecap="round" stroke-linejoin="round" 
             d="M12 4v16m8-8H4" />
     </svg>
+  </button>
+  <button 
+    title="Cerca chat"
+    (click)="searchChat()"
+    class="py-2 px-4 bg-gray-200 dark:hover:bg-gray-600  
+          dark:bg-gray-800 hover:bg-gray-300
+          text-gray-900 dark:text-white
+          font-semibold rounded-xl shadow transition duration-200 
+          disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+    type="button">
+      <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+      </svg>
   </button>
 
   <!-- PROFILO IN FONDO -->
@@ -154,7 +204,6 @@
       [expanded]="false">
     </app-profile>
   </div>
-
 </div>
 
 <!-- modale rinomina chat -->
@@ -218,5 +267,51 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modale di ricerca chat -->
+<div *ngIf="showSearchModal" 
+     class="fixed inset-0 z-50 flex justify-center items-start pt-20 bg-black/20 dark:bg-black/50"
+     (click)="closeSearchModal()">
+
+  <!-- CONTENUTO DEL MODALE (click interno non chiude il modale) -->
+  <div class="bg-gray-200 dark:bg-gray-800 w-full max-w-md rounded-3xl shadow-lg border border-gray-400 dark:border-gray-600"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header con barra di ricerca -->
+    <div class="p-4 border-b border-gray-300 dark:border-gray-600 flex items-center gap-2">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="filterSessions()"
+        placeholder="Cerca chat..."
+        class="w-full p-2 rounded-lg border border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button 
+        (click)="closeSearchModal()" 
+        type="button" 
+        class="dark:text-white bg-transparent dark:hover:bg-gray-600 hover:bg-gray-300 hover:rounded-xl w-9 h-9 flex items-center justify-center">
+        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 18 17.94 6M18 18 6.06 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Lista dei risultati -->
+    <ul class="max-h-64 overflow-y-auto">
+      <li *ngFor="let session of filteredSessions" class="border-b border-gray-300 dark:border-gray-600 dark:text-gray-400">
+        <button 
+          (click)="selectSession(session.id)"
+          class="w-full text-left px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-lg truncate">
+          {{ session.title || session.id }}
+        </button>
+      </li>
+
+      <li *ngIf="filteredSessions.length === 0" class="p-4 text-gray-500 dark:text-gray-400">
+        Nessuna chat trovata
+      </li>
+    </ul>
   </div>
 </div>
