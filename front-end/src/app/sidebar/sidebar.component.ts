@@ -48,7 +48,12 @@ export class Sidebar {
   searchQuery: string = '';
   filteredSessions: ChatSession[] = [];
 
-  isChatExpanded: boolean = true; // di default aperto
+  isChatExpanded: boolean = true;
+
+  //sidebar ridimensionabile
+  isResizing = false;
+  startX = 0;
+  startWidth = 0;
 
   openDrawer() {
     const el = this.drawer.nativeElement;
@@ -212,4 +217,28 @@ export class Sidebar {
   toggleChat() {
     this.isChatExpanded = !this.isChatExpanded;
   }
+
+  startResize(event: MouseEvent) {
+    this.isResizing = true;
+    this.startX = event.clientX;
+    this.startWidth = this.drawer.nativeElement.offsetWidth;
+
+    document.addEventListener("mousemove", this.resizeDrawer);
+    document.addEventListener("mouseup", this.stopResize);
+  }
+
+  resizeDrawer = (event: MouseEvent) => {
+    if (!this.isResizing) return;
+    const newWidth = this.startWidth + (event.clientX - this.startX);
+    // Limiti min/max della sidebar
+    const width = Math.min(Math.max(newWidth, 180), 500);
+    this.drawer.nativeElement.style.width = width + "px";
+  }
+
+  stopResize = () => {
+    this.isResizing = false;
+    document.removeEventListener("mousemove", this.resizeDrawer);
+    document.removeEventListener("mouseup", this.stopResize);
+  };
 }
+
