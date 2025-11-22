@@ -20,6 +20,7 @@ export class Sidebar {
   @Output() loadHistory = new EventEmitter<string>();
   @Input() currentSession!: string;
   @Output() sidebarState = new EventEmitter<boolean>();
+  @ViewChild('searchInputField') searchInputField!: ElementRef<HTMLInputElement>;
 
   // variabili per informazioni utente
   @Input() initials: string = '';
@@ -189,6 +190,9 @@ export class Sidebar {
     this.showSearchModal = true;
     this.searchQuery = '';
     this.filteredSessions = [...this.sessions]; // inizialmente tutti
+    setTimeout(() => {
+      this.searchInputField.nativeElement.focus();
+    }, 0);
   }
 
   // Chiudi modale
