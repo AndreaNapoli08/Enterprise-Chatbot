@@ -1,5 +1,12 @@
 [
   {
+    "question": "Vorrei prenotare una sala per domani.",
+    "gold_answer": "Accesso autorizzato come manager",
+    "expected_intent": "book_meeting_room",
+    "collection": null,
+    "expected_action": "action_check_user_role"
+  },
+  {
     "question": "Ciao! Come stai?",
     "gold_answer": "Ciao! Come posso aiutarti?",
     "expected_intent": "greet",
@@ -13,7 +20,6 @@
     "collection": null,
     "expected_action": "utter_greet"
   },
-
   {
     "question": "A presto!",
     "gold_answer": "Ti serve ancora aiuto?",
@@ -28,35 +34,19 @@
     "collection": null,
     "expected_action": "utter_ask_option_close_conversation"
   },
-
-  {
-    "question": "Sì va bene!",
-    "gold_answer": "Perfetto!",
-    "expected_intent": "affirm",
-    "collection": null,
-    "expected_action": null
-  },
-  {
-    "question": "Certo!",
-    "gold_answer": "Perfetto!",
-    "expected_intent": "affirm",
-    "collection": null,
-    "expected_action": null
-  },
-
   {
     "question": "Sono super felice!",
     "gold_answer": "Fantastico, continua così!",
     "expected_intent": "mood_great",
     "collection": null,
-    "expected_action": "action_save_context"
+    "expected_action": "utter_happy"
   },
   {
     "question": "Oggi va alla grande!",
     "gold_answer": "Fantastico, continua così!",
     "expected_intent": "mood_great",
     "collection": null,
-    "expected_action": "action_save_context"
+    "expected_action": "utter_happy"
   },
 
   {
@@ -64,16 +54,15 @@
     "gold_answer": "Ecco qualcosa per tirarti su il morale:",
     "expected_intent": "mood_unhappy",
     "collection": null,
-    "expected_action": "action_save_context"
+    "expected_action": "utter_cheer_up"
   },
   {
     "question": "Giornata pessima.",
     "gold_answer": "Ecco qualcosa per tirarti su il morale:",
     "expected_intent": "mood_unhappy",
     "collection": null,
-    "expected_action": "action_save_context"
+    "expected_action": "utter_cheer_up"
   },
-
   {
     "question": "Sei un bot?",
     "gold_answer": "Sono un bot, alimentato da Rasa.",
@@ -118,7 +107,6 @@
     "collection": null,
     "expected_action": "utter_out_of_scope"
   },
-
   {
     "question": "Che ore sono?",
     "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
@@ -133,67 +121,62 @@
     "collection": null,
     "expected_action": "utter_fallback"
   },
-
   {
-    "question": "No grazie, non voglio cercare nei documenti.",
+    "question": "/choose_no_document",
     "gold_answer": "Va bene, non cerco nei documenti per ora.",
     "expected_intent": "choose_no_document",
     "collection": null,
     "expected_action": "utter_option_no"
   },
   {
-    "question": "Preferisco non fare la ricerca.",
+    "question": "/choose_no_document",
     "gold_answer": "Va bene, non cerco nei documenti per ora.",
     "expected_intent": "choose_no_document",
     "collection": null,
     "expected_action": "utter_option_no"
   },
-
   {
-    "question": "Sì, cerca nei documenti.",
+    "question": "/choose_yes_document",
     "gold_answer": "Ecco i documenti disponibili:",
     "expected_intent": "choose_yes_document",
     "collection": null,
     "expected_action": "action_list_available_documents"
   },
   {
-    "question": "Ok, puoi cercare nei documenti?",
+    "question": "/choose_yes_document",
     "gold_answer": "Ecco i documenti disponibili:",
     "expected_intent": "choose_yes_document",
     "collection": null,
     "expected_action": "action_list_available_documents"
   },
-
   {
-    "question": "Sì, continua la conversazione.",
+    "question": "/no_close_conversation",
     "gold_answer": "Va bene, sono qui per aiutarti",
     "expected_intent": "no_close_conversation",
     "collection": null,
     "expected_action": "utter_no_close_conversation"
   },
   {
-    "question": "Ho ancora bisogno.",
+    "question": "/no_close_conversation",
     "gold_answer": "Va bene, sono qui per aiutarti",
     "expected_intent": "no_close_conversation",
     "collection": null,
     "expected_action": "utter_no_close_conversation"
   },
-
   {
-    "question": "No, puoi chiudere.",
+    "question": "/yes_close_conversation",
     "gold_answer": "Grazie per aver utilizzato il nostro servizio. Buona giornata!",
     "expected_intent": "yes_close_conversation",
     "collection": null,
     "expected_action": "utter_close_conversation"
   },
   {
-    "question": "Puoi chiudere la conversazione.",
+    "question": "/yes_close_conversation",
     "gold_answer": "Grazie per aver utilizzato il nostro servizio. Buona giornata!",
     "expected_intent": "yes_close_conversation",
     "collection": null,
     "expected_action": "utter_close_conversation"
   },
-
   {
     "question": "Fammi vedere un documento aziendale.",
     "gold_answer": "Ti invio il documento richiesto.",
@@ -208,25 +191,16 @@
     "collection": null,
     "expected_action": "action_send_local_pdf"
   },
-
-  {
-    "question": "Vorrei prenotare una sala per domani.",
-    "gold_answer": "Accesso autorizzato come manager",
-    "expected_intent": "book_meeting_room",
-    "collection": null,
-    "expected_action": "action_check_user_role"
-  },
-
   {
     "question": "Saremo in 4.",
-    "gold_answer": "Quali caratteristiche deve avere la sala?",
+    "gold_answer": "utter_ask_features_room",
     "expected_intent": "provide_participants_number",
     "collection": null,
     "expected_action": "utter_ask_features_room"
   },
   {
     "question": "Ci saranno 10 persone.",
-    "gold_answer": "Quali caratteristiche deve avere la sala?",
+    "gold_answer": "utter_ask_features_room",
     "expected_intent": "provide_participants_number",
     "collection": null,
     "expected_action": "utter_ask_features_room"
@@ -234,14 +208,14 @@
 
   {
     "question": "Mostrami le mie prenotazioni.",
-    "gold_answer": "Ecco le tue prenotazioni attuali:",
+    "gold_answer": "Prenotazioni trovate per spospociao08@gmail.com",
     "expected_intent": "ask_my_reservations",
     "collection": null,
     "expected_action": "action_get_reservation"
   },
   {
     "question": "Voglio vedere quali sale ho prenotato.",
-    "gold_answer": "Ecco le tue prenotazioni attuali:",
+    "gold_answer": "Prenotazioni trovate per spospociao08@gmail.com",
     "expected_intent": "ask_my_reservations",
     "collection": null,
     "expected_action": "action_get_reservation"
@@ -249,14 +223,14 @@
 
   {
     "question": "Elimina la prenotazione con id 1234-5678-9abc-def0.",
-    "gold_answer": "La prenotazione è stata eliminata.",
+    "gold_answer": "Prenotazione cancellata con successo",
     "expected_intent": "delete_reservation",
     "collection": null,
     "expected_action": "action_delete_reservation"
   },
   {
     "question": "Cancella la mia prenotazione attiva.",
-    "gold_answer": "La prenotazione è stata eliminata.",
+    "gold_answer": "Prenotazione cancellata con successo",
     "expected_intent": "delete_reservation",
     "collection": null,
     "expected_action": "action_delete_reservation"

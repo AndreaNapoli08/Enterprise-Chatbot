@@ -1,6 +1,6 @@
 <!-- drawer component -->
-<div #drawer id="drawer-navigation" style="width: 270px;" class="fixed min-w-[256px] top-0 left-0 z-40 h-screen p-4 transition-transform -translate-x-full dark:bg-gray-800 bg-gray-200 border-e border-default">
-  <div class="border-b dark:border-gray-500 border-default flex items-center">
+<div #drawer id="drawer-navigation" style="width: 270px;" class="fixed min-w-[256px] top-0 left-0 z-40 h-screen p-4 transition-transform -translate-x-full dark:bg-gray-800 bg-gray-200 border-e border-default flex flex-col">
+  <div class="border-b dark:border-gray-500 border-default flex items-center mb-4">
       <button 
         (click)="createNewChat()" 
         title="Nuova chat"
@@ -14,7 +14,7 @@
         <span class="sr-only">Close menu</span>
       </button>
   </div>
-  <div class="scrollbar flex flex-col space-y-2 mb-3 overflow-y-auto max-h-[90vh] py-5 overflow-y-auto">
+  <div class="scrollbar flex flex-col flex-1 space-y-2 overflow-y-auto">
     <button 
       title="Nuova chat"
       (click)="createNewChat()"
@@ -128,7 +128,7 @@
     </ul>
   </div>
   <!-- PROFILO COMPLETO (sidebar aperta) -->
-  <div class="absolute bottom-4 left-0 w-full px-4">
+  <div class="relative mt-2">
     <div class="flex items-center gap-3 p-3 
                 bg-gray-300 dark:bg-gray-700 
                 rounded-xl border border-gray-400 dark:border-gray-600 shadow

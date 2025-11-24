@@ -166,9 +166,12 @@ export class Sidebar {
     .then(() => {
       // Aggiorno localmente l'elenco delle sessioni
       this.sessions = this.sessions.filter((s: ChatSession) => s.id !== sessionId);
-      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-        this.router.navigate(['/home']);
-      });
+      if (this.currentSession === sessionId) {
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate(['/home']);
+        });
+      }
+      this.closeDeleteModal();
     })
     .catch(err => console.error(err));
   }

@@ -2,12 +2,12 @@ import json
 import requests
 import argparse
 import os
-import pandas as pd
+import pandas as pd #type: ignore
 import warnings
-from sklearn.exceptions import UndefinedMetricWarning
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, precision_recall_fscore_support
-import seaborn as sns
-import matplotlib.pyplot as plt
+from sklearn.exceptions import UndefinedMetricWarning #type: ignore
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, precision_recall_fscore_support #type: ignore
+import seaborn as sns #type: ignore
+import matplotlib.pyplot as plt #type: ignore
 
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
@@ -20,8 +20,8 @@ dataset_path = "test.json"
 # ------------------------------------------------------------
 #  Funzione per interrogare RASA
 # ------------------------------------------------------------
-def send_to_rasa(message, email: str = 'spospociao08@gmail.com'):
-    """Ritorna: response_text, executed_action"""
+def send_to_rasa(message, email):
+    """Ritorna: response_text """
     response = requests.post(RASA_WEBHOOK_URL, json={'message': message, 'metadata': {'email': email}})
 
     try:
@@ -30,20 +30,38 @@ def send_to_rasa(message, email: str = 'spospociao08@gmail.com'):
         return "", None
 
     bot_response = ""
-    executed_action = None
 
     for item in data:
         if "text" in item:
             bot_response += item["text"] + " "
 
-        # Se ci sono eventi → registra quale action è stata eseguita
-        if "metadata" in item and "custom" in item["metadata"]:
-            events = item["metadata"]["custom"].get("events", [])
-            for ev in events:
-                if ev.get("event") == "action":
-                    executed_action = ev.get("name")
+    return bot_response.strip()
 
-    return bot_response.strip(), executed_action
+def get_last_action(sender_id="default"):
+    """
+    Recupera l'ultima action eseguita leggendo dal tracker di RASA.
+    """
+    try:
+        tracker = requests.get(f"http://localhost:5005/conversations/{sender_id}/tracker").json()
+        events = tracker.get("events", [])
+    except Exception as e:
+        print("Errore tracker:", e)
+        return "no_action"
+
+    last_action = "no_action"
+
+    # Scorro gli eventi al contrario (dall'ultimo al primo)
+    for ev in reversed(events):
+        if ev.get("event") == "action":
+            name = ev.get("name")
+            if name not in ["action_listen", "action_reset_fallback", "action_handle_fallback"]:
+                last_action = name
+                break
+    
+    return last_action
+
+def reset_conversation(sender_id="default"):
+    requests.post(f"http://localhost:5005/conversations/{sender_id}/reset")
 
 # ------------------------------------------------------------
 #  MAIN
@@ -59,9 +77,12 @@ def main(dataset_path: str):
     expected_intents = []
 
     index = 0
+    sender = "test_user_1"
+    email = "spospociao08@gmail.com"
     # MAIN LOOP
     for entry in dataset:
         print(f"Processing {index+1}/{len(dataset)}", end='\r')
+        reset_conversation(sender)
         q = entry["question"]
         expected_intent = entry["expected_intent"]
         expected_action = entry["expected_action"]
@@ -72,10 +93,12 @@ def main(dataset_path: str):
         predicted_intent = parse_response.get("intent", {}).get("name")
 
         # 2) Action + Response
-        bot_answer, executed_action = send_to_rasa(q)
-        if executed_action is None:
-            executed_action = "no_action"
+        bot_answer = send_to_rasa(q,email)
+        executed_action = get_last_action("default")
 
+        print("Bot answer: ", bot_answer)
+        print("Executed action: ", executed_action)
+        print("Gold answer: ", gold_answer) 
         predicted_intents.append(predicted_intent)
         expected_intents.append(expected_intent)
 
@@ -85,15 +108,26 @@ def main(dataset_path: str):
         intent_ok = (predicted_intent == expected_intent)
         action_ok = (expected_action == executed_action)
 
-        # risposta corretta = contiene almeno una keyword significativa
-        # (soft match, evita problema semantic similarity)
-        keywords = [
-            k.strip().lower()
-            for k in gold_answer.split()
-            if len(k) > 4    # ignora stopwords corte
-        ]
+        # ------------------------------------------------------------
+        #  NUOVA LOGICA RISPOSTA OK
+        # ------------------------------------------------------------
 
-        answer_ok = any(k in bot_answer.lower() for k in keywords)
+        # Caso 1: se expected_action è solo custom (es: utter_ask_features_room) → usa action_ok
+        if gold_answer is None or gold_answer == "" or expected_action.startswith("utter_"):
+            answer_ok = action_ok
+
+        else:
+            # Caso 2: risposta testuale → usa vecchio soft-match delle keywords
+            keywords = [
+                k.strip().lower()
+                for k in gold_answer.split()
+                if len(k) > 4
+            ]
+            answer_ok = any(k in bot_answer.lower() for k in keywords)
+
+        print("Punteggio answer: ",answer_ok)
+        print("---------------------------------------------------\n")
+        # ------------------------------------------------------------
 
         formatted_pair = f"Domanda:\n{q}\n\nRisposta:\n{bot_answer}"
 
@@ -120,7 +154,7 @@ def main(dataset_path: str):
     intent_cm = confusion_matrix(expected_intents, predicted_intents, labels=intent_labels)
 
     plt.figure(figsize=(14,12))
-    sns.heatmap(intent_cm, annot=True, fmt="d", cmap="Greens",
+    sns.heatmap(intent_cm, annot=True, fmt="d", cmap="Blues",
                 xticklabels=intent_labels, yticklabels=intent_labels)
     plt.xlabel("Predicted Intent")
     plt.ylabel("Expected Intent")
@@ -161,7 +195,7 @@ def main(dataset_path: str):
     # ------------------------------------------------------------
     #  CONFUSION MATRIX ACTION
     # ------------------------------------------------------------
-    print("\n==\=======================================================")
+    print("\n==========================================================")
     print("                CONFUSION MATRIX ACTION")
     print("========================================================")
     executed_actions = [r["executed_action"] if r["executed_action"] is not None else "no_action" for r in results]

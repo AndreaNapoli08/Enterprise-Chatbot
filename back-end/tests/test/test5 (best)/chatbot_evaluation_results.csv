@@ -1,0 +1,407 @@
+pair,question,bot_answer,gold_answer,expected_intent,predicted_intent,intent_ok,expected_action,executed_action,action_ok,answer_ok
+"Domanda:
+Vorrei prenotare una sala per domani.
+
+Risposta:
+Accesso autorizzato come Manager ✅",Vorrei prenotare una sala per domani.,Accesso autorizzato come Manager ✅,Accesso autorizzato come manager,book_meeting_room,book_meeting_room,True,action_check_user_role,utter_ask_meeting_date,False,True
+"Domanda:
+Ciao! Come stai?
+
+Risposta:
+Ciao! Come posso aiutarti?",Ciao! Come stai?,Ciao! Come posso aiutarti?,Ciao! Come posso aiutarti?,greet,greet,True,utter_greet,utter_greet,True,True
+"Domanda:
+Buonasera!
+
+Risposta:
+Ciao! Come posso aiutarti?",Buonasera!,Ciao! Come posso aiutarti?,Ciao! Come posso aiutarti?,greet,greet,True,utter_greet,utter_greet,True,True
+"Domanda:
+A presto!
+
+Risposta:
+Ti serve ancora aiuto?",A presto!,Ti serve ancora aiuto?,Ti serve ancora aiuto?,goodbye,goodbye,True,utter_ask_option_close_conversation,utter_ask_option_close_conversation,True,True
+"Domanda:
+Arrivederci!
+
+Risposta:
+Ti serve ancora aiuto?",Arrivederci!,Ti serve ancora aiuto?,Ti serve ancora aiuto?,goodbye,goodbye,True,utter_ask_option_close_conversation,utter_ask_option_close_conversation,True,True
+"Domanda:
+Sono super felice!
+
+Risposta:
+Fantastico, continua così!",Sono super felice!,"Fantastico, continua così!","Fantastico, continua così!",mood_great,mood_great,True,utter_happy,utter_happy,True,True
+"Domanda:
+Oggi va alla grande!
+
+Risposta:
+Fantastico, continua così!",Oggi va alla grande!,"Fantastico, continua così!","Fantastico, continua così!",mood_great,mood_great,True,utter_happy,utter_happy,True,True
+"Domanda:
+Sono un po' triste oggi...
+
+Risposta:
+Ecco qualcosa per tirarti su il morale:",Sono un po' triste oggi...,Ecco qualcosa per tirarti su il morale:,Ecco qualcosa per tirarti su il morale:,mood_unhappy,mood_unhappy,True,utter_cheer_up,utter_cheer_up,True,True
+"Domanda:
+Giornata pessima.
+
+Risposta:
+Ecco qualcosa per tirarti su il morale:",Giornata pessima.,Ecco qualcosa per tirarti su il morale:,Ecco qualcosa per tirarti su il morale:,mood_unhappy,mood_unhappy,True,utter_cheer_up,utter_cheer_up,True,True
+"Domanda:
+Sei un bot?
+
+Risposta:
+Sono un bot, alimentato da Rasa.",Sei un bot?,"Sono un bot, alimentato da Rasa.","Sono un bot, alimentato da Rasa.",bot_challenge,bot_challenge,True,utter_iamabot,utter_iamabot,True,True
+"Domanda:
+Sto parlando con un umano?
+
+Risposta:
+Sono un bot, alimentato da Rasa.",Sto parlando con un umano?,"Sono un bot, alimentato da Rasa.","Sono un bot, alimentato da Rasa.",bot_challenge,bot_challenge,True,utter_iamabot,utter_iamabot,True,True
+"Domanda:
+Non ho altre domande.
+
+Risposta:
+Ti serve ancora aiuto?",Non ho altre domande.,Ti serve ancora aiuto?,Ti serve ancora aiuto?,conversation_end,conversation_end,True,utter_ask_option_close_conversation,utter_ask_option_close_conversation,True,True
+"Domanda:
+È tutto grazie.
+
+Risposta:
+Ti serve ancora aiuto?",È tutto grazie.,Ti serve ancora aiuto?,Ti serve ancora aiuto?,conversation_end,conversation_end,True,utter_ask_option_close_conversation,utter_ask_option_close_conversation,True,True
+"Domanda:
+asdasdjh12&&
+
+Risposta:
+Mi dispiace, non ho capito bene. Puoi riformulare?",asdasdjh12&&,"Mi dispiace, non ho capito bene. Puoi riformulare?","Mi dispiace, non ho capito bene. Puoi riformulare?",out_of_scope,out_of_scope,True,utter_out_of_scope,utter_out_of_scope,True,True
+"Domanda:
+lkjljl@@
+
+Risposta:
+Mi dispiace, non ho capito bene. Puoi riformulare?",lkjljl@@,"Mi dispiace, non ho capito bene. Puoi riformulare?","Mi dispiace, non ho capito bene. Puoi riformulare?",out_of_scope,out_of_scope,True,utter_out_of_scope,utter_out_of_scope,True,True
+"Domanda:
+Che ore sono?
+
+Risposta:
+Non so la risposta a questa domanda Vuoi che cerco nei documenti?",Che ore sono?,Non so la risposta a questa domanda Vuoi che cerco nei documenti?,Non so la risposta a questa domanda. Vuoi che cerco nei documenti?,nlu_fallback,nlu_fallback,True,utter_fallback,utter_ask_option_search_document,False,False
+"Domanda:
+Chi ha inventato internet?
+
+Risposta:
+Non so la risposta a questa domanda Vuoi che cerco nei documenti?",Chi ha inventato internet?,Non so la risposta a questa domanda Vuoi che cerco nei documenti?,Non so la risposta a questa domanda. Vuoi che cerco nei documenti?,nlu_fallback,nlu_fallback,True,utter_fallback,utter_ask_option_search_document,False,False
+"Domanda:
+/choose_no_document
+
+Risposta:
+Va bene, non cerco nei documenti per ora.",/choose_no_document,"Va bene, non cerco nei documenti per ora.","Va bene, non cerco nei documenti per ora.",choose_no_document,choose_no_document,True,utter_option_no,utter_option_no,True,True
+"Domanda:
+/choose_no_document
+
+Risposta:
+Va bene, non cerco nei documenti per ora. Mi dispiace, non riesco a capire la tua richiesta. Ti consiglio di contattare un operatore umano.",/choose_no_document,"Va bene, non cerco nei documenti per ora. Mi dispiace, non riesco a capire la tua richiesta. Ti consiglio di contattare un operatore umano.","Va bene, non cerco nei documenti per ora.",choose_no_document,choose_no_document,True,utter_option_no,utter_option_no,True,True
+"Domanda:
+/choose_yes_document
+
+Risposta:
+Ecco i documenti disponibili. Dove vuoi che cerco la risposta?",/choose_yes_document,Ecco i documenti disponibili. Dove vuoi che cerco la risposta?,Ecco i documenti disponibili:,choose_yes_document,choose_yes_document,True,action_list_available_documents,action_list_available_documents,True,True
+"Domanda:
+/choose_yes_document
+
+Risposta:
+Ecco i documenti disponibili. Dove vuoi che cerco la risposta?",/choose_yes_document,Ecco i documenti disponibili. Dove vuoi che cerco la risposta?,Ecco i documenti disponibili:,choose_yes_document,choose_yes_document,True,action_list_available_documents,action_list_available_documents,True,True
+"Domanda:
+/no_close_conversation
+
+Risposta:
+Va bene, sono qui per aiutarti",/no_close_conversation,"Va bene, sono qui per aiutarti","Va bene, sono qui per aiutarti",no_close_conversation,no_close_conversation,True,utter_no_close_conversation,utter_no_close_conversation,True,True
+"Domanda:
+/no_close_conversation
+
+Risposta:
+Va bene, sono qui per aiutarti",/no_close_conversation,"Va bene, sono qui per aiutarti","Va bene, sono qui per aiutarti",no_close_conversation,no_close_conversation,True,utter_no_close_conversation,utter_no_close_conversation,True,True
+"Domanda:
+/yes_close_conversation
+
+Risposta:
+Grazie per aver utilizzato il nostro servizio. Buona giornata!",/yes_close_conversation,Grazie per aver utilizzato il nostro servizio. Buona giornata!,Grazie per aver utilizzato il nostro servizio. Buona giornata!,yes_close_conversation,yes_close_conversation,True,utter_close_conversation,utter_close_conversation,True,True
+"Domanda:
+/yes_close_conversation
+
+Risposta:
+Grazie per aver utilizzato il nostro servizio. Buona giornata!",/yes_close_conversation,Grazie per aver utilizzato il nostro servizio. Buona giornata!,Grazie per aver utilizzato il nostro servizio. Buona giornata!,yes_close_conversation,yes_close_conversation,True,utter_close_conversation,utter_close_conversation,True,True
+"Domanda:
+Fammi vedere un documento aziendale.
+
+Risposta:
+Indicami il nome o l'argomento del documento che desideri visualizzare",Fammi vedere un documento aziendale.,Indicami il nome o l'argomento del documento che desideri visualizzare,Ti invio il documento richiesto.,ask_document,ask_document,True,action_send_local_pdf,action_send_local_pdf,True,True
+"Domanda:
+Mostrami il file sulle linee guida.
+
+Risposta:
+Ecco il documento che hai richiesto:",Mostrami il file sulle linee guida.,Ecco il documento che hai richiesto:,Ti invio il documento richiesto.,ask_document,ask_document,True,action_send_local_pdf,action_send_local_pdf,True,True
+"Domanda:
+Saremo in 4.
+
+Risposta:
+Non so la risposta a questa domanda Vuoi che cerco nei documenti?",Saremo in 4.,Non so la risposta a questa domanda Vuoi che cerco nei documenti?,utter_ask_features_room,provide_participants_number,nlu_fallback,False,utter_ask_features_room,utter_ask_option_search_document,False,False
+"Domanda:
+Ci saranno 10 persone.
+
+Risposta:
+",Ci saranno 10 persone.,,utter_ask_features_room,provide_participants_number,provide_participants_number,True,utter_ask_features_room,utter_ask_features_room,True,True
+"Domanda:
+Mostrami le mie prenotazioni.
+
+Risposta:
+📅 Prenotazioni trovate per spospociao08@gmail.com",Mostrami le mie prenotazioni.,📅 Prenotazioni trovate per spospociao08@gmail.com,Prenotazioni trovate per spospociao08@gmail.com,ask_my_reservations,ask_my_reservations,True,action_get_reservation,action_get_reservation,True,True
+"Domanda:
+Voglio vedere quali sale ho prenotato.
+
+Risposta:
+📅 Prenotazioni trovate per spospociao08@gmail.com",Voglio vedere quali sale ho prenotato.,📅 Prenotazioni trovate per spospociao08@gmail.com,Prenotazioni trovate per spospociao08@gmail.com,ask_my_reservations,ask_my_reservations,True,action_get_reservation,action_get_reservation,True,True
+"Domanda:
+Elimina la prenotazione con id 1234-5678-9abc-def0.
+
+Risposta:
+Non ho trovato un ID prenotazione nel messaggio.",Elimina la prenotazione con id 1234-5678-9abc-def0.,Non ho trovato un ID prenotazione nel messaggio.,Prenotazione cancellata con successo,delete_reservation,delete_reservation,True,action_delete_reservation,action_delete_reservation,True,True
+"Domanda:
+Cancella la mia prenotazione attiva.
+
+Risposta:
+Non ho trovato un ID prenotazione nel messaggio.",Cancella la mia prenotazione attiva.,Non ho trovato un ID prenotazione nel messaggio.,Prenotazione cancellata con successo,delete_reservation,delete_reservation,True,action_delete_reservation,action_delete_reservation,True,True
+"Domanda:
+Voglio cambiare la mia password.
+
+Risposta:
+",Voglio cambiare la mia password.,,Inserisci la vecchia e la nuova password.,change_password,change_password,True,utter_change_password,utter_change_password,True,True
+"Domanda:
+Come posso aggiornare la password?
+
+Risposta:
+",Come posso aggiornare la password?,,Inserisci la vecchia e la nuova password.,change_password,change_password,True,utter_change_password,utter_change_password,True,True
+"Domanda:
+La vecchia password è abc123 e la nuova è def456.
+
+Risposta:
+Non sono riuscito a capire le password. Scrivile così: 'La vecchia password è: ... La nuova password è: ...'",La vecchia password è abc123 e la nuova è def456.,Non sono riuscito a capire le password. Scrivile così: 'La vecchia password è: ... La nuova password è: ...',La tua password è stata aggiornata con successo.,receive_new_password,receive_new_password,True,action_change_password,action_change_password,True,True
+"Domanda:
+Aggiorna la password da pass01 a pass02.
+
+Risposta:
+Non sono riuscito a capire le password. Scrivile così: 'La vecchia password è: ... La nuova password è: ...'",Aggiorna la password da pass01 a pass02.,Non sono riuscito a capire le password. Scrivile così: 'La vecchia password è: ... La nuova password è: ...',La tua password è stata aggiornata con successo.,receive_new_password,receive_new_password,True,action_change_password,action_change_password,True,True
+"Domanda:
+A cosa serve la relazione di tirocinio?
+
+Risposta:
+La relazione di tirocinio illustra le attività svolte, riflette su ciò che è stato osservato e documenta linke il processo. È un testo informativo espositivo con parti argomentative destinate ai/alle tutor del tirocinio.
+​
+Fonte: linee_guida.pdf",A cosa serve la relazione di tirocinio?,"La relazione di tirocinio illustra le attività svolte, riflette su ciò che è stato osservato e documenta linke il processo. È un testo informativo espositivo con parti argomentative destinate ai/alle tutor del tirocinio.
+​
+Fonte: linee_guida.pdf",Serve a illustrare l'attività svolta...,ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Quante pagine deve avere la relazione finale?
+
+Risposta:
+La domanda non specifica il numero di pagine per la relazione finale nel documento fornito, quindi non è stato specificato. La risposta corretta sarebbe che il numero di pagine non è indicato nel contesto dato.
+​
+Fonte: linee_guida.pdf",Quante pagine deve avere la relazione finale?,"La domanda non specifica il numero di pagine per la relazione finale nel documento fornito, quindi non è stato specificato. La risposta corretta sarebbe che il numero di pagine non è indicato nel contesto dato.
+​
+Fonte: linee_guida.pdf",Si consiglia una lunghezza tra le 10 e le 15 facciate...,ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Cosa scrivere nella parte introduttiva della relazione?
+
+Risposta:
+Nella parte introduttiva, lo studente descrive le motivazioni per scegliere l'ambito di tirocinio e risponde alle aspettative riguardanti interessi, conoscenze ed abilità.
+​
+Fonte: linee_guida.pdf",Cosa scrivere nella parte introduttiva della relazione?,"Nella parte introduttiva, lo studente descrive le motivazioni per scegliere l'ambito di tirocinio e risponde alle aspettative riguardanti interessi, conoscenze ed abilità.
+​
+Fonte: linee_guida.pdf","Nella parte introduttiva, l'utente dovrebbe definire...",ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Che cos’è Blue Reply?
+
+Risposta:
+Nessuna risposta rilevante è stata trovata nei documenti",Che cos’è Blue Reply?,Nessuna risposta rilevante è stata trovata nei documenti,Blue Reply è una società di consulenza...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Quanti giorni di ferie ha un lavoratore full time?
+
+Risposta:
+26 giorni annui retribuiti per i dipendenti a tempo pieno.
+​
+Fonte: informazioni_aziendali.pdf",Quanti giorni di ferie ha un lavoratore full time?,"26 giorni annui retribuiti per i dipendenti a tempo pieno.
+​
+Fonte: informazioni_aziendali.pdf",Il diritto annuale standard è di 26 giorni...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Come posso richiedere le ferie?
+
+Risposta:
+Per richiedere le ferie, contatta il tuo manager entro cinque giorni lavorativi dalla tua richiesta. Se non ricevi risposta, ti verrà invio un promemoria automatico tramite email o messaggistica interna dell'azienda.
+​
+Fonte: informazioni_aziendali.pdf",Come posso richiedere le ferie?,"Per richiedere le ferie, contatta il tuo manager entro cinque giorni lavorativi dalla tua richiesta. Se non ricevi risposta, ti verrà invio un promemoria automatico tramite email o messaggistica interna dell'azienda.
+​
+Fonte: informazioni_aziendali.pdf",Tutte le richieste di ferie devono essere inserite...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Qual è la differenza tra diario di bordo e relazione finale?
+
+Risposta:
+La relazione finale illustra le attività svolte, gli apprendimenti acquisiti e documenta l'esperienza del tirocinio. Il diario di bordo è un registro personale delle proprie impressioni ed esperienze durante il periodo di tirocino.
+​
+Fonte: linee_guida.pdf",Qual è la differenza tra diario di bordo e relazione finale?,"La relazione finale illustra le attività svolte, gli apprendimenti acquisiti e documenta l'esperienza del tirocinio. Il diario di bordo è un registro personale delle proprie impressioni ed esperienze durante il periodo di tirocino.
+​
+Fonte: linee_guida.pdf",La relazione finale non sostituisce il diario di bordo...,ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Che tipo di testo è la relazione di tirocinio?
+
+Risposta:
+La relazione di tirocinio è un testo informativo espositivo con parti argomentative.
+​
+Fonte: linee_guida.pdf",Che tipo di testo è la relazione di tirocinio?,"La relazione di tirocinio è un testo informativo espositivo con parti argomentative.
+​
+Fonte: linee_guida.pdf",La relazione di tirocinio è un testo riflessivo...,ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Come descrivere le attività educative osservate?
+
+Risposta:
+Descrivi il piano settimanale delle attività, inclusi gli obiettivi specifici per ciascuna giornata e i ruoli degli studenti e del personale. Includi anche le modalità di documentazione e valutazione educativa. Se applicabile, descrivere la partecipazione alle riunioni familiari con dettagli sulla frequenza e il tipo di incontri.
+​
+Fonte: linee_guida.pdf",Come descrivere le attività educative osservate?,"Descrivi il piano settimanale delle attività, inclusi gli obiettivi specifici per ciascuna giornata e i ruoli degli studenti e del personale. Includi anche le modalità di documentazione e valutazione educativa. Se applicabile, descrivere la partecipazione alle riunioni familiari con dettagli sulla frequenza e il tipo di incontri.
+​
+Fonte: linee_guida.pdf",Nella parte centrale della relazione si devono descrivere...,ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Devo analizzare le competenze acquisite durante il tirocinio?
+
+Risposta:
+Sì, devi analizzare e descrivere le competenze acquisite. Usa un testo espositivo con elementi argomentativi. Il registro da utilizzare è il formale-accademico. La relazione di tirocinio dovrebbe includere una verifica del raggiungimento degli obiettivi e un'analisi delle competenze acquisite, come le abilità relazionali, progettuali o organizzative.
+​
+Fonte: linee_guida.pdf",Devo analizzare le competenze acquisite durante il tirocinio?,"Sì, devi analizzare e descrivere le competenze acquisite. Usa un testo espositivo con elementi argomentativi. Il registro da utilizzare è il formale-accademico. La relazione di tirocinio dovrebbe includere una verifica del raggiungimento degli obiettivi e un'analisi delle competenze acquisite, come le abilità relazionali, progettuali o organizzative.
+​
+Fonte: linee_guida.pdf","Sì, nelle Riflessioni sull'esperienza devi analizzare...",ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Quali criticità devo segnalare nella relazione?
+
+Risposta:
+Non sono specificate critiche da segnalare; la domanda sembra chiedere suggerimenti generali per una valutazione critica. Tuttavia, poiché non ci sono riferimenti espliciti nel contesto fornito, è consigliabile esprimere che le criticità dovrebbero essere dedotte attraverso un'analisi attenta e riflessiva dell'esperienza di tirocinio stesso.
+​
+Fonte: linee_guida.pdf",Quali criticità devo segnalare nella relazione?,"Non sono specificate critiche da segnalare; la domanda sembra chiedere suggerimenti generali per una valutazione critica. Tuttavia, poiché non ci sono riferimenti espliciti nel contesto fornito, è consigliabile esprimere che le criticità dovrebbero essere dedotte attraverso un'analisi attenta e riflessiva dell'esperienza di tirocinio stesso.
+​
+Fonte: linee_guida.pdf","Nelle riflessioni finali, è opportuno segnalare...",ask_information_relazione,ask_information_relazione,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Posso accumulare le ferie non utilizzate?
+
+Risposta:
+No, è consentito riportare al massimo cinque gior0 di ferie all'anno successivo. Le giornate rimanenti devono essere pianificate per evitare accumuli eccessivi.
+​
+Fonte: informazioni_aziendali.pdf",Posso accumulare le ferie non utilizzate?,"No, è consentito riportare al massimo cinque gior0 di ferie all'anno successivo. Le giornate rimanenti devono essere pianificate per evitare accumuli eccessivi.
+​
+Fonte: informazioni_aziendali.pdf","Sì, è possibile accumulare ferie...",ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,False
+"Domanda:
+Cosa sono i permessi ROL?
+
+Risposta:
+I permessi ROL sono permessi retribuiti, come festività o motivi personali brevi, che forniscono compensazione economica per il tempo di assenza dal lavoro.
+​
+Fonte: informazioni_aziendali.pdf",Cosa sono i permessi ROL?,"I permessi ROL sono permessi retribuiti, come festività o motivi personali brevi, che forniscono compensazione economica per il tempo di assenza dal lavoro.
+​
+Fonte: informazioni_aziendali.pdf",I permessi ROL sono permessi retribuiti...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Come funziona la piattaforma welfare?
+
+Risposta:
+La piattaforma consente di visualizzare il proprio saldo annuale, scegliere servizi convenzionati e monitorare le spese. Non è cumulabile l'importo non utilizzato entro la fine dell'anno.
+​
+Fonte: informazioni_aziendali.pdf",Come funziona la piattaforma welfare?,"La piattaforma consente di visualizzare il proprio saldo annuale, scegliere servizi convenzionati e monitorare le spese. Non è cumulabile l'importo non utilizzato entro la fine dell'anno.
+​
+Fonte: informazioni_aziendali.pdf",Blue Reply mette a disposizione una piattaforma welfare...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Devo connettermi alla VPN anche se lavoro da casa?
+
+Risposta:
+Sì, è possibile utilizzare la VPN per accedere ai file e alle piattaforme aziendali quando si lavora da casa. Per connettersi, seguirai i passaggi elencati nel contesto precedente. Tuttavia, assicurati di rispettare le policy di utilizzo della VPN stabilite dall'azienda per evitare eventuali provvedimenti disciplinari.
+​
+Fonte: informazioni_aziendali.pdf",Devo connettermi alla VPN anche se lavoro da casa?,"Sì, è possibile utilizzare la VPN per accedere ai file e alle piattaforme aziendali quando si lavora da casa. Per connettersi, seguirai i passaggi elencati nel contesto precedente. Tuttavia, assicurati di rispettare le policy di utilizzo della VPN stabilite dall'azienda per evitare eventuali provvedimenti disciplinari.
+​
+Fonte: informazioni_aziendali.pdf","Sì, l'utilizzo della VPN aziendale è obbligatorio...",ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Cosa succede se mi ammalo durante le ferie?
+
+Risposta:
+Se ti ammali durante le ferie, devi informare tempestivamente HR fornendo il certificato medico. I giorni di malattia riconosciuti non vengono computati come ferie.
+​
+Fonte: informazioni_aziendali.pdf",Cosa succede se mi ammalo durante le ferie?,"Se ti ammali durante le ferie, devi informare tempestivamente HR fornendo il certificato medico. I giorni di malattia riconosciuti non vengono computati come ferie.
+​
+Fonte: informazioni_aziendali.pdf",In caso di malattia durante il periodo di ferie...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Come funziona il sistema dei buoni pasto elettronici?
+
+Risposta:
+I dipendenti possono acquistare crediti che non contribuiscono al reddito imponibile e sono esenti da tassazione. Se superano i limiti, la quota eccedente è soggetta a imposte. I buoni vengono sostituiti in media entro 3-5 gior0 ## Instruction 2 (More difficult with at least {ct} more constraints)
+​
+Fonte: informazioni_aziendali.pdf",Come funziona il sistema dei buoni pasto elettronici?,"I dipendenti possono acquistare crediti che non contribuiscono al reddito imponibile e sono esenti da tassazione. Se superano i limiti, la quota eccedente è soggetta a imposte. I buoni vengono sostituiti in media entro 3-5 gior0 ## Instruction 2 (More difficult with at least {ct} more constraints)
+​
+Fonte: informazioni_aziendali.pdf",I buoni pasto sono elettronici e vengono caricati...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Dove posso modificare il mio IBAN?
+
+Risposta:
+Per modificare l'IBAN, contatta la tua reparto assicurativi o visita il Portale HR per accedere alla sezione “Welfare e Assicurazioni”.
+​
+Fonte: informazioni_aziendali.pdf",Dove posso modificare il mio IBAN?,"Per modificare l'IBAN, contatta la tua reparto assicurativi o visita il Portale HR per accedere alla sezione “Welfare e Assicurazioni”.
+​
+Fonte: informazioni_aziendali.pdf",L'aggiornamento dell'IBAN deve essere fatto sul Portale HR...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Quando viene pagato lo stipendio?
+
+Risposta:
+La domanda ""Quando viene pagato lo stipendio?"" non è specificata nel contesto fornito. La risposta corretta sarebbe che la retribuzione viene erogata con cadenza mensile, generalmente entro il 27 di ogni mese tramite bonifico bancario sul conto indicato dal dipendente.
+​
+Fonte: informazioni_aziendali.pdf",Quando viene pagato lo stipendio?,"La domanda ""Quando viene pagato lo stipendio?"" non è specificata nel contesto fornito. La risposta corretta sarebbe che la retribuzione viene erogata con cadenza mensile, generalmente entro il 27 di ogni mese tramite bonifico bancario sul conto indicato dal dipendente.
+​
+Fonte: informazioni_aziendali.pdf",Lo stipendio viene accreditato mensilmente...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Dove trovo il mio cedolino paga?
+
+Risposta:
+Nel Portale HR, entro un giorno prima dell'erogazione della retribuzione.
+​
+Fonte: informazioni_aziendali.pdf",Dove trovo il mio cedolino paga?,"Nel Portale HR, entro un giorno prima dell'erogazione della retribuzione.
+​
+Fonte: informazioni_aziendali.pdf",Il cedolino paga è disponibile nel Portale HR...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Come richiedere un rimborso spese?
+
+Risposta:
+1. Inserire la domanda nel modulo ""Rimborsi e Missioni"" del Portale HR; 2. Allegare i documenti originali giustificativi; 3. Ottenere l'approvazione da parte di HR.
+​
+Fonte: informazioni_aziendali.pdf",Come richiedere un rimborso spese?,"1. Inserire la domanda nel modulo ""Rimborsi e Missioni"" del Portale HR; 2. Allegare i documenti originali giustificativi; 3. Ottenere l'approvazione da parte di HR.
+​
+Fonte: informazioni_aziendali.pdf",I rimborsi vanno richiesti tramite il modulo elettronico...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Cosa succede se non uso il credito welfare entro fine anno?
+
+Risposta:
+Il tuo credito welfare residuo verrà scaduto e potrebbe influire negativamente sui benefici futuri.
+​
+Fonte: informazioni_aziendali.pdf",Cosa succede se non uso il credito welfare entro fine anno?,"Il tuo credito welfare residuo verrà scaduto e potrebbe influire negativamente sui benefici futuri.
+​
+Fonte: informazioni_aziendali.pdf",Il credito welfare non utilizzato non potrà essere recuperato...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Quali corsi di formazione sono disponibili?
+
+Risposta:
+I documenti non specificano quali corsi di formazione siano disponibili. Per informazioni dettagliate, è necessario fare riferimento direttamente ai contratti o al Portale HR della Blue Reply.
+​
+Fonte: informazioni_aziendali.pdf",Quali corsi di formazione sono disponibili?,"I documenti non specificano quali corsi di formazione siano disponibili. Per informazioni dettagliate, è necessario fare riferimento direttamente ai contratti o al Portale HR della Blue Reply.
+​
+Fonte: informazioni_aziendali.pdf",Blue Reply offre un catalogo corsi...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Cosa devo fare se ricevo un’e-mail sospetta di phishing?
+
+Risposta:
+Non rispondere mai all'email e segnalala immediatamente al team IT Security.
+​
+Fonte: informazioni_aziendali.pdf",Cosa devo fare se ricevo un’e-mail sospetta di phishing?,"Non rispondere mai all'email e segnalala immediatamente al team IT Security.
+​
+Fonte: informazioni_aziendali.pdf",Non aprire l'e-mail e segnala al team IT...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
+"Domanda:
+Cosa fa il team IT Security in merito alla VPN?
+
+Risposta:
+Il team IT Security gestisce le questioni di sicurezza della rete e risponde alle eventuali violazioni delle policy.
+​
+Fonte: informazioni_aziendali.pdf",Cosa fa il team IT Security in merito alla VPN?,"Il team IT Security gestisce le questioni di sicurezza della rete e risponde alle eventuali violazioni delle policy.
+​
+Fonte: informazioni_aziendali.pdf",Il team IT Security monitora l’utilizzo della VPN...,ask_information_aziendale,ask_information_aziendale,True,action_answer_from_chroma,action_answer_from_chroma,True,True
