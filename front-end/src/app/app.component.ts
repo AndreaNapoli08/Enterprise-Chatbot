@@ -12,6 +12,7 @@ import { initFlowbite } from 'flowbite';
 })
 export class AppComponent implements OnInit {
   constructor(private router: Router) {}
+  title= 'prova-flowbite';
 
   ngOnInit(): void {
     // aggiornamento colore scrollbar in base al tema (chiaro/scuro)

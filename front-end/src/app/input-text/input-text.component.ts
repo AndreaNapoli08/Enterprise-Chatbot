@@ -9,9 +9,10 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'input-text',
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './input-text.component.html',
-  styleUrl: './input-text.component.css'
+  styleUrls: ['./input-text.component.css']
 })
 
 export class InputText {
@@ -46,7 +47,6 @@ export class InputText {
   }
 
   onTextChange(value: string) {
-    console.log('Input text changed:', value);
     this.stateEmptyInput.emit(value.trim().length === 0);
   }
 
