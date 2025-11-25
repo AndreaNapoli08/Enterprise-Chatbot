@@ -6,6 +6,7 @@
     "collection": null,
     "expected_action": "action_check_user_role"
   },
+  
   {
     "question": "Ciao! Come stai?",
     "gold_answer": "Ciao! Come posso aiutarti?",
@@ -50,7 +51,7 @@
   },
 
   {
-    "question": "Sono un po' triste oggi...",
+    "question": "Sono un po' triste oggi",
     "gold_answer": "Ecco qualcosa per tirarti su il morale:",
     "expected_intent": "mood_unhappy",
     "collection": null,
@@ -112,14 +113,7 @@
     "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
     "expected_intent": "nlu_fallback",
     "collection": null,
-    "expected_action": "utter_fallback"
-  },
-  {
-    "question": "Chi ha inventato internet?",
-    "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
-    "expected_intent": "nlu_fallback",
-    "collection": null,
-    "expected_action": "utter_fallback"
+    "expected_action": "utter_ask_option_search_document"
   },
   {
     "question": "/choose_no_document",
@@ -169,6 +163,13 @@
     "expected_intent": "yes_close_conversation",
     "collection": null,
     "expected_action": "utter_close_conversation"
+  },
+  {
+    "question": "Chi ha inventato internet?",
+    "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
   },
   {
     "question": "/yes_close_conversation",
@@ -268,7 +269,7 @@
 
   {
     "question": "A cosa serve la relazione di tirocinio?",
-    "gold_answer": "Serve a illustrare l'attività svolta...",
+    "gold_answer": "Serve a illustrare l'attività svolta, riflettere sull’esperienza e documentare quanto appreso",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -276,7 +277,7 @@
 
   {
     "question": "Quante pagine deve avere la relazione finale?",
-    "gold_answer": "Si consiglia una lunghezza tra le 10 e le 15 facciate...",
+    "gold_answer": "Si consiglia una lunghezza tra 10 e 15 facciate circa",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -284,7 +285,7 @@
 
   {
     "question": "Cosa scrivere nella parte introduttiva della relazione?",
-    "gold_answer": "Nella parte introduttiva, l'utente dovrebbe definire...",
+    "gold_answer": "Nella parte introduttiva devi descrivere il servizio educativo, gli obiettivi del tirocinio e il contesto dell’ente",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -292,7 +293,7 @@
 
   {
     "question": "Che cos’è Blue Reply?",
-    "gold_answer": "Blue Reply è una società di consulenza...",
+    "gold_answer": "Blue Reply è una società di consulenza IT del gruppo Reply.",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -300,7 +301,7 @@
 
   {
     "question": "Quanti giorni di ferie ha un lavoratore full time?",
-    "gold_answer": "Il diritto annuale standard è di 26 giorni...",
+    "gold_answer": "Il diritto standard è di 26 giorni di ferie annuali",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -308,7 +309,7 @@
 
   {
     "question": "Come posso richiedere le ferie?",
-    "gold_answer": "Tutte le richieste di ferie devono essere inserite...",
+    "gold_answer": "Le richieste di ferie devono essere inserite nel Portale HR aziendale",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -316,7 +317,7 @@
 
   {
     "question": "Qual è la differenza tra diario di bordo e relazione finale?",
-    "gold_answer": "La relazione finale non sostituisce il diario di bordo...",
+    "gold_answer": "La relazione finale non sostituisce il diario di bordo: il diario è personale, la relazione è riflessiva e strutturata",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -324,7 +325,7 @@
 
   {
     "question": "Che tipo di testo è la relazione di tirocinio?",
-    "gold_answer": "La relazione di tirocinio è un testo riflessivo...",
+    "gold_answer": "È un testo informativo-espositivo con parti argomentative che analizzano criticamente l’esperienza",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -332,7 +333,7 @@
 
   {
     "question": "Come descrivere le attività educative osservate?",
-    "gold_answer": "Nella parte centrale della relazione si devono descrivere...",
+    "gold_answer": "Nella parte centrale devi descrivere attività, obiettivi, organizzazione della giornata e modalità educative osservate",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -340,7 +341,7 @@
 
   {
     "question": "Devo analizzare le competenze acquisite durante il tirocinio?",
-    "gold_answer": "Sì, nelle Riflessioni sull'esperienza devi analizzare...",
+    "gold_answer": "Sì, nelle riflessioni finali devi analizzare competenze acquisite, criticità e risultati raggiunti",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -348,7 +349,7 @@
 
   {
     "question": "Quali criticità devo segnalare nella relazione?",
-    "gold_answer": "Nelle riflessioni finali, è opportuno segnalare...",
+    "gold_answer": "Devi indicare difficoltà incontrate, punti di forza e aspetti da migliorare rispetto agli obiettivi formativi",
     "expected_intent": "ask_information_relazione",
     "collection": "relazione_docs",
     "expected_action": "action_answer_from_chroma"
@@ -356,7 +357,7 @@
 
   {
     "question": "Posso accumulare le ferie non utilizzate?",
-    "gold_answer": "Sì, è possibile accumulare ferie...",
+    "gold_answer": "Sì, le ferie possono essere accumulate secondo le policy aziendali",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -364,7 +365,7 @@
 
   {
     "question": "Cosa sono i permessi ROL?",
-    "gold_answer": "I permessi ROL sono permessi retribuiti...",
+    "gold_answer": "Sono permessi retribuiti utilizzabili per esigenze personali",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -372,7 +373,7 @@
 
   {
     "question": "Come funziona la piattaforma welfare?",
-    "gold_answer": "Blue Reply mette a disposizione una piattaforma welfare...",
+    "gold_answer": "È disponibile una piattaforma welfare dove utilizzare il credito assegnato annualmente.",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -380,7 +381,7 @@
 
   {
     "question": "Devo connettermi alla VPN anche se lavoro da casa?",
-    "gold_answer": "Sì, l'utilizzo della VPN aziendale è obbligatorio...",
+    "gold_answer": "Sì, per accedere alle risorse aziendali è necessario utilizzare la VPN",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -388,7 +389,7 @@
 
   {
     "question": "Cosa succede se mi ammalo durante le ferie?",
-    "gold_answer": "In caso di malattia durante il periodo di ferie...",
+    "gold_answer": "Le ferie possono essere convertite in malattia secondo la procedura aziendale",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -396,7 +397,7 @@
 
   {
     "question": "Come funziona il sistema dei buoni pasto elettronici?",
-    "gold_answer": "I buoni pasto sono elettronici e vengono caricati...",
+    "gold_answer": "I buoni pasto sono elettronici e vengono caricati mensilmente sulla card dedicata",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -404,7 +405,7 @@
 
   {
     "question": "Dove posso modificare il mio IBAN?",
-    "gold_answer": "L'aggiornamento dell'IBAN deve essere fatto sul Portale HR...",
+    "gold_answer": "L’IBAN può essere aggiornato tramite il Portale HR",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -412,7 +413,7 @@
 
   {
     "question": "Quando viene pagato lo stipendio?",
-    "gold_answer": "Lo stipendio viene accreditato mensilmente...",
+    "gold_answer": "Lo stipendio viene pagato ogni mese secondo il calendario aziendale",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -420,7 +421,7 @@
 
   {
     "question": "Dove trovo il mio cedolino paga?",
-    "gold_answer": "Il cedolino paga è disponibile nel Portale HR...",
+    "gold_answer": "Il cedolino paga è disponibile nel Portale HR",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -428,7 +429,7 @@
 
   {
     "question": "Come richiedere un rimborso spese?",
-    "gold_answer": "I rimborsi vanno richiesti tramite il modulo elettronico...",
+    "gold_answer": "I rimborsi vanno inviati tramite il modulo elettronico nell'area dedicata del Portale HR",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -436,7 +437,7 @@
 
   {
     "question": "Cosa succede se non uso il credito welfare entro fine anno?",
-    "gold_answer": "Il credito welfare non utilizzato non potrà essere recuperato...",
+    "gold_answer": "Il credito welfare non utilizzato non può essere recuperato",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -444,7 +445,7 @@
 
   {
     "question": "Quali corsi di formazione sono disponibili?",
-    "gold_answer": "Blue Reply offre un catalogo corsi...",
+    "gold_answer": "Blue Reply mette a disposizione un catalogo corsi digitali e in aula",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -452,7 +453,7 @@
 
   {
     "question": "Cosa devo fare se ricevo un’e-mail sospetta di phishing?",
-    "gold_answer": "Non aprire l'e-mail e segnala al team IT...",
+    "gold_answer": "Non aprirla e segnala subito il messaggio al team IT",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
@@ -460,9 +461,408 @@
 
   {
     "question": "Cosa fa il team IT Security in merito alla VPN?",
-    "gold_answer": "Il team IT Security monitora l’utilizzo della VPN...",
+    "gold_answer": "Il team IT Security monitora l’uso della VPN e verifica la sicurezza degli accessi",
     "expected_intent": "ask_information_aziendale",
     "collection": "azienda_docs",
     "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Buondì!",
+    "gold_answer": "Ciao! Come posso aiutarti?",
+    "expected_intent": "greet",
+    "collection": null,
+    "expected_action": "utter_greet"
+  },
+  {
+    "question": "Ehilà, tutto ok?",
+    "gold_answer": "Ciao! Come posso aiutarti?",
+    "expected_intent": "greet",
+    "collection": null,
+    "expected_action": "utter_greet"
+  },
+  {
+    "question": "Va bene, ci aggiorniamo dopo.",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "goodbye",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Devo andare, a presto!",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "goodbye",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Wow oggi sono super carico!",
+    "gold_answer": "Fantastico, continua così!",
+    "expected_intent": "mood_great",
+    "collection": null,
+    "expected_action": "utter_happy"
+  },
+  {
+    "question": "Mi sento pieno di energia!",
+    "gold_answer": "Fantastico, continua così!",
+    "expected_intent": "mood_great",
+    "collection": null,
+    "expected_action": "utter_happy"
+  },
+  {
+    "question": "Mi sento davvero giù",
+    "gold_answer": "Ecco qualcosa per tirarti su il morale:",
+    "expected_intent": "mood_unhappy",
+    "collection": null,
+    "expected_action": "utter_cheer_up"
+  },
+  {
+    "question": "Oggi non va proprio.",
+    "gold_answer": "Ecco qualcosa per tirarti su il morale:",
+    "expected_intent": "mood_unhappy",
+    "collection": null,
+    "expected_action": "utter_cheer_up"
+  },
+  {
+    "question": "Ma sei programmato o umano?",
+    "gold_answer": "Sono un bot, alimentato da Rasa.",
+    "expected_intent": "bot_challenge",
+    "collection": null,
+    "expected_action": "utter_iamabot"
+  },
+  {
+    "question": "Risponde una persona vera?",
+    "gold_answer": "Sono un bot, alimentato da Rasa.",
+    "expected_intent": "bot_challenge",
+    "collection": null,
+    "expected_action": "utter_iamabot"
+  },
+
+  {
+    "question": "Ok, credo sia tutto quello che dovevo chiedere.",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "conversation_end",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Per ora va bene così, grazie.",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "conversation_end",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+
+  {
+    "question": "ggdsgdfgdf",
+    "gold_answer": "Mi dispiace, non ho capito bene. Puoi riformulare?",
+    "expected_intent": "out_of_scope",
+    "collection": null,
+    "expected_action": "utter_out_of_scope"
+  },
+  {
+    "question": "123$%$%",
+    "gold_answer": "Mi dispiace, non ho capito bene. Puoi riformulare?",
+    "expected_intent": "out_of_scope",
+    "collection": null,
+    "expected_action": "utter_out_of_scope"
+  },
+  {
+    "question": "Perché il cielo è blu?",
+    "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
+  },
+  {
+    "question": "/choose_no_document",
+    "gold_answer": "Va bene, non cerco nei documenti per ora.",
+    "expected_intent": "choose_no_document",
+    "collection": null,
+    "expected_action": "utter_option_no"
+  },
+  {
+    "question": "/choose_yes_document",
+    "gold_answer": "Ecco i documenti disponibili:",
+    "expected_intent": "choose_yes_document",
+    "collection": null,
+    "expected_action": "action_list_available_documents"
+  },
+
+  {
+    "question": "Saremo in 8 persone.",
+    "gold_answer": "utter_ask_features_room",
+    "expected_intent": "provide_participants_number",
+    "collection": null,
+    "expected_action": "utter_ask_features_room"
+  },
+  {
+    "question": "Il gruppo è composto da 3 partecipanti.",
+    "gold_answer": "utter_ask_features_room",
+    "expected_intent": "provide_participants_number",
+    "collection": null,
+    "expected_action": "utter_ask_features_room"
+  },
+
+  {
+    "question": "Mostrami tutte le mie prenotazioni future.",
+    "gold_answer": "Prenotazioni trovate per spospociao08@gmail.com",
+    "expected_intent": "ask_my_reservations",
+    "collection": null,
+    "expected_action": "action_get_reservation"
+  },
+  {
+    "question": "Voglio sapere quali sale ho già prenotato.",
+    "gold_answer": "Prenotazioni trovate per spospociao08@gmail.com",
+    "expected_intent": "ask_my_reservations",
+    "collection": null,
+    "expected_action": "action_get_reservation"
+  },
+
+  {
+    "question": "Cancella la prenotazione numero abc-123.",
+    "gold_answer": "Prenotazione cancellata con successo",
+    "expected_intent": "delete_reservation",
+    "collection": null,
+    "expected_action": "action_delete_reservation"
+  },
+  {
+    "question": "Rimuovi la mia prenotazione attuale.",
+    "gold_answer": "Prenotazione cancellata con successo",
+    "expected_intent": "delete_reservation",
+    "collection": null,
+    "expected_action": "action_delete_reservation"
+  },
+
+  {
+    "question": "Vorrei aggiornare la mia password.",
+    "gold_answer": "Inserisci la vecchia e la nuova password.",
+    "expected_intent": "change_password",
+    "collection": null,
+    "expected_action": "utter_change_password"
+  },
+  {
+    "question": "Devo modificare la password del mio account.",
+    "gold_answer": "Inserisci la vecchia e la nuova password.",
+    "expected_intent": "change_password",
+    "collection": null,
+    "expected_action": "utter_change_password"
+  },
+
+  {
+    "question": "Cambia la password da qwerty a password123.",
+    "gold_answer": "La tua password è stata aggiornata con successo.",
+    "expected_intent": "receive_new_password",
+    "collection": null,
+    "expected_action": "action_change_password"
+  },
+  {
+    "question": "La vecchia password è 0000 e la nuova è 5555.",
+    "gold_answer": "La tua password è stata aggiornata con successo.",
+    "expected_intent": "receive_new_password",
+    "collection": null,
+    "expected_action": "action_change_password"
+  },
+  {
+    "question": "Dove si trova il monte più alto d'Italia?",
+    "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
+  },
+  {
+    "question": "Come si conclude la relazione di tirocinio?",
+    "gold_answer": "La conclusione raccoglie valutazioni personali, competenze sviluppate e riflessione sul valore formativo dell’esperienza",
+    "expected_intent": "ask_information_relazione",
+    "collection": "relazione_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Quali elementi devo inserire nella premessa della relazione?",
+    "gold_answer": "Nella premessa devi indicare le motivazioni della scelta dell’ente e gli obiettivi iniziali del tirocinio",
+    "expected_intent": "ask_information_relazione",
+    "collection": "relazione_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Come funziona la richiesta di straordinari?",
+    "gold_answer": "La richiesta di straordinari deve essere approvata dal responsabile tramite il Portale HR.",
+    "expected_intent": "ask_information_aziendale",
+    "collection": "azienda_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Cosa devo fare se non riesco ad accedere al portale HR?",
+    "gold_answer": "Devi contattare il team IT per un controllo dell’account o della password",
+    "expected_intent": "ask_information_aziendale",
+    "collection": "azienda_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Che carattere devo usare per la relazione di tirocinio?",
+    "gold_answer": "Si consiglia carattere 12 con interlinea 1.5, Times New Roman o Arial.",
+    "expected_intent": "ask_information_relazione",
+    "collection": "relazione_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Non ricordo dove trovare le linee guida, sai dirmelo?",
+    "gold_answer": "Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
+  },
+  {
+    "question": "Hai qualche informazione più dettagliata?",
+    "gold_answer": "Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
+  },
+  {
+    "question": "Come va strutturata la parte centrale della relazione?",
+    "gold_answer": "La parte centrale descrive attività, obiettivi, organizzazione educativa e pratiche osservate.",
+    "expected_intent": "ask_information_relazione",
+    "collection": "relazione_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Cosa devo inserire nella conclusione della relazione?",
+    "gold_answer": "La conclusione raccoglie competenze acquisite, risultati raggiunti e riflessioni finali.",
+    "expected_intent": "ask_information_relazione",
+    "collection": "relazione_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Come segnalo un problema tecnico?",
+    "gold_answer": "Segnala il problema al team IT tramite ticket o e-mail dedicata.",
+    "expected_intent": "ask_information_aziendale",
+    "collection": "azienda_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Posso lavorare da remoto?",
+    "gold_answer": "Il lavoro da remoto è possibile secondo le policy aziendali.",
+    "expected_intent": "ask_information_aziendale",
+    "collection": "azienda_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Come posso vedere le mie ore lavorate?",
+    "gold_answer": "Puoi consultare le ore lavorate sul Portale HR nella sezione presenze.",
+    "expected_intent": "ask_information_aziendale",
+    "collection": "azienda_docs",
+    "expected_action": "action_answer_from_chroma"
+  },
+  {
+    "question": "Ciao bot!",
+    "gold_answer": "Ciao! Come posso aiutarti?",
+    "expected_intent": "greet",
+    "collection": null,
+    "expected_action": "utter_greet"
+  },
+  {
+    "question": "Buonasera!",
+    "gold_answer": "Ciao! Come posso aiutarti?",
+    "expected_intent": "greet",
+    "collection": null,
+    "expected_action": "utter_greet"
+  },
+  {
+    "question": "A dopo!",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "goodbye",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Ok ci sentiamo più tardi.",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "goodbye",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Perché il mare non ha le righe?",
+    "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
+  },
+  {
+    "question": "Non ho altre domande.",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "conversation_end",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Direi che possiamo chiudere qui.",
+    "gold_answer": "Ti serve ancora aiuto?",
+    "expected_intent": "conversation_end",
+    "collection": null,
+    "expected_action": "utter_ask_option_close_conversation"
+  },
+  {
+    "question": "Ma tu sei un bot?",
+    "gold_answer": "Sono un bot, alimentato da Rasa.",
+    "expected_intent": "bot_challenge",
+    "collection": null,
+    "expected_action": "utter_iamabot"
+  },
+  {
+    "question": "Chi risponde, una persona o un programma?",
+    "gold_answer": "Sono un bot, alimentato da Rasa.",
+    "expected_intent": "bot_challenge",
+    "collection": null,
+    "expected_action": "utter_iamabot"
+  },
+  {
+    "question": "Mi sento super positivo oggi!",
+    "gold_answer": "Fantastico, continua così!",
+    "expected_intent": "mood_great",
+    "collection": null,
+    "expected_action": "utter_happy"
+  },
+  {
+    "question": "Che bella giornata, sono carichissimo!",
+    "gold_answer": "Fantastico, continua così!",
+    "expected_intent": "mood_great",
+    "collection": null,
+    "expected_action": "utter_happy"
+  },
+  {
+    "question": "Come mi sento oggi?",
+    "gold_answer": "Sto recuperando il contesto precedente...",
+    "expected_intent": "ask_mood",
+    "collection": null,
+    "expected_action": "action_query_context"
+  },
+  {
+    "question": "ti ricordi come mi sentivo prima?",
+    "gold_answer": "Sto recuperando il contesto precedente...",
+    "expected_intent": "ask_mood",
+    "collection": null,
+    "expected_action": "action_query_context"
+  },
+  {
+    "question": "Spiegami la teoria delle stringhe in dieci parole.",
+    "gold_answer": "Non so la risposta a questa domanda. Vuoi che cerco nei documenti?",
+    "expected_intent": "nlu_fallback",
+    "collection": null,
+    "expected_action": "utter_ask_option_search_document"
+  },
+  {
+    "question": "Saremo in 12 persone.",
+    "gold_answer": "utter_ask_features_room",
+    "expected_intent": "provide_participants_number",
+    "collection": null,
+    "expected_action": "utter_ask_features_room"
+  },
+  {
+    "question": "Il gruppo è di 5 partecipanti.",
+    "gold_answer": "utter_ask_features_room",
+    "expected_intent": "provide_participants_number",
+    "collection": null,
+    "expected_action": "utter_ask_features_room"
   }
 ]

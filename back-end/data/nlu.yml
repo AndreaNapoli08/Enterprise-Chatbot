@@ -76,6 +76,7 @@ nlu:
     - mi sento benissimo
     - sono felice
     - sto alla grande
+    - mi sento positivo
     - giornata stupenda
     - tutto va alla perfezione
     - sono super felice
@@ -83,6 +84,7 @@ nlu:
     - davvero perfetto
     - ottimo
     - mi sento carico
+    - oggi sono carichissimo
 
 - intent: mood_unhappy
   examples: |
@@ -107,6 +109,8 @@ nlu:
     - sei un essere umano?
     - sto parlando con un bot?
     - sto parlando con una persona?
+    - risponde una persona vera?
+    - sei programmato?
 
 - intent: ask_document
   examples: |

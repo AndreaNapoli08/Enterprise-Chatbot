@@ -67,7 +67,6 @@ rules:
 - rule: Gestione fallback
   steps:
   - intent: nlu_fallback
-  - action: utter_fallback
   - action: utter_ask_option_search_document
 
 - rule: Ricorda lo stato d'animo

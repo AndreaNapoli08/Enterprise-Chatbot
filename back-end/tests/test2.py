@@ -3,6 +3,7 @@ import requests
 import argparse
 import os
 import pandas as pd #type: ignore
+import time
 import warnings
 from sklearn.exceptions import UndefinedMetricWarning #type: ignore
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, precision_recall_fscore_support #type: ignore
@@ -75,13 +76,14 @@ def main(dataset_path: str):
 
     predicted_intents = []
     expected_intents = []
+    response_times = []
+    action_response_times = {}
 
     index = 0
     sender = "test_user_1"
     email = "spospociao08@gmail.com"
     # MAIN LOOP
     for entry in dataset:
-        print(f"Processing {index+1}/{len(dataset)}", end='\r')
         reset_conversation(sender)
         q = entry["question"]
         expected_intent = entry["expected_intent"]
@@ -93,14 +95,31 @@ def main(dataset_path: str):
         predicted_intent = parse_response.get("intent", {}).get("name")
 
         # 2) Action + Response
+        start_time = time.time()
         bot_answer = send_to_rasa(q,email)
+        end_time = time.time()
+        response_time = end_time - start_time   
+
+        response_times.append(round(response_time, 3))
+
         executed_action = get_last_action("default")
 
+        print(f"Processing {index+1}/{len(dataset)}", end='\r')
+        print("Domanda utente: ", q)
         print("Bot answer: ", bot_answer)
+        print("Predicted intent: ", predicted_intent)
+        print("Expected intent: ", expected_intent)
+        print("Expected action: ", expected_action)
         print("Executed action: ", executed_action)
         print("Gold answer: ", gold_answer) 
+        print("Response time (s): ", round(response_time, 3))
         predicted_intents.append(predicted_intent)
         expected_intents.append(expected_intent)
+
+        # Salva tempo per azione
+        if executed_action not in action_response_times:
+            action_response_times[executed_action] = []
+        action_response_times[executed_action].append(response_time)
 
         # ------------------------------------------------------------
         #  RUBRIC EVALUATION
@@ -127,7 +146,6 @@ def main(dataset_path: str):
 
         print("Punteggio answer: ",answer_ok)
         print("---------------------------------------------------\n")
-        # ------------------------------------------------------------
 
         formatted_pair = f"Domanda:\n{q}\n\nRisposta:\n{bot_answer}"
 
@@ -142,7 +160,8 @@ def main(dataset_path: str):
             "expected_action": expected_action,
             "executed_action": executed_action,
             "action_ok": action_ok,
-            "answer_ok": answer_ok
+            "answer_ok": answer_ok,
+            "response_time": round(response_time, 3)
         })
 
         index += 1
@@ -156,7 +175,7 @@ def main(dataset_path: str):
     plt.figure(figsize=(14,12))
     sns.heatmap(intent_cm, annot=True, fmt="d", cmap="Blues",
                 xticklabels=intent_labels, yticklabels=intent_labels)
-    plt.xlabel("Predicted Intent")
+    plt.xlabel("Executed Intent")
     plt.ylabel("Expected Intent")
     plt.title("Confusion Matrix - INTENT")
     plt.tight_layout()
@@ -208,7 +227,7 @@ def main(dataset_path: str):
     plt.figure(figsize=(12,8))
     sns.heatmap(action_cm, annot=True, fmt="d", cmap="Blues",
                 xticklabels=action_labels, yticklabels=action_labels)
-    plt.xlabel("Predicted Action")
+    plt.xlabel("Executed Action")
     plt.ylabel("Expected Action")
     plt.title("Confusion Matrix - ACTION")
     plt.tight_layout()
@@ -294,6 +313,41 @@ def main(dataset_path: str):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig("evaluation_plots/errors_per_intent.png", bbox_inches='tight')
+    plt.close()
+
+    print("\n========================================================")
+    print("          TEMPI MEDI DI RISPOSTA PER AZIONE")
+    print("========================================================")
+    for action, times in action_response_times.items():
+        avg_time = sum(times) / len(times)
+        print(f"{action}: {avg_time:.3f} secondi")
+
+    # Tempo medio totale
+    avg_response_time = sum(response_times) / len(response_times)
+    print("\nTempo medio di risposta totale: {:.3f} secondi".format(avg_response_time))
+
+    # Bar chart con tempi medi di risposta
+    actions = list(action_response_times.keys())
+    avg_times = [sum(times)/len(times) for times in action_response_times.values()]
+    plt.figure(figsize=(12,6))
+    plt.bar(actions, avg_times, color='skyblue')
+    plt.xticks(rotation=45, ha='right')
+    plt.ylabel("Tempo medio di risposta (s)")
+    plt.title("Tempo medio di risposta per azione")
+    plt.tight_layout()
+    plt.savefig("evaluation_plots/bar_chart_time_per_action.png", bbox_inches='tight')
+    plt.close()
+    
+    # Box plot dei tempi di risposta per azione
+    data = [times for times in action_response_times.values()]
+    labels = list(action_response_times.keys())
+    plt.figure(figsize=(12,6))
+    sns.boxplot(data=data)
+    plt.xticks(range(len(labels)), labels, rotation=45)
+    plt.ylabel("Tempo di risposta (s)")
+    plt.title("Distribuzione dei tempi di risposta per azione")
+    plt.tight_layout()
+    plt.savefig("evaluation_plots/box_plot_time_per_action.png", bbox_inches='tight')
     plt.close()
 
     # ------------------------------------------------------------

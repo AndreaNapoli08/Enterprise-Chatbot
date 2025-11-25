@@ -1,0 +1,84 @@
+========================================================
+                METRICHE INTENT
+========================================================
+Intent Accuracy: 0.9839
+Precision (weighted): 0.9892
+Recall (weighted):    0.9839
+F1-score (weighted):  0.9828
+
+DETTAGLIO PER INTENT:
+                             precision    recall  f1-score   support
+
+               ask_document       1.00      1.00      1.00         2
+  ask_information_aziendale       1.00      1.00      1.00        17
+  ask_information_relazione       1.00      1.00      1.00         8
+        ask_my_reservations       1.00      1.00      1.00         2
+          book_meeting_room       1.00      1.00      1.00         1
+              bot_challenge       1.00      1.00      1.00         2
+            change_password       1.00      1.00      1.00         2
+         choose_no_document       1.00      1.00      1.00         2
+        choose_yes_document       1.00      1.00      1.00         2
+           conversation_end       1.00      1.00      1.00         2
+         delete_reservation       1.00      1.00      1.00         2
+                    goodbye       1.00      1.00      1.00         2
+                      greet       1.00      1.00      1.00         2
+                 mood_great       1.00      1.00      1.00         2
+               mood_unhappy       1.00      1.00      1.00         2
+               nlu_fallback       0.67      1.00      0.80         2
+      no_close_conversation       1.00      1.00      1.00         2
+               out_of_scope       1.00      1.00      1.00         2
+provide_participants_number       1.00      0.50      0.67         2
+       receive_new_password       1.00      1.00      1.00         2
+     yes_close_conversation       1.00      1.00      1.00         2
+
+                   accuracy                           0.98        62
+                  macro avg       0.98      0.98      0.97        62
+               weighted avg       0.99      0.98      0.98        62
+
+
+==========================================================
+                CONFUSION MATRIX ACTION
+========================================================
+
+========================================================
+                METRICHE ACTION
+========================================================
+Action Accuracy: 0.9355
+Precision (weighted): 0.9516
+Recall (weighted):    0.9355
+F1-score (weighted):  0.9409
+
+DETTAGLIO PER ACTION:
+                                     precision    recall  f1-score   support
+
+          action_answer_from_chroma       1.00      1.00      1.00        25
+             action_change_password       1.00      1.00      1.00         2
+             action_check_user_role       0.00      0.00      0.00         1
+          action_delete_reservation       1.00      1.00      1.00         2
+             action_get_reservation       1.00      1.00      1.00         2
+    action_list_available_documents       1.00      1.00      1.00         2
+              action_send_local_pdf       1.00      1.00      1.00         2
+            utter_ask_features_room       1.00      0.50      0.67         2
+             utter_ask_meeting_date       0.00      0.00      0.00         0
+utter_ask_option_close_conversation       1.00      1.00      1.00         4
+   utter_ask_option_search_document       0.00      0.00      0.00         0
+              utter_change_password       1.00      1.00      1.00         2
+                     utter_cheer_up       1.00      1.00      1.00         2
+           utter_close_conversation       1.00      1.00      1.00         2
+                     utter_fallback       0.00      0.00      0.00         2
+                        utter_greet       1.00      1.00      1.00         2
+                        utter_happy       1.00      1.00      1.00         2
+                      utter_iamabot       1.00      1.00      1.00         2
+        utter_no_close_conversation       1.00      1.00      1.00         2
+                    utter_option_no       1.00      1.00      1.00         2
+                 utter_out_of_scope       1.00      1.00      1.00         2
+
+                           accuracy                           0.94        62
+                          macro avg       0.81      0.79      0.79        62
+                       weighted avg       0.95      0.94      0.94        62
+
+
+========================================================
+                METRICHE RISPOSTE
+========================================================
+Answer Accuracy: 0.8387

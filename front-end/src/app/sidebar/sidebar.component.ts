@@ -177,7 +177,6 @@ export class Sidebar {
   }
 
   createNewChat() {
-    this.currentSession = "";
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.router.navigate(['/home']);
     });

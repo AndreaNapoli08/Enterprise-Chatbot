@@ -184,9 +184,6 @@ responses:
 
   utter_option_no:
     - text: "Va bene, non cerco nei documenti per ora."
-    
-  utter_fallback:
-    - text: "Non so la risposta a questa domanda"
 
   utter_out_of_scope:
     - text: "Mi dispiace, non ho capito bene. Puoi riformulare?"
