@@ -41,7 +41,7 @@ export class Sidebar {
   showRenameModal: boolean = false;
   currentSessionToRename: string = "";
   renameInput: string = "";
-
+  sidebarOpen: boolean = false;
   showDeleteModal: boolean = false;
   currentSessionToDelete: string = "";
 
@@ -56,16 +56,28 @@ export class Sidebar {
   isResizing = false;
   startX = 0;
   startWidth = 0;
+  isMobile = false;
+
+  ngOnInit() {
+    this.checkScreen();
+    window.addEventListener('resize', () => this.checkScreen());
+  }
+  checkScreen() {
+    // breakpoint per md = 768px, come Tailwind
+    this.isMobile = window.innerWidth < 768;
+  }
 
   openDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.remove('-translate-x-full');
+    this.sidebarOpen = true;
     this.sidebarState.emit(true); 
   }
 
   closeDrawer() {
     const el = this.drawer.nativeElement;
     el.classList.add('-translate-x-full');
+    this.sidebarOpen = false;
     this.sidebarState.emit(false);
   }
 
@@ -130,7 +142,6 @@ export class Sidebar {
       return res.json();
     })
     .then(data => {
-      console.log("Titolo aggiornato nel DB:", data);
 
       // Aggiorna la UI locale
       const session = this.sessions.find((s: ChatSession) => s.id === sessionId);
@@ -183,6 +194,14 @@ export class Sidebar {
     });
   }
 
+  onSessionClick(sessionId: string) {
+    this.loadSession(sessionId);  // chiama la funzione esistente
+
+    if (this.isMobile) {
+      this.closeDrawer();         // chiude il drawer solo su mobile
+    }
+  }
+
   loadSession(sessionId: string) {
     this.currentSession = sessionId;
     this.loadHistory.emit(sessionId);
@@ -218,6 +237,7 @@ export class Sidebar {
   // Carica la sessione selezionata dal risultato
   selectSession(sessionId: string) {
     this.loadSession(sessionId);
+    this.closeDrawer();
     this.closeSearchModal();
   }
 

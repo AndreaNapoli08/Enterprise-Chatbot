@@ -23,10 +23,8 @@ export class Profile {
   constructor(private authService: AuthService, private host: ElementRef) {}
 
   toggleDropdown(event?: MouseEvent) {
-    console.log(event);
     if (event) event.stopPropagation();
     this.isOpen = !this.isOpen;
-    console.log("Dropdown isOpen:", this.isOpen);
   }
 
   closeDropdown() {

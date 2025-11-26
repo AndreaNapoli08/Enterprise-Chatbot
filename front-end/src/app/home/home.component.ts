@@ -33,7 +33,6 @@ export class Home implements AfterViewChecked {
   shouldScroll = false;
   loading = false;
   waiting_answer = false;
-  empty_input = true;
 
   /* ----------------- LONG WAITING INDICATOR ----- */
   long_waiting = false;
@@ -49,8 +48,10 @@ export class Home implements AfterViewChecked {
   startTime = 0;
 
   sidebarOpen = false;
+  isDesktop = window.innerWidth >= 768;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild(Sidebar) sidebar!: Sidebar;
 
   constructor(
     private auth: AuthService,
@@ -61,6 +62,22 @@ export class Home implements AfterViewChecked {
   /*  INIZIALIZZAZIONE COMPONENTE                          */
   /*  -----------------------------------------------------*/
   
+  private _empty_input = true;
+
+  get empty_input(): boolean {
+    return this._empty_input;
+  }
+
+  set empty_input(value: boolean) {
+    this._empty_input = value;
+
+    // Se diventa true, scrolla in basso
+    if (value) {
+      setTimeout(() => this.scrollToBottom(), 0);
+    }
+  }
+
+
   ngOnInit() {
     this.loadUser();
     this.getSessions();
@@ -172,7 +189,6 @@ export class Home implements AfterViewChecked {
       this.closeChatSession();
     }
 
-    console.log(message);
     this.saveMessageToBackend(message);
 
     const isBot = message.role === 'bot';
@@ -385,5 +401,10 @@ export class Home implements AfterViewChecked {
       .split('.')
       .map((p) => p[0]?.toUpperCase())
       .join('');
+  }
+
+  // Chisura sidebar da overlay mobile
+  onOverlayClick() {
+    this.sidebar.closeDrawer(); // chiude la sidebar tramite il metodo interno
   }
 }

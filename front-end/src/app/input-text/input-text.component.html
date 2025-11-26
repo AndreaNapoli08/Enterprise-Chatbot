@@ -1,17 +1,29 @@
-<div *ngIf="conversationEnded === true" class="flex items-center justify-center gap-2">
-  <span class="text-sm text-gray-800 dark:text-gray-400 text-center">
-    La conversazione è terminata. Per ulteriori domande
-  </span>
-  <button
-    (click)="createNewChat()"
-    class="text-xs px-2 py-2 bg-gray-200 dark:hover:bg-gray-600  
-          dark:bg-gray-800 hover:bg-gray-400
-          text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
-          font-semibold rounded-xl shadow transition duration-200"
-  >
-    Nuova chat
-  </button>
+<div *ngIf="conversationEnded === true" class="flex justify-center md:justify-center items-center gap-2">
+  
+  <!-- MOBILE: testo a due righe + bottone affiancato -->
+  <div class="flex flex-row items-center gap-2 md:flex-row md:gap-2">
+    <div class="flex flex-col text-center md:flex-row text-gray-800 dark:text-gray-400 md:text-left md:gap-1">
+      <span>La conversazione è terminata.</span>
+      <span>Per ulteriori domande</span>
+    </div>
+    
+    <!-- Bottone -->
+    <button
+      (click)="createNewChat()"
+      class="text-xs px-2 py-2 bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-600 hover:bg-gray-400
+             text-gray-900 dark:text-white border border-gray-400 dark:border-gray-600 
+             font-semibold rounded-xl shadow transition duration-200"
+    >
+      Nuova chat
+    </button>
+  </div>
+  
 </div>
+
+
+
+
+
 
 <form (ngSubmit)="onSubmit()" *ngIf="conversationEnded === false" class="flex items-center">
   <label for="simple-search" class="sr-only">Ask me something...</label>

@@ -57,6 +57,5 @@ export class AppComponent implements OnInit {
     document.head.appendChild(favicon);
 
     favicon.href = isDark ? 'favicon_dark.ico' : 'favicon_light.ico';
-    console.log("Favicon updated to: " + favicon.href);
   }
 }
