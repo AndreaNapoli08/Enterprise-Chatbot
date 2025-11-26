@@ -10,6 +10,7 @@ import { Profile } from '../profile/profile.component';
 @Component({
   selector: 'sidebar',
   imports: [CommonModule, FormsModule, Profile],
+  standalone: true,
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })

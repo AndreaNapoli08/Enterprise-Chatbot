@@ -5,7 +5,6 @@ import { ChatService } from '../services/chat.service';
 import { AuthService } from '../services/auth.service';
 import { MessageBusService } from '../services/message-bus.service';
 import { of } from 'rxjs';
-import { Message } from '../interfaces/message';
 
 describe('ChatBubble Component', () => {
   let component: ChatBubble;
