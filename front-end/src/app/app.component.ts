@@ -48,13 +48,14 @@ export class AppComponent implements OnInit {
 
   // Funzione per cambiare la favicon
   updateFavicon(isDark: boolean) {
-    let favicon = document.getElementById('favicon') as HTMLLinkElement;
-    // Se non esiste, creala
-    favicon = document.createElement('link');
-    favicon.id = 'favicon';
-    favicon.rel = 'icon';
-    favicon.type = 'image/x-icon';
-    document.head.appendChild(favicon);
+    let favicon = document.getElementById('favicon') as HTMLLinkElement | null;
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.id = 'favicon';
+      favicon.rel = 'icon';
+      favicon.type = 'image/x-icon';
+      document.head.appendChild(favicon);
+    }
 
     favicon.href = isDark ? 'favicon_dark.ico' : 'favicon_light.ico';
   }

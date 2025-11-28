@@ -91,7 +91,7 @@ export class Home implements AfterViewChecked {
       this.name = u.firstName;
       this.surname = u.lastName;
       this.role = u.role;
-      this.initials = this.getInitialsFromEmail(this.email);
+      this.initials = this.getInitials(this.name, this.surname);
     });
   }
 
@@ -394,13 +394,9 @@ export class Home implements AfterViewChecked {
     });
   }
 
-  getInitialsFromEmail(email: string | null) {
-    if (!email) return '';
-    const [name] = email.split('@');
-    return name
-      .split('.')
-      .map((p) => p[0]?.toUpperCase())
-      .join('');
+  getInitials(name: string | null, surname: string | null) {
+    if (!name || !surname) return '';
+    return (name[0]?.toUpperCase() || '') + (surname[0]?.toUpperCase() || '');
   }
 
   // Chisura sidebar da overlay mobile
