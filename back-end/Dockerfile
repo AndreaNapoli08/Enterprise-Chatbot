@@ -1,10 +1,8 @@
-# Usa un'immagine leggera di Python
 FROM python:3.9-slim
 
-# Imposta la cartella di lavoro
 WORKDIR /app
 
-# Installa dipendenze di sistema necessarie a RASA e Postgres
+# Installa pacchetti necessari
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -14,16 +12,20 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia requirements.txt e installa pacchetti Python
+# Installa dipendenze Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia tutto il back-end
+# Copia tutto il tuo backend
 COPY . .
 
-# Esponi le porte usate da RASA e FastAPI
+# Rendi eseguibile lo script di startup
+RUN chmod +x start.sh
+
+# Espone le porte interne del container (non usate da Render, ma utili)
 EXPOSE 5005
+EXPOSE 5055
 EXPOSE 10000
 
-# Avvia RASA + FastAPI insieme
-CMD ["bash", "-c", "rasa run --enable-api --cors '*' & uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+# Comando di avvio
+CMD ["./start.sh"]
