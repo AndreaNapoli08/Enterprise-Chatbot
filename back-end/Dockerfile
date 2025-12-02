@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia requirements.txt e installa pacchetti Python
-COPY requirements.txt .
+COPY back-end/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia tutto il back-end
