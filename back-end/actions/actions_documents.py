@@ -138,6 +138,23 @@ class ActionAnswerFromChroma(Action):
 
         return q
 
+    def get_ollama_base_url():
+        """
+        Legge l'URL di Ngrok dal Gist GitHub.
+        Ritorna qualcosa come: https://xxxx.ngrok-free.app
+        """
+        GIST_URL = "https://gist.githubusercontent.com/AndreaNapoli08/0b153d525eb3a45d37cafd65b32bca8c/raw/ngrok_url.txt"
+
+        try:
+            r = requests.get(GIST_URL, timeout=5)
+            url = r.text.strip()
+            if url.startswith("http"):
+                return url
+        except:
+            pass
+
+        return None
+
     def run(
         self,
         dispatcher: CollectingDispatcher,
@@ -179,12 +196,18 @@ class ActionAnswerFromChroma(Action):
             vectordb = ActionAnswerFromChroma.vectordbs[collection_name]
 
         # --- Inizializza l’LLM una sola volta ---
+        ollama_base = get_ollama_base_url()
+        if not ollama_base:
+            dispatcher.utter_message(text="Errore: impossibile contattare Ollama (URL ngrok non trovato).")
+            return []
+        
         if ActionAnswerFromChroma.llm is None:
             try:
                 ActionAnswerFromChroma.llm = Ollama(
                     model="phi3:3.8b",
                     #model="mistral",
-                    temperature=0
+                    temperature=0,
+                    base_url=f"{ollama_base}"
                 )
             except Exception as e:
                 dispatcher.utter_message(text=f"Errore inizializzando LLM: {e}")

@@ -8,23 +8,59 @@ from rasa_sdk import Action, Tracker # type: ignore
 from rasa_sdk.executor import CollectingDispatcher # type: ignore
 from rasa_sdk.events import SlotSet # type: ignore
 
+def get_ollama_url():
+    """
+    Recupera l'URL di Ollama attraverso Ngrok leggendo il tuo Gist.
+    """
+    GIST_URL = "https://gist.githubusercontent.com/AndreaNapoli08/0b153d525eb3a45d37cafd65b32bca8c/raw/ngrok_url.txt"
+
+    try:
+        res = requests.get(GIST_URL, timeout=5)
+        url = res.text.strip()
+        if url.startswith("http"):
+            return url 
+    except:
+        pass
+
+    return None
+
+def call_ollama(prompt: str, model: str = "phi3:3.8b"):
+    """
+    Esegue una richiesta al modello Ollama usando l’URL dinamico Ngrok.
+    """
+    base_url = get_ollama_url()
+    if not base_url:
+        return "{}"  # fallback
+
+    try:
+        response = requests.post(
+            f"{base_url}/api/generate",
+            json={
+                "model": model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {"temperature": 0}
+            },
+            timeout=200
+        )
+        data = response.json()
+        return data.get("response", data.get("text", ""))
+    except Exception as e:
+        return "{}"
+
+
 # Salvataggio del contesto
 class ActionSaveContext(Action):
     def name(self) -> Text:
         return "action_save_context"
 
-    async def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any]
-    ) -> List[Dict[Text, Any]]:
+    async def run(self, dispatcher, tracker, domain):
 
         user_message = tracker.latest_message.get("text")
         if not user_message:
             return []
 
-        # 🔹 Prompt GENERICO: il modello decide cosa estrarre
+        # Prompt GENERICO: il modello decide cosa estrarre
         prompt = f"""
             Sei un assistente italiano che estrae informazioni strutturate da un messaggio in formato JSON.
             
@@ -44,51 +80,35 @@ class ActionSaveContext(Action):
             Messaggio dell'utente da analizzare: "{user_message}"
         """
 
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={"model": "phi3:3.8b", "prompt": prompt, "stream": False},
-                #json={"model": "mistral", "prompt": prompt, "stream": False},
-                timeout=200
-            )
-            data = response.json()
-            text_output = data.get("response", data.get("text", "{}"))
-        except Exception as e:
-            text_output = "{}"
+        # 💡 Chiamata a Ollama via ngrok
+        text_output = call_ollama(prompt)
 
-        # 🔹 Estrai il primo JSON valido dal testo
+        # Estrazione JSON
         match = re.search(r"\{.*\}", text_output, re.DOTALL)
         extracted = {}
         if match:
             try:
                 extracted = json.loads(match.group(0))
-            except Exception:
+            except:
                 extracted = {}
 
-        # Aggiungi metadati (data e ultimo messaggio)
         extracted["_last_user_message"] = user_message
         extracted["_timestamp"] = datetime.utcnow().isoformat() + "Z"
 
-        # 🔹 Recupera il contesto precedente (se esiste)
         prev_context = tracker.get_slot("auto_context")
         try:
             prev = json.loads(prev_context) if prev_context else {}
-        except Exception:
+        except:
             prev = {}
 
-        # 🔹 Unisci vecchio e nuovo contesto
         merged = dict(prev)
         for k, v in extracted.items():
-            # se entrambi liste → unisci
             if k in merged and isinstance(merged[k], list) and isinstance(v, list):
                 merged[k] = list(dict.fromkeys(merged[k] + v))
             else:
                 merged[k] = v
 
-        new_context = json.dumps(merged, ensure_ascii=False)
-
-        # 🔹 Salva tutto nello slot
-        return [SlotSet("auto_context", new_context)]
+        return [SlotSet("auto_context", json.dumps(merged, ensure_ascii=False))]
 
 
 # Prelievo del contesto e risposta alle domande
@@ -96,16 +116,9 @@ class ActionQueryContext(Action):
     def name(self) -> Text:
         return "action_query_context"
 
-    async def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any]
-    ) -> List[Dict[Text, Any]]:
+    async def run(self, dispatcher, tracker, domain):
 
-        # Messaggio dell'utente (es: "con chi avevo la riunione?")
         user_question = tracker.latest_message.get("text")
-        # Contesto salvato in auto_context
         context_json = tracker.get_slot("auto_context")
 
         if not context_json:
@@ -130,18 +143,11 @@ class ActionQueryContext(Action):
             - Non inventare nulla.
             - Restituisci solo una frase chiara.
         """
-        # Chiamata all'LLM (esempio con Ollama)
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={"model": "phi3:3.8b", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
-                #json={"model": "mistral", "prompt": prompt, "stream": False, "options": {"temperature": 0}},
-                timeout=200
-            )
-            data = response.json()
-            answer = data.get("response", data.get("text", "")).strip()
-        except Exception as e:
-            answer = f"Errore durante l'interrogazione del contesto: {e}"
+
+        # 💡 Chiamata ad Ollama via Ngrok
+        answer = call_ollama(prompt).strip()
+        if not answer:
+            answer = "Non ho trovato informazioni rilevanti nel contesto."
 
         dispatcher.utter_message(text=answer)
         return []
