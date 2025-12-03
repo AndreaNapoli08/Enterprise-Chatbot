@@ -38,7 +38,7 @@ public_url = None
 # ---------------------------
 def start_ngrok():
     global public_url
-    subprocess.Popen([NGROK_PATH, "http", "8000"])
+    subprocess.Popen([NGROK_PATH, "http", "11434"])
     time.sleep(2)
     try:
         resp = requests.get("http://127.0.0.1:4040/api/tunnels")

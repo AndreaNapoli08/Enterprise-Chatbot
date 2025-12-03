@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "prova-flowbite": {
+    "enterprise-chatbot": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/prova-flowbite",
+            "outputPath": "dist/enterprise-chatbot",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -59,10 +59,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "prova-flowbite:build:production"
+              "buildTarget": "enterprise-chatbot:build:production"
             },
             "development": {
-              "buildTarget": "prova-flowbite:build:development"
+              "buildTarget": "enterprise-chatbot:build:development"
             }
           },
           "defaultConfiguration": "development"

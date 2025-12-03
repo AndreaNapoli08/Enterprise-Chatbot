@@ -205,7 +205,6 @@ class ActionAnswerFromChroma(Action):
             try:
                 ActionAnswerFromChroma.llm = Ollama(
                     model="phi3:3.8b",
-                    #model="mistral",
                     temperature=0,
                     base_url=f"{ollama_base}"
                 )

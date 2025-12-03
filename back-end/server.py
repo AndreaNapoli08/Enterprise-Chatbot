@@ -6,7 +6,7 @@ from typing import List
 import uuid
 
 import os, json, uuid
-from actions.utils import load_users, hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
+from utils import load_users, hash_password, check_password, load_rooms, save_rooms, parse_datetime, send_gmail_email, get_user_by_email
 from datetime import datetime, timedelta
 
 # import per il database

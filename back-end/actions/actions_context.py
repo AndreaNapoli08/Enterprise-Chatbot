@@ -32,6 +32,7 @@ def call_ollama(prompt: str, model: str = "phi3:3.8b"):
     if not base_url:
         return "{}"  # fallback
 
+    print(base_url)
     try:
         response = requests.post(
             f"{base_url}/api/generate",
@@ -82,7 +83,7 @@ class ActionSaveContext(Action):
 
         # 💡 Chiamata a Ollama via ngrok
         text_output = call_ollama(prompt)
-
+        print("Ollama output:", text_output)
         # Estrazione JSON
         match = re.search(r"\{.*\}", text_output, re.DOTALL)
         extracted = {}

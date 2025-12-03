@@ -1,8 +1,8 @@
 from sqlmodel import Session, create_engine, select
 from models import User, Room, Document, ChatSession, ChatMessage
+import os
 
-DATABASE_URL = "postgresql://neondb_owner:npg_aWSoyV12FPNf@ep-sweet-wind-abejqd6y-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-
+DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 
 with Session(engine) as session:

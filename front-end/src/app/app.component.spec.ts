@@ -44,7 +44,7 @@ describe('AppComponent', () => {
 
   it('should create the app and have correct title', () => {
     expect(component).toBeTruthy();
-    expect(component.title).toBe('prova-flowbite');
+    expect(component.title).toBe('enterprise-chatbot');
   });
 
   it('ngOnInit applies dark theme when prefers-color-scheme is dark and calls initFlowbite', () => {
