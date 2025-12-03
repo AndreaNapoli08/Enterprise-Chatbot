@@ -76,7 +76,7 @@
                   hover:bg-gray-300 dark:hover:bg-gray-600 text-left truncate overflow-hidden whitespace-nowrap"
             type="button"
           >
-            {{ session.title == null ? session.id : session.title }}
+            {{ session.title == null || session.title == 'Nuova chat' ? session.id : session.title }}
           </button>
 
           <!-- Bottone dei 3 puntini -->

@@ -196,7 +196,7 @@ class ActionAnswerFromChroma(Action):
             vectordb = ActionAnswerFromChroma.vectordbs[collection_name]
 
         # --- Inizializza l’LLM una sola volta ---
-        ollama_base = get_ollama_base_url()
+        ollama_base = ActionAnswerFromChroma.get_ollama_base_url()
         if not ollama_base:
             dispatcher.utter_message(text="Errore: impossibile contattare Ollama (URL ngrok non trovato).")
             return []

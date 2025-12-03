@@ -145,7 +145,7 @@ describe('HomeComponent', () => {
     }));
   
     it('getInitialsFromEmail returns initials or empty string', () => {
-      expect(component.getInitialsFromEmail('marco.rossi@example.com')).toBe('MR');
-      expect(component.getInitialsFromEmail(null)).toBe('');
+      expect(component.getInitials('Marco', 'Rossi')).toBe('MR');
+      expect(component.getInitials(null, null)).toBe('');
     });
 });

@@ -39,7 +39,7 @@ class ChatSession(SQLModel, table=True):
 
     id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
     user_email: str = Field(index=True)
-    title: str
+    title: str = Field(default="Nuova chat")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_activity: datetime = Field(default_factory=datetime.utcnow)
     active: bool = Field(default=True)

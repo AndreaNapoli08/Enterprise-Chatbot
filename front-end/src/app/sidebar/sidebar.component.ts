@@ -112,7 +112,7 @@ export class Sidebar {
   openRenameModal(sessionId: string, sessionTitle: string) {
     this.currentSessionToRename = sessionId;
     this.showRenameModal = true;
-    this.renameInput = sessionTitle && sessionTitle.trim() !== "" 
+    this.renameInput = sessionTitle && sessionTitle.trim() !== "" && sessionTitle !== "Nuova chat"
     ? sessionTitle 
     : sessionId;
     setTimeout(() => {
