@@ -132,7 +132,7 @@ export class Sidebar {
     const sessionId = this.currentSessionToRename;
     const newTitle = this.renameInput.trim();
 
-    fetch(`http://localhost:5050/chat/update_session_title/${sessionId}`, {
+    fetch(`https://enterprise-chatbot.onrender.com/chat/update_session_title/${sessionId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_title: newTitle })
@@ -168,7 +168,7 @@ export class Sidebar {
   }
 
   deleteSession(sessionId: string) {
-    fetch(`http://localhost:5050/chat/delete_session/${sessionId}`, {
+    fetch(`https://enterprise-chatbot.onrender.com/chat/delete_session/${sessionId}`, {
       method: 'DELETE'
     })
     .then(res => {

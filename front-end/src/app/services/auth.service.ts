@@ -9,7 +9,7 @@ import { Observable, map, catchError, of } from 'rxjs';
 })
 
 export class AuthService {
-  private apiUrl = 'http://localhost:5050/users';
+  private apiUrl = 'https://enterprise-chatbot.onrender.com/users';
   private loggedIn: boolean = false;
 
   constructor(private router: Router, private http: HttpClient) {}

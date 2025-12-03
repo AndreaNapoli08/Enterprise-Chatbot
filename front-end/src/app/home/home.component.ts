@@ -103,7 +103,7 @@ export class Home implements AfterViewChecked {
     this.auth.getCurrentUser().pipe(take(1)).subscribe((user) => {
       if (!user) return;
 
-      fetch(`http://localhost:5050/chat/get_sessions/${user.email}`)
+      fetch(`https://enterprise-chatbot.onrender.com/chat/get_sessions/${user.email}`)
         .then((res) => (res.status === 404 ? [] : res.json()))
         .then((s) => (this.sessions = s))
         .catch((e) => console.error('Errore sessioni:', e));
@@ -111,7 +111,7 @@ export class Home implements AfterViewChecked {
   }
 
   closeChatSession() {
-    fetch(`http://localhost:5050/chat/close_session/${this.current_session}`, {
+    fetch(`https://enterprise-chatbot.onrender.com/chat/close_session/${this.current_session}`, {
       method: 'POST',
     }).catch((e) =>
       console.error('Errore nel chiudere la sessione:', e)
@@ -123,7 +123,7 @@ export class Home implements AfterViewChecked {
 
     try {
       const res = await fetch(
-        `http://localhost:5050/chat/get_messages/${sessionId}`
+        `https://enterprise-chatbot.onrender.com/chat/get_messages/${sessionId}`
       );
       const data = await res.json();
 
@@ -249,7 +249,7 @@ export class Home implements AfterViewChecked {
 
   async saveMessageToBackend(message: Message) {
     try {
-      const res = await fetch(`http://localhost:5050/chat/save_message/${this.current_session}`, {
+      const res = await fetch(`https://enterprise-chatbot.onrender.com/chat/save_message/${this.current_session}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
