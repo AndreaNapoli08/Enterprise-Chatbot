@@ -103,7 +103,6 @@ class ActionGetReservation(Action):
             return []
 
         endpoint = os.getenv("RESERVATIONS_API_URL")
-        print(endpoint)
         api_url = f"{endpoint}{user_email}"
 
         try:

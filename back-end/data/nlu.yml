@@ -120,6 +120,8 @@ nlu:
     - fammi vedere un documento
     - dammi un documento
     - mi mandi il documento riguardo le informazioni aziendali?
+    - mi puoi fornire il file `informazioni_aziendali.pdf`?
+    - mi puoi fornire il file `linee_guida.pdf`?
     - mandami il documento sulle linee guida
     - puoi inviarmi il documento sulle politiche aziendali?
     - informazioni aziendali
