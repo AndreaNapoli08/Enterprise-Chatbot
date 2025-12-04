@@ -6,8 +6,10 @@ import json, re, os, requests
 from rasa_sdk import Action, Tracker # type: ignore
 from rasa_sdk.executor import CollectingDispatcher # type: ignore
 
-# --- Controllo disponibilità sala ---
+from dotenv import load_dotenv # type: ignore
+load_dotenv()
 
+# --- Controllo disponibilità sala ---
 class ActionAvailabilityCheckRoom(Action):
     def name(self) -> Text:
         return "action_availability_check_room"
@@ -101,6 +103,7 @@ class ActionGetReservation(Action):
             return []
 
         endpoint = os.getenv("RESERVATIONS_API_URL")
+        print(endpoint)
         api_url = f"{endpoint}{user_email}"
 
         try:

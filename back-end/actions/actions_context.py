@@ -12,7 +12,7 @@ def get_ollama_url():
     """
     Recupera l'URL di Ollama attraverso Ngrok leggendo il tuo Gist.
     """
-    GIST_URL = "https://gist.githubusercontent.com/AndreaNapoli08/0b153d525eb3a45d37cafd65b32bca8c/raw/ngrok_url.txt"
+    GIST_URL = "https://gist.githubusercontent.com/AndreaNapoli08/0b153d525eb3a45d37cafd65b32bca8c/raw/ollama_url.txt"
 
     try:
         res = requests.get(GIST_URL, timeout=5)

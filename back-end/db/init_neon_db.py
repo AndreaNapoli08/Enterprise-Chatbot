@@ -4,7 +4,9 @@ from models import User, Room, Document, ChatSession, ChatMessage
 from datetime import datetime
 import uuid
 import os
+from dotenv import load_dotenv # type: ignore
 
+load_dotenv()
 # Connection string Neon
 DATABASE_URL = os.getenv("DATABASE_URL")
 

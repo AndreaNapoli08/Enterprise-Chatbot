@@ -300,7 +300,7 @@
         type="text"
         [(ngModel)]="searchQuery"
         (input)="filterSessions()"
-        placeholder="Cerca chat..."
+        placeholder="s..."
         class="w-full p-2 rounded-lg border border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button 
@@ -320,7 +320,7 @@
         <button 
           (click)="selectSession(session.id)"
           class="w-full text-left px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-700 rounded-lg truncate">
-          {{ session.title || session.id }}
+          {{ session.title == null || session.title == 'Nuova chat' ? session.id : session.title }}
         </button>
       </li>
 

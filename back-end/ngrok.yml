@@ -1,0 +1,10 @@
+version: "2"
+authtoken: 2PF6Ueo33p1LMQZN5rVXfCl6zUg_4sJCCtnP9hHAupPWpWYjf
+
+tunnels:
+  ollama:
+    addr: 11434
+    proto: http
+  rasa:
+    addr: 5005
+    proto: http

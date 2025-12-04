@@ -5,7 +5,9 @@ import os, json, requests, re
 from rasa_sdk import Action, Tracker # type: ignore
 from rasa_sdk.executor import CollectingDispatcher # type: ignore
 from rasa_sdk.events import FollowupAction # type: ignore
+from dotenv import load_dotenv # type: ignore
 
+load_dotenv()
 # === Controlla il ruolo dell'utente loggato ===
 class ActionCheckUserRole(Action):
     def name(self) -> Text:

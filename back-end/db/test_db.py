@@ -1,6 +1,9 @@
 from sqlmodel import Session, create_engine, select
 from models import User, Room, Document, ChatSession, ChatMessage
 import os
+from dotenv import load_dotenv # type: ignore
+
+load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)

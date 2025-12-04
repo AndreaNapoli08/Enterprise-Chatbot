@@ -2,6 +2,7 @@ import os
 from typing import Any, Text, Dict, List
 import re, requests
 from PyPDF2 import PdfReader # type: ignore
+from dotenv import load_dotenv # type: ignore
 
 # import per rasa
 from rasa_sdk import Action, Tracker # type: ignore
@@ -20,6 +21,8 @@ PDF_DIR = os.path.join(os.path.dirname(__file__), "data/docs")
 CHROMA_DIR = "actions/data/chroma_db" 
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
+load_dotenv()
+
 # Invio di un PDF locale in risposta a una richiesta dell'utente
 class ActionSendLocalPDF(Action):
     def name(self) -> str:
@@ -34,20 +37,29 @@ class ActionSendLocalPDF(Action):
             "linee guida": "linee_guida.pdf",
         }
 
+        pdf_url=""
+
         # Trova il PDF più rilevante
         selected_pdf = None
         for key, filename in pdf_map.items():
             if key in user_message:
                 selected_pdf = filename
+                if filename == "linee_guida.pdf":
+                    pdf_url = "https://drive.google.com/uc?export=download&id=1UAysV_OIQB0oXODTEFmp03zNOW5HpCcs"
+                elif filename == "informazioni_aziendali.pdf":
+                    pdf_url = "https://drive.google.com/uc?export=download&id=18lvJQk7YCCr7trgco_0o1T_3RR40pgmZ"
                 break
-            
+        
+        
         if not selected_pdf:
             user_events = [e for e in tracker.events if e.get("event") == "user"]
             intent_name = user_events[-2].get("parse_data", {}).get("intent", {}).get("name")
             if intent_name == "ask_information_relazione":
                 selected_pdf = "linee_guida.pdf"    
+                pdf_url = "https://drive.google.com/uc?export=download&id=1UAysV_OIQB0oXODTEFmp03zNOW5HpCcs"
             elif intent_name == "ask_information_aziendale":
                 selected_pdf = "informazioni_aziendali.pdf" 
+                pdf_url = "https://drive.google.com/uc?export=download&id=18lvJQk7YCCr7trgco_0o1T_3RR40pgmZ"
             else:
                 dispatcher.utter_message(text="Indicami il nome o l'argomento del documento che desideri visualizzare")
                 return []
@@ -65,8 +77,6 @@ class ActionSendLocalPDF(Action):
         except Exception:
             num_pages = "N/D"
 
-        endpoint = os.getenv("DOCUMENTS_API_URL")
-        pdf_url = f"{endpoint}/{selected_pdf}"
         dispatcher.utter_message(
             text="Ecco il documento che hai richiesto:",
             attachment={
@@ -143,7 +153,7 @@ class ActionAnswerFromChroma(Action):
         Legge l'URL di Ngrok dal Gist GitHub.
         Ritorna qualcosa come: https://xxxx.ngrok-free.app
         """
-        GIST_URL = "https://gist.githubusercontent.com/AndreaNapoli08/0b153d525eb3a45d37cafd65b32bca8c/raw/ngrok_url.txt"
+        GIST_URL = "https://gist.githubusercontent.com/AndreaNapoli08/0b153d525eb3a45d37cafd65b32bca8c/raw/ollama_url.txt"
 
         try:
             r = requests.get(GIST_URL, timeout=5)
