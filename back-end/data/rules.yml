@@ -103,6 +103,7 @@ rules:
   steps:
     - intent: book_meeting_room
     - action: action_check_user_role
+    - action: action_listen
 
 - rule: Prenotazione sala riunioni - chiedi numero di partecipanti
   steps:

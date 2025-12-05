@@ -43,7 +43,7 @@ def get_last_action(sender_id="default"):
     Recupera l'ultima action eseguita leggendo dal tracker di RASA.
     """
     try:
-        tracker = requests.get(f"https://enterprise-chatbot.onrender.com/conversations/{sender_id}/tracker").json()
+        tracker = requests.get(f"http://localhost:5005/conversations/{sender_id}/tracker").json()
         events = tracker.get("events", [])
     except Exception as e:
         print("Errore tracker:", e)
@@ -62,7 +62,7 @@ def get_last_action(sender_id="default"):
     return last_action
 
 def reset_conversation(sender_id="default"):
-    requests.post(f"https://enterprise-chatbot.onrender.com/conversations/{sender_id}/reset")
+    requests.post(f"http://localhost:5005/conversations/{sender_id}/reset")
 
 # ------------------------------------------------------------
 #  MAIN

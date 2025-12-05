@@ -414,7 +414,6 @@ nlu:
   examples: |
     - [informazioni_aziendali.pdf](file_name)
     - [linee_guida.pdf](file_name)
-# qui aggiungere altri documenti quando li avremo
 
 - intent: book_meeting_room
   examples: |
