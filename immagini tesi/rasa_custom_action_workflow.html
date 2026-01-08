@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Custom Action - RASA</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 32px;
+            border-radius: 14px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+            max-width: 1100px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #1f2933;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+        #diagram {
+            display: flex;
+            justify-content: center;
+        }
+        /* Adjust Mermaid rendering size for better page fit */
+        .mermaid {
+            font-size: 16px;
+        }
+        .legend {
+            margin-top: 26px;
+            padding: 18px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #2193b0;
+        }
+        .legend h3 {
+            margin: 0 0 8px 0;
+            color: #1f2933;
+            font-size: 16px;
+        }
+        .legend-item {
+            margin: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Workflow di una Custom Action RASA</h1>
+        <p class="subtitle">Dal trigger nel dialogo alla risposta all'utente</p>
+
+        <div id="diagram">
+            <div class="mermaid">
+%%{init: {'themeVariables': { 'fontSize': '16px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 70 }}}%%
+flowchart TB
+    U["Utente invia messaggio"] --> P["NLU pipeline<br>Intent e Entità"]
+    P --> Pol["Policies<br>Memo/Rule/TED"]
+    Pol -->|predice| A["Custom Action"]
+    
+    subgraph Action_Flow["Fase Custom Action"]
+        direction TB
+        A --> Ctx["Leggi Slot / Context"]
+        Ctx --> Call["Chiamata Backend/API"]
+        Call --> Proc["Elabora dati<br>(es: disponibilità sala, verifica ruolo)"]
+        Proc --> Update["Aggiorna Slot / Eventi"]
+        Update --> Resp["Costruisci Risposta"]
+    end
+    
+    Resp --> R["Risposta RASA"]
+    R --> F["Frontend / Utente"]
+
+    %% Styling
+    classDef userStyle fill:#e3f2fd,stroke:#1d4ed8,stroke-width:3px,color:#0f172a
+    classDef nluStyle fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#111827
+    classDef policyStyle fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#111827
+    classDef actionStyle fill:#ecfdf3,stroke:#16a34a,stroke-width:2px,color:#0f172a
+    classDef backendStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0f172a
+    classDef outputStyle fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#0f172a
+
+    class U userStyle
+    class P nluStyle
+    class Pol policyStyle
+    class A,Update,Resp actionStyle
+    class Ctx,Call,Proc backendStyle
+    class R,F outputStyle
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Legenda</h3>
+            <div class="legend-item"><strong>Trigger:</strong> L'utente invia un messaggio, la pipeline NLU estrae intenti/entità.</div>
+            <div class="legend-item"><strong>Decisione:</strong> Le policies (regole + modelli) scelgono l'azione successiva.</div>
+            <div class="legend-item"><strong>Custom Action:</strong> Legge slot/context, chiama backend, elabora dati, aggiorna slot ed eventi.</div>
+            <div class="legend-item"><strong>Risposta:</strong> La custom action costruisce la risposta che RASA inoltra al frontend.</div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

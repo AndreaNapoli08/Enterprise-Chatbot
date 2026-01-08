@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagramma Sequenza RAG - Enterprise-Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            min-height: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        .diagram {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            margin: 20px 0;
+        }
+        .example-box {
+            background: #e8f5e9;
+            border-left: 4px solid #43a047;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .example-box h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .step-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .code-block {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+            border-left: 3px solid #667eea;
+            font-size: 0.9em;
+        }
+        .info-panel {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .metric-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #1976d2;
+            font-family: 'Courier New', monospace;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flusso RAG (Retrieval-Augmented Generation)</h1>
+        <p class="subtitle">Esempio concreto: query "Come posso aggiornare i miei dati bancari?" attraverso il sistema</p>
+        
+        <div class="example-box">
+            <h3>📋 Scenario di Esempio</h3>
+            <p><strong>Query utente:</strong> <span class="highlight">"Come posso aggiornare i miei dati bancari?"</span></p>
+            <p><strong>Documento sorgente:</strong> informazioni_aziendali.pdf (collezione: azienda_docs)</p>
+            <p><strong>Chunk rilevante nel DB:</strong> "Per aggiornare i dati bancari, accedi all'area personale del portale HR nella sezione Dati Anagrafici. Compila il modulo con IBAN e codice BIC della nuova banca. Allega copia documento identità e certificazione bancaria. La richiesta sarà elaborata entro 15 giorni lavorativi dal reparto amministrazione."</p>
+        </div>
+
+        <div class="diagram">
+            <div class="mermaid">
+            sequenceDiagram
+                participant U as 👤 Utente
+                participant R as RASA Bot
+                participant A as action_answer_from_chroma
+                participant E as Embedding Model<br/>(all-MiniLM-L6-v2)
+                participant C as Chroma Vector DB<br/>(azienda_docs)
+                participant O as Ollama LLM<br/>(phi3:3.8b)
+
+                Note over U,O: Fase 1: Ricezione Query
+    U->>R: "Come posso aggiornare<br/>i miei dati bancari?"
+                
+                Note over U,O: Fase 2: Embedding della Query
+    A->>E: embed_query("Come posso<br/>aggiornare dati bancari?")
+    E-->>A: query_vector [384-dim]<br/>[0.23, -0.67, 0.91, ...]
+                Note over U,O: Fase 3: Retrieval Semantico (MMR)
+                A->>C: retriever.get_relevant_documents()<br/>search_type: mmr<br/>k=2, fetch_k=4, lambda=0.5
+                C->>C: Calcola similarità coseno<br/>tra query_vector e<br/>tutti i chunk vettorizzati
+                C->>C: Fetch top 4 candidati<br/>Applica MMR diversification
+                C-->>A: Top 2 chunk rilevanti<br/>Chunk 1 (score: 0.75): "Per aggiornare dati bancari..."<br/>Chunk 2 (score: 0.68): "Documentazione richiesta HR..."
+                
+                Note over U,O: Fase 4: Verifica Threshold
+    A->>A: Check score > 1.1?<br/>0.75 < 1.1 ✓ (passa)
+                Note over U,O: Fase 5: Costruzione Prompt RAG
+                A->>A: Costruisci prompt:<br/>contesto + istruzioni + query
+                rect rgb(240, 248, 255)
+                    Note right of A: Prompt Template:<br/>"Sei un assistente che risponde in italiano.<br/>Hai a disposizione:<br/>[CHUNK 1] + [CHUNK 2]<br/>Domanda: Come aggiorno dati bancari?<br/>Rispondi breve (1-2 frasi)"
+                end
+                
+                Note over U,O: Fase 6: Generazione Risposta LLM
+                A->>O: POST /api/generate<br/>model: phi3:3.8b<br/>temperature: 0<br/>prompt: [contesto completo]
+                O->>O: Inferenza LLM<br/>Reasoning su chunk<br/>Genera risposta
+                O-->>A: response JSON:<br/>"Per aggiornare i dati bancari,<br/>accedi al portale HR nella sezione<br/>Dati Anagrafici e compila il modulo<br/>con IBAN e BIC. Allega documento e<br/>certificazione bancaria.<br/>Fonte: informazioni_aziendali.pdf"
+                
+                Note over U,O: Fase 7: Post-processing
+                A->>A: Estrai testo da response<br/>Aggiungi metadata fonte
+                
+                Note over U,O: Fase 8: Invio Risposta
+                A-->>R: dispatcher.utter_message()<br/>text + fonte
+                R-->>U: "Per aggiornare i dati bancari, accedi<br/>al portale HR in Dati Anagrafici e compila<br/>il modulo con IBAN/BIC allegando documenti.<br/>📄 Fonte: informazioni_aziendali.pdf"
+
+                Note over U,O: ✅ Latenza totale: ~2-3 secondi (CPU)
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>⚙️ Parametri Tecnici della Pipeline</h3>
+            <div class="metric-grid">
+                <div class="metric-item">
+                    <div class="metric-label">Embedding Model</div>
+                    <div class="metric-value">all-MiniLM-L6-v2</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Dimensioni Vettore</div>
+                    <div class="metric-value">384-dim</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Retrieval Strategy</div>
+                    <div class="metric-value">MMR</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Chunk Restituiti (k)</div>
+                    <div class="metric-value">2</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Candidati Iniziali (fetch_k)</div>
+                    <div class="metric-value">4</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Lambda MMR</div>
+                    <div class="metric-value">0.5</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Score Threshold</div>
+                    <div class="metric-value">&lt; 1.1</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">LLM Model</div>
+                    <div class="metric-value">phi3:3.8b</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Temperature</div>
+                    <div class="metric-value">0 (deterministico)</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Latenza Media</div>
+                    <div class="metric-value">2-3s (CPU)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-detail">
+            <h3 style="color: #667eea; margin-top: 0;">Dettaglio Fase per Fase</h3>
+            
+            <div style="margin: 20px 0;">
+                <span class="step-number">1</span>
+                <strong>Ricezione Query RASA</strong>
+                <p style="margin-left: 40px;">L'utente invia il messaggio attraverso l'interfaccia chatbot. RASA classifica l'intent come <code>ask_information_aziendale</code> tramite il modello NLU e triggera la custom action <code>action_answer_from_chroma</code>.</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">2</span>
+                <strong>Embedding della Query</strong>
+                <p style="margin-left: 40px;">Il testo della query viene convertito in un vettore numerico 384-dimensionale tramite il modello all-MiniLM-L6-v2. Questo vettore cattura il significato semantico della query.</p>
+                <div class="code-block" style="margin-left: 40px;">
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+query_vector = embeddings.embed_query("Come posso aggiornare i miei dati bancari?")
+# Output: array di 384 float, es: [0.23, -0.67, 0.91, ..., 0.52]
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">3</span>
+                <strong>Retrieval Semantico con MMR</strong>
+                <p style="margin-left: 40px;">Chroma confronta il query_vector con tutti i chunk vettorizzati nella collezione <code>azienda_docs</code> usando similarità coseno. MMR (Maximal Marginal Relevance) bilancia rilevanza e diversità:</p>
+                <ul style="margin-left: 60px;">
+                    <li>Recupera i 4 chunk con score più alto (fetch_k=4)</li>
+                    <li>Applica diversificazione MMR per evitare chunk ridondanti</li>
+                    <li>Restituisce i migliori 2 chunk (k=2) con lambda=0.5 (50% similarità, 50% diversità)</li>
+                </ul>
+                <div class="code-block" style="margin-left: 40px;">
+retriever = vectordb.as_retriever(
+    search_type="mmr",
+    search_kwargs={"k": 2, "fetch_k": 4, "lambda_mult": 0.5}
+)
+chunks = retriever.get_relevant_documents(query)
+# Risultato: 2 chunk con score 0.75 e 0.68
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">4</span>
+                <strong>Verifica Score Threshold</strong>
+                <p style="margin-left: 40px;">Il sistema controlla che gli score dei chunk recuperati siano inferiori alla soglia di 1.1 (in Chroma, score bassi = alta similarità). Se tutti gli score sono > 1.1, significa nessun match rilevante e il sistema risponde "Non ho trovato informazioni".</p>
+                <div class="code-block" style="margin-left: 40px;">
+if all(doc.metadata.get('score', 0) > 1.1 for doc in chunks):
+    return "Nessuna risposta rilevante trovata nei documenti."
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">5</span>
+                <strong>Costruzione Prompt RAG</strong>
+                <p style="margin-left: 40px;">I chunk recuperati vengono concatenati con istruzioni specifiche per guidare il comportamento di Ollama. Il prompt include:</p>
+                <ul style="margin-left: 60px;">
+                    <li>Identità del sistema ("Sei un assistente che risponde solo in italiano")</li>
+                    <li>Contesto dai chunk (testo estratto dai documenti)</li>
+                    <li>Vincoli di output (breve, 1-2 frasi, include fonte)</li>
+                    <li>La query originale dell'utente</li>
+                </ul>
+                <div class="code-block" style="margin-left: 40px;">
+prompt = f"""Sei un assistente che risponde solo in italiano.
+Hai a disposizione le seguenti informazioni da documenti aziendali:
+
+{chunk_1_text}  # "Per aggiornare dati bancari, accedi al portale HR..."
+{chunk_2_text}  # "Documentazione richiesta: IBAN, BIC, documento..."
+
+Domanda dell'utente: {user_message}  # "Come posso aggiornare i miei dati bancari?"
+
+Rispondi in modo breve e preciso (1-2 frasi, salvo procedure).
+Includi la fonte del documento nella risposta.
+Se non c'è informazione rilevante, dillo chiaramente."""
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">6</span>
+                <strong>Generazione Risposta LLM (Ollama phi3)</strong>
+                <p style="margin-left: 40px;">Il prompt completo viene inviato a Ollama tramite POST HTTP all'endpoint <code>/api/generate</code>. Il modello phi3:3.8b esegue inferenza con temperature=0 per garantire output deterministico (stesso input → stesso output). Il modello legge il contesto, ragiona sui chunk e sintetizza una risposta che rispetta i vincoli del prompt.</p>
+                <div class="code-block" style="margin-left: 40px;">
+response = requests.post(
+    "http://localhost:11434/api/generate",
+    json={
+        "model": "phi3:3.8b",
+        "prompt": prompt,
+        "stream": False,
+        "options": {"temperature": 0}
+    },
+    timeout=200
+)
+result = response.json()['response']
+# Output: "Per aggiornare i dati bancari, accedi al portale HR nella sezione Dati Anagrafici..."
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">7</span>
+                <strong>Post-processing</strong>
+                <p style="margin-left: 40px;">La risposta generata viene estratta dal JSON di Ollama, ripulita da eventuali artefatti di formattazione, e arricchita con metadata della fonte (nome documento originale).</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <span class="step-number">8</span>
+                <strong>Invio Risposta all'Utente</strong>
+                <p style="margin-left: 40px;">La risposta finale viene inviata all'utente tramite RASA dispatcher con il testo sintetizzato + fonte. L'utente vede la risposta nella UI del chatbot.</p>
+                <div class="code-block" style="margin-left: 40px;">
+dispatcher.utter_message(
+    text=f"{risposta_sintetizzata}\n\n📄 Fonte: {nome_documento}"
+)
+                </div>
+            </div>
+        </div>
+
+        <div class="example-box">
+            <h3>🔍 Confronto: Query diversa, stesso sistema</h3>
+            <p><strong>Query alternativa:</strong> <span class="highlight">"Come cambio il mio indirizzo di residenza?"</span></p>
+            <p><strong>Chunk recuperato:</strong> "Per modificare l'indirizzo di residenza, accedi al portale HR nella sezione Dati Personali. Aggiorna i campi indirizzo, CAP e città. Allega certificato di residenza aggiornato. Le modifiche saranno attive entro 5 giorni lavorativi."</p>
+            <p><strong>Risposta generata:</strong> "Accedi al portale HR nella sezione Dati Personali, aggiorna i campi indirizzo e allega il certificato di residenza. Le modifiche saranno attive entro 5 giorni lavorativi.<br/><br/>📄 Fonte: informazioni_aziendali.pdf"</p>
+            <p style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px; font-size: 0.9em;">
+                <strong>Nota:</strong> La pipeline è identica. La differenza sta solo nel contenuto della query e nei chunk recuperati da Chroma. Il sistema è completamente generalizzato e funziona per qualsiasi domanda documentale.
+            </p>
+        </div>
+
+        <div class="info-panel">
+            <h3>⏱️ Breakdown Latenza (Hardware: CPU Intel i7, no GPU)</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 6px; overflow: hidden;">
+                <thead style="background: #1976d2; color: white;">
+                    <tr>
+                        <th style="padding: 12px; text-align: left;">Fase</th>
+                        <th style="padding: 12px; text-align: left;">Operazione</th>
+                        <th style="padding: 12px; text-align: right;">Latenza</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 10px;">1-2</td>
+                        <td style="padding: 10px;">RASA NLU + Embedding query</td>
+                        <td style="padding: 10px; text-align: right; font-family: 'Courier New', monospace;">~100ms</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 10px;">3</td>
+                        <td style="padding: 10px;">Chroma similarity search + MMR</td>
+                        <td style="padding: 10px; text-align: right; font-family: 'Courier New', monospace;">~150ms</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 10px;">4-5</td>
+                        <td style="padding: 10px;">Threshold check + prompt construction</td>
+                        <td style="padding: 10px; text-align: right; font-family: 'Courier New', monospace;">~50ms</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 10px; background: #fff3e0;">6</td>
+                        <td style="padding: 10px; background: #fff3e0;"><strong>Ollama phi3 inference (CPU)</strong></td>
+                        <td style="padding: 10px; text-align: right; font-family: 'Courier New', monospace; background: #fff3e0;"><strong>~2-3s</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 10px;">7-8</td>
+                        <td style="padding: 10px;">Post-processing + dispatch</td>
+                        <td style="padding: 10px; text-align: right; font-family: 'Courier New', monospace;">~100ms</td>
+                    </tr>
+                    <tr style="background: #e8f5e9;">
+                        <td style="padding: 12px; font-weight: bold;" colspan="2">Totale end-to-end</td>
+                        <td style="padding: 12px; text-align: right; font-family: 'Courier New', monospace; font-weight: bold; color: #2e7d32;">~2.4-3.4s</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                <strong>Nota:</strong> Con GPU (es: RTX 3060), la fase 6 (Ollama inference) scenderebbe a ~0.5-1s, portando il totale sotto 1.5s. Il collo di bottiglia è invariabilmente l'inferenza LLM.
+            </p>
+        </div>
+
+        <div class="example-box" style="background: #ffebee; border-left-color: #c62828;">
+            <h3 style="color: #b71c1c;">❌ Caso Fallback: Nessun Chunk Rilevante</h3>
+            <p><strong>Query:</strong> <span class="highlight">"Quanto costa un caffè al bar?"</span></p>
+            <p><strong>Comportamento:</strong></p>
+            <ol>
+                <li>Chroma restituisce chunk con score > 1.1 (bassa similarità)</li>
+                <li>La custom action rileva che nessun chunk supera la soglia di rilevanza</li>
+                <li>Incrementa il contatore di fallback e risponde: <em>"Non ho trovato informazioni rilevanti nei documenti aziendali. Posso aiutarti con policy, procedure o prenotazioni?"</em></li>
+                <li>L'utente viene guidato a riformulare la query o contattare un operatore umano</li>
+            </ol>
+            <p style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px; font-size: 0.9em;">
+                Questo meccanismo previene allucinazioni: il sistema ammette ignoranza invece di inventare risposte non ancorate ai documenti.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: { 
+                useMaxWidth: true,
+                wrap: true,
+                mirrorActors: true,
+                messageMargin: 80,
+                boxMargin: 10
+            }
+        });
+        mermaid.contentLoaded();
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Intenti - RASA</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        #diagram {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .stats {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            padding: 15px;
+            border-left: 4px solid;
+            background: white;
+            border-radius: 5px;
+        }
+        .stat-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .conversational { border-left-color: #2196F3; }
+        .sentiment { border-left-color: #FF9800; }
+        .documentation { border-left-color: #4CAF50; }
+        .booking { border-left-color: #9C27B0; }
+        .users { border-left-color: #F44336; }
+        .fallthrough { border-left-color: #607D8B; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mappa Concettuale degli Intenti</h1>
+        <p class="subtitle">29 intenti organizzati per area funzionale</p>
+        
+        <div id="diagram">
+            <div class="mermaid">
+mindmap
+  root((Enterprise<br/>Chatbot<br/>29 Intenti))
+    Conversazionali Base)Conversazionali Base(
+      greet<br/>Saluti
+      goodbye<br/>Congedi
+      affirm<br/>Affermazioni
+      deny<br/>Negazioni
+      bot_challenge<br/>Sfida al bot
+    Sentiment e Mood)Sentiment e Mood(
+      mood_great<br/>Felicità
+      mood_unhappy<br/>Tristezza
+      ask_mood<br/>Status bot
+    Documentazione)Documentazione(
+      ask_document<br/>Richiesta documento
+      ask_information_relazione<br/>Linee guida
+      ask_information_aziendale<br/>Info aziendali
+      choose_yes_document<br/>Conferma ricerca
+      choose_no_document<br/>Rifiuta ricerca
+      choose_document<br/>Selezione doc
+    Prenotazione Sale)Prenotazione Sale(
+      book_meeting_room<br/>Prenotazione
+      provide_date<br/>Fornisce data
+      provide_participants_number<br/>N. partecipanti
+      provide_room_features<br/>Caratteristiche
+      ask_my_reservations<br/>Consulta prenotazioni
+      delete_reservation<br/>Cancella prenotazione
+    Gestione Utenti)Gestione Utenti(
+      change_password<br/>Cambio password
+      receive_new_password<br/>Nuova password
+    Fall-through)Fall-through(
+      nlu_fallback<br/>Bassa confidenza
+      out_of_scope<br/>Fuori ambito
+      conversation_end<br/>Fine dialogo
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card conversational">
+                <h4>Conversazionali</h4>
+                <div class="number">5</div>
+                <div class="label">greet, goodbye, affirm, deny, bot_challenge</div>
+            </div>
+            <div class="stat-card sentiment">
+                <h4>Sentiment/Mood</h4>
+                <div class="number">3</div>
+                <div class="label">mood_great, mood_unhappy, ask_mood</div>
+            </div>
+            <div class="stat-card documentation">
+                <h4>Documentazione</h4>
+                <div class="number">6</div>
+                <div class="label">Ricerca e navigazione documenti aziendali</div>
+            </div>
+            <div class="stat-card booking">
+                <h4>Prenotazione</h4>
+                <div class="number">6</div>
+                <div class="label">Gestione completa prenotazioni sale riunioni</div>
+            </div>
+            <div class="stat-card users">
+                <h4>Gestione Utenti</h4>
+                <div class="number">2</div>
+                <div class="label">change_password, receive_new_password</div>
+            </div>
+            <div class="stat-card fallthrough">
+                <h4>Fall-through</h4>
+                <div class="number">3</div>
+                <div class="label">nlu_fallback, out_of_scope, conversation_end</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            mindmap: {
+                useMaxWidth: true,
+                padding: 20
+            }
+        });
+    </script>
+</body>
+</html>

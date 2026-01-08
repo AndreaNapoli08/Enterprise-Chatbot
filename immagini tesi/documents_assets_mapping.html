@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Logica Assets Documentali - Enterprise-Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .diagram {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            min-height: 500px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .info-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .info-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .info-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .file-path {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        .collection-name {
+            font-family: 'Courier New', monospace;
+            background: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #1b5e20;
+        }
+        .intent-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+        .intent-relazione {
+            background: #fff3e0;
+            color: #e65100;
+            font-family: 'Courier New', monospace;
+        }
+        .intent-aziendale {
+            background: #f3e5f5;
+            color: #6a1b9a;
+            font-family: 'Courier New', monospace;
+        }
+        .persistence-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        .legend h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .legend-item {
+            margin: 10px 0;
+        }
+        .code-block {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+            border-left: 3px solid #667eea;
+        }
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mappa Logica degli Asset Documentali</h1>
+        
+        <div class="section">
+            <h2>Panoramica Architettura</h2>
+            <div class="diagram">
+                <div class="mermaid">
+graph LR
+    subgraph source["📄 Asset Documentali"]
+        PDF1["<b>informazioni_aziendali.pdf</b><br/>Ubicazione: back-end/actions/data/docs/"]
+        PDF2["<b>linee_guida.pdf</b><br/>Ubicazione: back-end/actions/data/docs/"]
+    end
+    
+    subgraph processing["⚙️ Elaborazione (Ingestione)"]
+        INGESTION["Script: ingest.py<br/>PyPDFLoader → Chunking → Embedding<br/>all-MiniLM-L6-v2 (384-dim vectors)"]
+    end
+    
+    subgraph collections["🗂️ Collezioni Chroma"]
+        COLL1["<b>azienda_docs</b><br/>~30 chunk vettorizzati<br/>Score threshold: 1.1"]
+        COLL2["<b>relazione_docs</b><br/>~30 chunk vettorizzati<br/>Score threshold: 1.1"]
+    end
+    
+    subgraph persistence["💾 Persistenza su Disco"]
+        PERSIST["Directory: back-end/actions/data/chroma_db/<br/>├── azienda_docs/<br/>│   ├── chroma.sqlite3<br/>│   └── hnswlib.bin<br/>└── relazione_docs/<br/>    ├── chroma.sqlite3<br/>    └── hnswlib.bin"]
+    end
+    
+    subgraph runtime["🚀 Runtime Query"]
+        RETRIEVER["Custom Action: action_answer_from_chroma<br/>Query → Embedding → MMR Search (k=2)<br/>Cached retriever in-process"]
+    end
+    
+    PDF1 -->|filename mapping| INGESTION
+    PDF2 -->|filename mapping| INGESTION
+    INGESTION -->|"chunks + vectors"| COLL1
+    INGESTION -->|"chunks + vectors"| COLL2
+    COLL1 -->|"persist()"| PERSIST
+    COLL2 -->|"persist()"| PERSIST
+    PERSIST -->|"load at startup"| RETRIEVER
+    
+    style source fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style processing fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    style collections fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style persistence fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style runtime fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Mappatura Dettagliata File → Collezione → Intenti</h2>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>File PDF</th>
+                        <th>Collezione Chroma</th>
+                        <th>Intent Associati</th>
+                        <th>Contenuto Tipico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="file-path">informazioni_aziendali.pdf</span></td>
+                        <td><span class="collection-name">azienda_docs</span></td>
+                        <td>
+                            <span class="intent-badge intent-aziendale">ask_information_aziendale</span>
+                            <span class="intent-badge intent-aziendale">ask_policies</span>
+                        </td>
+                        <td>Policy aziendali, benefit, procedure HR, contatti dipartimenti</td>
+                    </tr>
+                    <tr>
+                        <td><span class="file-path">linee_guida.pdf</span></td>
+                        <td><span class="collection-name">relazione_docs</span></td>
+                        <td>
+                            <span class="intent-badge intent-relazione">ask_information_relazione</span>
+                            <span class="intent-badge intent-relazione">ask_procedures</span>
+                        </td>
+                        <td>Linee guida operative, standard documentali, procedure specifiche</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Struttura di Persistenza su Disco</h2>
+            <div class="persistence-box">
+                <p><strong>Percorso radice:</strong> <span class="file-path">back-end/actions/data/chroma_db/</span></p>
+                <div class="code-block">
+back-end/actions/data/chroma_db/
+├── chroma.sqlite3                    # Indice SQLite globale
+├── azienda_docs/
+│   ├── chroma.sqlite3               # Indice collezione
+│   ├── hnswlib.bin                  # Indice vettoriale HNSW
+│   ├── embeddings_file.pkl          # Embedding model state
+│   ├── metadata.json                # Metadati chunk (fonte, id)
+│   └── documents/
+│       ├── uuid1/ → chunk 1 vettorizzato
+│       └── uuid2/ → chunk 2 vettorizzato
+│
+└── relazione_docs/
+    ├── chroma.sqlite3
+    ├── hnswlib.bin
+    ├── embeddings_file.pkl
+    ├── metadata.json
+    └── documents/
+        ├── uuid1/ → chunk 1 vettorizzato
+        └── uuid2/ → chunk 2 vettorizzato
+                </div>
+            </div>
+
+            <p><strong>Descrizione file principali:</strong></p>
+            <ul>
+                <li><span class="file-path">chroma.sqlite3</span> - Database SQLite che memorizza metadati di chunk (ID, fonte, timestamp ingestione) e puntatori ai vettori</li>
+                <li><span class="file-path">hnswlib.bin</span> - Indice vettoriale HNSW (Hierarchical Navigable Small World) per ricerca ANN veloce; permette similarity search in O(log N) anziché O(N)</li>
+                <li><span class="file-path">embeddings_file.pkl</span> - Serializzazione Python del modello embedding (all-MiniLM-L6-v2) per accelerare caricamento a runtime</li>
+                <li><span class="file-path">metadata.json</span> - Mappatura chunk ID → sorgente PDF, numero pagina, testo grezzo per audit</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Flusso di Ingestione (Script ingest.py)</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <strong>Caricamento PDF:</strong> PyPDFLoader estrae testo da <span class="file-path">back-end/actions/data/docs/*.pdf</span>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <strong>Chunking:</strong> RecursiveCharacterTextSplitter divide il testo in chunk da 1000 caratteri con overlap di 150 caratteri
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+chunk_size=1000           # ~150-200 parole per chunk
+chunk_overlap=150         # Evita perdita di informazioni a confini
+# Esempio: un PDF di 30KB → ~30 chunk
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">3</span>
+                    <strong>Embedding:</strong> Ogni chunk è convertito a vettore 384-dimensionale tramite all-MiniLM-L6-v2
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+model = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+vector = model.embed_query("cosa è una prenotazione sala?")
+# Risultato: array di 384 numeri float
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">4</span>
+                    <strong>Persistenza Chroma:</strong> Vettori e metadati salvati in collezione nomata
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+vectordb = Chroma.from_documents(
+    documents=chunks,
+    embedding=embeddings,
+    persist_directory="data/chroma_db",
+    collection_name="azienda_docs"  # o relazione_docs
+)
+vectordb.persist()  # Salva su disco
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">5</span>
+                    <strong>Risultato:</strong> Collezione pronta per ricerca semantica a runtime
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Flusso di Retrieval a Runtime</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <strong>Ricezione Query RASA:</strong> Custom action <span class="file-path">action_answer_from_chroma</span> riceve messaggio utente
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <strong>Selezione Collezione:</strong> Basato su <code>intent</code> o <code>file_name</code> slot
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+if intent == "ask_information_aziendale":
+    collection_name = "azienda_docs"
+elif intent == "ask_information_relazione":
+    collection_name = "relazione_docs"
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">3</span>
+                    <strong>Caricamento Collezione (cached):</strong> La prima volta, carica da disco; succesivamente riusa istanza in memoria
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+# Variabile di classe statica - persiste durante lifetime server RASA
+ActionAnswerFromChroma.vectordbs[collection_name] = (
+    Chroma(
+        collection_name=collection_name,
+        persist_directory="actions/data/chroma_db",
+        embedding_function=embeddings
+    )
+)
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">4</span>
+                    <strong>Embedding Query:</strong> Messaggio utente convertito a vettore tramite stesso modello (all-MiniLM-L6-v2)
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+query_vector = embeddings.embed_query(user_message)
+# Es: "Come prenoto una sala?" → vettore 384-dim
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">5</span>
+                    <strong>Ricerca MMR (Maximal Marginal Relevance):</strong> Recupera 2 chunk diversi ma rilevanti
+                </div>
+                <div class="code-block" style="margin-left: 40px;">
+retriever = vectordb.as_retriever(
+    search_type="mmr",
+    search_kwargs={
+        "k": 2,           # Risultati finali
+        "fetch_k": 4,     # Candidati iniziali
+        "lambda_mult": 0.5  # Bilancia similarità e diversità
+    }
+)
+chunks = retriever.get_relevant_documents(user_message)
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">6</span>
+                    <strong>Filtraggio Score:</strong> Se tutti gli score < 1.1, nessun match rilevante
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span class="step-number">7</span>
+                    <strong>Passaggio a LLM:</strong> Chunk recuperati passati a Ollama per RAG
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Parametri di Ricerca Semantica</h2>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Valore</th>
+                        <th>Significato</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>chunk_size</code></td>
+                        <td>1000 caratteri</td>
+                        <td>Ogni frammento ~ 150-200 parole. Equilibrio tra contesto e granularità</td>
+                    </tr>
+                    <tr>
+                        <td><code>chunk_overlap</code></td>
+                        <td>150 caratteri</td>
+                        <td>Sovrapposizione tra chunk successivi per evitare perdita informazioni a confini</td>
+                    </tr>
+                    <tr>
+                        <td><code>embedding_model</code></td>
+                        <td>all-MiniLM-L6-v2</td>
+                        <td>384 dimensioni, multilingue, leggero (33M parametri), determinístico</td>
+                    </tr>
+                    <tr>
+                        <td><code>similarity_metric</code></td>
+                        <td>Cosine Similarity</td>
+                        <td>Misura angolo tra vettori; ~70% somiglianza = score 0.7</td>
+                    </tr>
+                    <tr>
+                        <td><code>k</code> (retrieval)</td>
+                        <td>2</td>
+                        <td>Numero di chunk finali recuperati da passar al LLM</td>
+                    </tr>
+                    <tr>
+                        <td><code>fetch_k</code> (retrieval)</td>
+                        <td>4</td>
+                        <td>Candidati iniziali prima di applicare diversificazione MMR</td>
+                    </tr>
+                    <tr>
+                        <td><code>lambda_mult</code></td>
+                        <td>0.5</td>
+                        <td>MMR: 50% somiglianza + 50% diversità. Trade-off tra rilevanza e varietà</td>
+                    </tr>
+                    <tr>
+                        <td><code>score_threshold</code></td>
+                        <td>1.1</td>
+                        <td>Soglia conservativa: rifiuta match con similarità bassa. Favorisce precisione</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legend">
+            <h3>Note Operative</h3>
+            <div class="legend-grid">
+                <div>
+                    <h4>Aggiunta Nuovi Documenti</h4>
+                    <p>Per aggiungere un nuovo PDF (es: <code>training.pdf</code>):</p>
+                    <ol>
+                        <li>Copiare PDF in <span class="file-path">back-end/actions/data/docs/</span></li>
+                        <li>Aggiungere entry nel dizionario <code>COLLECTIONS</code> in <span class="file-path">ingest.py</span>:
+                            <div class="code-block">
+"training.pdf": "training_docs"
+                            </div>
+                        </li>
+                        <li>Eseguire <code>python ingest.py</code></li>
+                        <li>Nuova collezione disponibile per retrieval</li>
+                    </ol>
+                </div>
+                <div>
+                    <h4>Sincronizzazione Path</h4>
+                    <p><strong>CRITICO:</strong> I path devono essere coerenti:</p>
+                    <ul>
+                        <li>Ingestione: <span class="file-path">data/chroma_db</span></li>
+                        <li>Runtime: <span class="file-path">actions/data/chroma_db</span></li>
+                    </ul>
+                    <p>Se i path non corrispondono, le collezioni non vengono trovate a runtime. In production, usare variabili d'ambiente centralizzate.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: true }
+        });
+        mermaid.contentLoaded();
+    </script>
+</body>
+</html>

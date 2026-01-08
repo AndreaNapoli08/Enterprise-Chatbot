@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schema ER Database - Enterprise Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 32px;
+            border-radius: 14px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+            max-width: 1300px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #1f2933;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+        #diagram {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid {
+            font-size: 15px;
+        }
+        /* Ingrandisce il font delle etichette delle relazioni */
+        .mermaid .relationshipLabel {
+            font-size: 18px !important;
+            font-weight: 600;
+        }
+        .legend {
+            margin-top: 26px;
+            padding: 18px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .legend h3 {
+            margin: 0 0 8px 0;
+            color: #1f2933;
+            font-size: 16px;
+        }
+        .legend-item {
+            margin: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Schema Entity-Relationship del Database</h1>
+        <p class="subtitle">Modello dati PostgreSQL con quattro entità principali</p>
+
+        <div id="diagram">
+            <div class="mermaid">
+%%{init: {'theme': 'default', 'themeVariables': { 'fontSize': '15px' }}}%%
+erDiagram
+    USERS ||--o{ CHAT_SESSIONS : "possiede"
+    USERS ||--o{ ROOMS : "prenota (JSONB)"
+    USERS ||--o{ DOCUMENTS : "consulta"
+    CHAT_SESSIONS ||--o{ CHAT_MESSAGES : "contiene"
+    
+    USERS {
+        int id PK "Auto-increment"
+        string first_name "Nome"
+        string last_name "Cognome"
+        string email UK "Username univoco"
+        string password "Hash bcrypt"
+        string role "Manager/Dipendente"
+    }
+    
+    CHAT_SESSIONS {
+        uuid id PK "UUID univoco"
+        string user_email FK "Proprietario"
+        string title "Titolo conversazione"
+        timestamp created_at "Data creazione"
+        timestamp last_activity "Ultima attività"
+        bool active "Sessione attiva"
+    }
+    
+    ROOMS {
+        uuid id PK "UUID univoco"
+        string name "Nome sala"
+        int numero "Numero interno"
+        int capienza "Posti disponibili"
+        jsonb caratteristiche "Array feature"
+        jsonb prenotazioni "Array booking"
+    }
+    
+    DOCUMENTS {
+        int id PK "Auto-increment"
+        string title "Titolo documento"
+        string description "Descrizione"
+        string filename "File su disco"
+        timestamp uploaded_at "Data upload"
+    }
+    
+    CHAT_MESSAGES {
+        int id PK "Auto-increment"
+        uuid session_id FK "Riferimento sessione"
+        string sender "user/bot"
+        string type "text/button/image"
+        jsonb content "Payload strutturato"
+        timestamp timestamp "Data invio"
+    }
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Legenda</h3>
+            <div class="legend-item"><strong>PK:</strong> Primary Key - Chiave primaria della tabella</div>
+            <div class="legend-item"><strong>FK:</strong> Foreign Key - Chiave esterna che referenzia altra tabella</div>
+            <div class="legend-item"><strong>UK:</strong> Unique Key - Campo con vincolo di unicità</div>
+            <div class="legend-item"><strong>JSONB:</strong> Tipo PostgreSQL per dati semi-strutturati con indicizzazione efficiente</div>
+            <div class="legend-item"><strong>Relazioni:</strong> 
+                <ul style="margin: 8px 0 0 20px; padding: 0;">
+                    <li>USERS → CHAT_SESSIONS: Un utente può avere più sessioni di chat (1:N)</li>
+                    <li>USERS → ROOMS: Le prenotazioni sono embedded in JSONB con email utente (logica)</li>
+                    <li>USERS → DOCUMENTS: Gli utenti consultano i documenti aziendali (1:N logica)</li>
+                    <li>CHAT_SESSIONS → CHAT_MESSAGES: Una sessione contiene più messaggi (1:N)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            er: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>

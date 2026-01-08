@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagramma Riassuntivo Deploy - Enterprise-Chatbot</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fb; margin: 0; padding: 24px; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 12px 28px rgba(16,24,40,.12); padding: 28px; max-width: 1400px; margin: 0 auto; }
+    h1 { margin: 0 0 8px 0; font-size: 24px; color: #1f2937; }
+    p.subtitle { margin: 0 0 20px 0; color: #6b7280; }
+    .diagram { background: #fafafa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; }
+    .legend { margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .legend-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; }
+    .legend-item h4 { margin: 0 0 6px 0; font-size: 14px; color: #374151; }
+    .legend-item p { margin: 0; font-size: 13px; color: #6b7280; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+    .mermaid {
+        display: flex;
+        justify-content: center;
+        min-height: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Deploy del Sistema - Panoramica</h1>
+    <p class="subtitle">Frontend statico su GitHub Pages, API su Render, DB su Neon, RASA e Ollama in locale esposti via ngrok, endpoint dinamici su GitHub Gist</p>
+    <div class="diagram">
+      <div class="mermaid">
+        flowchart LR
+        %% NODES
+        subgraph USER["Utente (Browser)"]
+        end
+
+        subgraph GH_PAGES["GitHub Pages<br>Frontend Angular"]
+        end
+
+        subgraph RENDER["Render<br>FastAPI Server (HTTPS)"]
+        end
+
+        subgraph NEON["Neon (Cloud PostgreSQL)<br>TLS"]
+        end
+
+        subgraph LOCAL["Ambiente Locale (On-Prem)"]
+            direction TB
+            RASA["RASA Server<br>(REST 5005)<br>Local"]
+            OLLAMA["Ollama LLM<br>(phi3:3.8b)<br>Local :11434"]
+            NGROK_R["ngrok Tunnel<br>RASA → https://rasa-*.ngrok.io"]
+            NGROK_O["ngrok Tunnel<br>Ollama → https://ollama-*.ngrok.io"]
+            UPDATER["Script Updater<br>(ngrok → Gist)"]
+        end
+
+        subgraph GITHUB["GitHub"]
+            GIST["GitHub Gist<br>Endpoint Registry<br>{ RASA_URL, OLLAMA_URL }"]
+        end
+
+        %% EDGES
+        USER -- HTTPS --> GH_PAGES
+        GH_PAGES -- HTTPS / CORS --> RENDER
+        GH_PAGES -. Legge endpoint .-> GIST
+
+        %% Chat Flow
+        GH_PAGES -. Chat REST .-> NGROK_R
+        NGROK_R --> RASA
+
+        %% RAG Flow
+        RASA -- Docs/Metadata (HTTPS) --> RENDER
+        RENDER -- Query/CRUD (SQL) --> NEON
+        RASA -- LLM Inference (HTTPS) --> NGROK_O
+        NGROK_O --> OLLAMA
+
+        %% Dynamic Endpoints Management
+        UPDATER -- POST new URLs --> GIST
+        RASA -. Fetch OLLAMA_URL on init .-> GIST
+        GH_PAGES -. Fetch RASA_URL on load .-> GIST
+
+        %% STYLES
+        style USER fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px
+        style GH_PAGES fill:#E8EAF6,stroke:#3949AB,stroke-width:2px
+        style RENDER fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
+        style NEON fill:#E0F7FA,stroke:#00838F,stroke-width:2px
+        style LOCAL fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px
+        style RASA fill:#FFE0B2,stroke:#F57C00,stroke-width:2px
+        style OLLAMA fill:#FFECB3,stroke:#F9A825,stroke-width:2px
+        style NGROK_R fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px
+        style NGROK_O fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px
+        style GITHUB fill:#F1F8E9,stroke:#7CB342,stroke-width:2px
+        style GIST fill:#DCEDC8,stroke:#558B2F,stroke-width:2px
+        style UPDATER fill:#FFFDE7,stroke:#FDD835,stroke-width:2px
+
+        %% LINK LABELS
+        linkStyle default stroke:#9CA3AF,stroke-width:1.8px
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <h4>Frontend</h4>
+        <p>L'app Angular è distribuita su <strong>GitHub Pages</strong>; legge gli endpoint correnti da <code>GitHub Gist</code> per connettersi a RASA (ngrok) e alle API su Render.</p>
+      </div>
+      <div class="legend-item">
+        <h4>API Server (Render)</h4>
+        <p>Il servizio FastAPI gira su <strong>Render</strong> (HTTPS). Espone API per documenti/utenti e comunica con <strong>Neon</strong> via TLS.</p>
+      </div>
+      <div class="legend-item">
+        <h4>RASA + Ollama</h4>
+        <p><strong>RASA</strong> e <strong>Ollama</strong> girano in locale. Sono esposti pubblicamente tramite due tunnel separati <strong>ngrok</strong> (RASA e Ollama).</p>
+      </div>
+      <div class="legend-item">
+        <h4>Gestione Endpoint Dinamici</h4>
+        <p>Uno script locale aggiorna <strong>GitHub Gist</strong> ad ogni riavvio dei tunnel ngrok, pubblicando <code>RASA_URL</code> e <code>OLLAMA_URL</code>.</p>
+      </div>
+      <div class="legend-item">
+        <h4>Flusso RAG</h4>
+        <p>RASA recupera i chunk dai documenti (via API Render + Neon) e chiama <strong>Ollama</strong> (via ngrok) per generare la risposta, poi la invia al frontend.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { useMaxWidth: true } });
+    mermaid.contentLoaded();
+  </script>
+</body>
+</html>

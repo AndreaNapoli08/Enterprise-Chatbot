@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizzazione Embedding Space - Enterprise-Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        #canvas-container {
+            position: relative;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 600px;
+        }
+        canvas {
+            cursor: crosshair;
+        }
+        .info-panel {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #333;
+        }
+        .metric-box {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 10px 0;
+        }
+        .metric-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 1.2em;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        .explanation {
+            background: #fff3e0;
+            border-left: 4px solid #f57c00;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .explanation h4 {
+            margin-top: 0;
+            color: #e65100;
+        }
+        .code-inline {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spazio Vettoriale degli Embedding</h1>
+        <p class="subtitle">Proiezione 2D dello spazio semantico 384-dimensionale di all-MiniLM-L6-v2</p>
+        
+        <div id="canvas-container">
+            <canvas id="embeddingCanvas" width="900" height="600"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <h3>📊 Metriche di Similarità</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="metric-box">
+                    <div class="metric-label">Similarità Semantica Alta</div>
+                    <div class="metric-value" id="highSimilarity">0.89</div>
+                    <small>"prenotazione sala" ↔ "booking room"</small>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Similarità Semantica Bassa</div>
+                    <div class="metric-value" id="lowSimilarity">0.12</div>
+                    <small>"stipendio" ↔ "password"</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4caf50;"></div>
+                <div>
+                    <strong>"prenotazione sala"</strong><br>
+                    <small>Vector: [0.12, -0.34, 0.78, ...]</small>
+                </div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #8bc34a;"></div>
+                <div>
+                    <strong>"booking room"</strong><br>
+                    <small>Vector: [0.15, -0.31, 0.72, ...]</small>
+                </div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f44336;"></div>
+                <div>
+                    <strong>"stipendio"</strong><br>
+                    <small>Vector: [-0.67, 0.43, -0.21, ...]</small>
+                </div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2196f3;"></div>
+                <div>
+                    <strong>"password"</strong><br>
+                    <small>Vector: [0.34, 0.89, 0.11, ...]</small>
+                </div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9c27b0;"></div>
+                <div>
+                    <strong>"ferie annuali"</strong><br>
+                    <small>Vector: [-0.71, 0.39, -0.18, ...]</small>
+                </div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff9800;"></div>
+                <div>
+                    <strong>"meeting setup"</strong><br>
+                    <small>Vector: [0.09, -0.29, 0.69, ...]</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>💡 Come Interpretare la Visualizzazione</h4>
+            <ul>
+                <li><strong>Distanza nello spazio:</strong> Punti vicini rappresentano frasi con significato semantico simile. La distanza euclidea o la similarità coseno misurano questa prossimità.</li>
+                <li><strong>Cluster semantici:</strong> "prenotazione sala", "booking room" e "meeting setup" formano un cluster (concetti correlati alle sale riunioni).</li>
+                <li><strong>Punti isolati:</strong> "stipendio" e "password" sono lontani da tutti perché semanticamente non correlati ai concetti di meeting.</li>
+                <li><strong>Dimensionalità:</strong> Lo spazio reale ha 384 dimensioni; questa visualizzazione 2D è una proiezione semplificata (tramite PCA o t-SNE nella pratica).</li>
+                <li><strong>Similarità coseno:</strong> Misura usata da Chroma. Valore da 0 (ortogonali, completamente diversi) a 1 (identici). Score > 0.7 indica alta similarità semantica.</li>
+            </ul>
+        </div>
+
+        <div class="info-panel">
+            <h3>🔍 Processo di Retrieval Semantico</h3>
+            <p>Quando un utente fa una query come <span class="code-inline">"come prenoto una sala?"</span>, il sistema:</p>
+            <ol style="line-height: 1.8;">
+                <li>Converte la query in vettore 384-dim tramite all-MiniLM-L6-v2</li>
+                <li>Calcola similarità coseno tra query vector e tutti i chunk vettorizzati in Chroma</li>
+                <li>Recupera i k=2 chunk con score più alto (più vicini nello spazio)</li>
+                <li>Se score < threshold (1.1), rifiuta i risultati come non rilevanti</li>
+                <li>Passa i chunk migliori a Ollama per generare risposta (RAG)</li>
+            </ol>
+            <p><strong>Esempio concreto:</strong></p>
+            <p>Query <span class="code-inline">"prenotazioni"</span> ha alta similarità (0.89) con chunk contenente "booking room" → recuperato come rilevante.<br>
+            Query <span class="code-inline">"prenotazioni"</span> ha bassa similarità (0.12) con chunk "password reset" → non recuperato.</p>
+        </div>
+
+        <div class="explanation" style="background: #e8f5e9; border-left-color: #43a047;">
+            <h4 style="color: #2e7d32;">✅ Vantaggi della Ricerca Semantica vs Keyword</h4>
+            <ul>
+                <li><strong>Sinonimi:</strong> "prenotazione" e "booking" matchano anche se parole diverse</li>
+                <li><strong>Multilingue:</strong> Query in italiano trova risposte in inglese se semanticamente simili</li>
+                <li><strong>Tolleranza errori:</strong> "prenotazzione" (typo) ha comunque embedding simile</li>
+                <li><strong>Concetti astratti:</strong> "Come gestisco assenze?" matcha con "ferie", "malattia", "permessi"</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('embeddingCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Simulazione di coordinate 2D per i vettori (proiezione da 384D)
+        // Coordinate ottimizzate per evitare sovrapposizioni
+        const points = [
+            // Cluster "meeting/room" - vicini tra loro (in alto a sinistra)
+            { x: 250, y: 180, label: 'prenotazione sala', color: '#4caf50', cluster: 'meeting' },
+            { x: 390, y: 225, label: 'booking room', color: '#8bc34a', cluster: 'meeting' },
+            { x: 360, y: 140, label: 'meeting setup', color: '#ff9800', cluster: 'meeting' },
+            
+            // Cluster "HR/salary" - vicino tra loro (in basso a sinistra)
+            { x: 200, y: 480, label: 'stipendio', color: '#f44336', cluster: 'hr' },
+            { x: 320, y: 450, label: 'ferie annuali', color: '#9c27b0', cluster: 'hr' },
+            
+            // Punto isolato - semanticamente non correlato (in alto a destra)
+            { x: 700, y: 200, label: 'password', color: '#2196f3', cluster: 'security' },
+        ];
+
+        // Funzione per disegnare il background con griglia leggera
+        function drawBackground() {
+            // Griglia più leggera e spaziata
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= width; i += 100) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= height; i += 100) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+                ctx.stroke();
+            }
+
+            // Assi principali più visibili
+            ctx.strokeStyle = '#bbb';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, height / 2);
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 0);
+            ctx.lineTo(width / 2, height);
+            ctx.stroke();
+
+            // Etichette assi più leggibili
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 13px Arial';
+            ctx.save();
+            ctx.translate(15, 150);
+            ctx.rotate(-Math.PI / 2);
+            ctx.restore();
+        }
+
+        // Funzione per calcolare distanza euclidea
+        function distance(p1, p2) {
+            return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
+
+        // Funzione per disegnare linee di similarità (solo le 2 principali)
+        function drawSimilarityLines() {
+            // Linea tra "prenotazione sala" e "booking room" (alta similarità)
+            const p1 = points[0];
+            const p2 = points[1];
+            ctx.strokeStyle = 'rgba(76, 175, 80, 0.6)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 4]);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            
+            // Etichetta distanza su sfondo bianco per leggibilità - posizionata perpendicolarmente alla linea
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const len = Math.max(1, Math.hypot(dx, dy));
+            // normale unitaria (perpendicolare alla linea)
+            const nx = -dy / len;
+            const ny = dx / len;
+            // offset per allontanare l'etichetta dalla linea e dai cerchi
+            const offset = 55;
+            const labelX = midX + nx * offset;
+            const labelY = midY + ny * offset;
+            
+            ctx.font = 'bold 12px Arial';
+            const highText = '✓ Alta similarità: 0.89';
+            const tw = ctx.measureText(highText).width;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillRect(labelX - (tw/2) - 8, labelY - 12, tw + 16, 22);
+            ctx.fillStyle = '#2e7d32';
+            ctx.fillText(highText, labelX - (tw/2), labelY + 4);
+
+            // Linea tra "stipendio" e "password" (bassa similarità)
+            const p3 = points[3];
+            const p4 = points[5];
+            ctx.strokeStyle = 'rgba(244, 67, 54, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 6]);
+            ctx.beginPath();
+            ctx.moveTo(p3.x, p3.y);
+            ctx.lineTo(p4.x, p4.y);
+            ctx.stroke();
+            
+            const midX2 = (p3.x + p4.x) / 2;
+            const midY2 = (p3.y + p4.y) / 2 + 20;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(midX2 - 75, midY2 - 15, 150, 20);
+            ctx.fillStyle = '#c62828';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('✗ Bassa similarità: 0.12', midX2 - 70, midY2);
+
+            ctx.setLineDash([]);
+        }
+
+        // Funzione per disegnare cluster di sfondo (semplificati)
+        function drawClusters() {
+            // Cluster meeting - più grande e meglio posizionato
+            ctx.fillStyle = 'rgba(139, 195, 74, 0.15)';
+            ctx.beginPath();
+            ctx.arc(305, 180, 120, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(139, 195, 74, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Label con sfondo
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(215, 55, 180, 25);
+            ctx.fillStyle = '#558b2f';
+            ctx.font = 'bold 15px Arial';
+            ctx.fillText('🗂️ Cluster: Meeting/Rooms', 220, 76);
+
+            // Cluster HR - più separato
+            ctx.fillStyle = 'rgba(156, 39, 176, 0.15)';
+            ctx.beginPath();
+            ctx.arc(260, 465, 90, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(156, 39, 176, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Label con sfondo
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(195, 370, 130, 25);
+            ctx.fillStyle = '#6a1b9a';
+            ctx.font = 'bold 15px Arial';
+            ctx.fillText('👥 Cluster: HR', 200, 390);
+
+            // Punto isolato - etichetta semplificata
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(620, 245, 150, 25);
+            ctx.fillStyle = '#1565c0';
+            ctx.font = 'bold 15px Arial';
+            ctx.fillText('🔒Security', 625, 263);
+        }
+
+        // Funzione per disegnare i punti vettoriali (più chiari e leggibili)
+        function drawPoints() {
+            points.forEach((point, index) => {
+                // Ombra più pronunciata
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetX = 4;
+                ctx.shadowOffsetY = 4;
+
+                // Cerchio esterno più grande
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 28, 0, 2 * Math.PI);
+                ctx.fillStyle = point.color;
+                ctx.fill();
+                ctx.strokeStyle = '#222';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                // Cerchio interno per contrasto
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 22, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fill();
+
+                // Label sopra il punto con sfondo bianco per leggibilità
+                ctx.textAlign = 'center';
+                const labelWidth = ctx.measureText(point.label).width;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fillRect(point.x - labelWidth/2 - 8, point.y - 50, labelWidth + 16, 22);
+                
+                // Bordo etichetta
+                ctx.strokeStyle = point.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(point.x - labelWidth/2 - 8, point.y - 50, labelWidth + 16, 22);
+                
+                // Testo etichetta
+                ctx.fillStyle = '#222';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(point.label, point.x, point.y - 34);
+
+                // Numero dell'indice nel cerchio
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText((index + 1).toString(), point.x, point.y + 6);
+            });
+        }
+
+        // Funzione per disegnare vettori direzionali (opzionale, rimosso per ridurre confusione)
+        function drawVectors() {
+            // Vettori rimossi per maggiore chiarezza visiva
+            // Il focus è sui cluster e le relazioni di similarità
+            return;
+        }
+
+        // Rendering principale con ordine ottimizzato
+        function render() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Ordine di rendering per evitare sovrapposizioni
+            drawBackground();
+            drawClusters();  // Cluster prima delle linee
+            drawSimilarityLines();  // Linee prima dei punti
+            drawPoints();  // Punti sopra tutto
+
+            // Titolo embedding space con sfondo per maggiore leggibilità
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillRect(width/2 - 220, 10, 440, 50);
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(width/2 - 220, 10, 440, 50);
+            
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Spazio Vettoriale', width / 2, 35);
+            ctx.font = '13px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Model: sentence-transformers/all-MiniLM-L6-v2', width / 2, 52);
+        }
+
+        // Calcola metriche dinamicamente
+        function updateMetrics() {
+            const d1 = distance(points[0], points[1]);
+            const d2 = distance(points[3], points[5]);
+            
+            // Simula cosine similarity (inverso della distanza normalizzata)
+            const maxDist = Math.sqrt(width * width + height * height);
+            const sim1 = (1 - d1 / maxDist).toFixed(2);
+            const sim2 = (1 - d2 / maxDist).toFixed(2);
+            
+            document.getElementById('highSimilarity').textContent = sim1;
+            document.getElementById('lowSimilarity').textContent = sim2;
+        }
+
+        // Animazione hover
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            points.forEach((point) => {
+                const dist = distance({ x: mouseX, y: mouseY }, point);
+                if (dist < 25) {
+                    canvas.style.cursor = 'pointer';
+                } else {
+                    canvas.style.cursor = 'crosshair';
+                }
+            });
+        });
+
+        // Inizializza
+        updateMetrics();
+        render();
+    </script>
+</body>
+</html>
